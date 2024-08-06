@@ -8,21 +8,6 @@ const DashboardContent = () => {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <SharedHeader>Admin/Dashboard</SharedHeader>
-      <Typography
-        sx={{
-          p: 2,
-          color: "black",
-          borderRadius: "20px",
-          boxShadow: "2px 2px 2px 2px white",
-          backgroundColor: "white",
-          marginBottom: "10px",
-          marginTop: "-15px",
-          fontSize: "24px",
-        }}
-        gutterBottom
-      >
-        Admin/ Dashboard
-      </Typography>
       <Grid container spacing={1}>
         <Grid
           sx={{
@@ -161,7 +146,10 @@ const DashboardContent = () => {
         </Grid>
         <Grid item sx={{ margin: "10px" }} xs={8} md={8}>
           <Paper sx={{ p: 2, width: "100%" }}>
-            <Example />
+            <Box>
+              <h3>List of Book Status</h3>
+              <Example />
+            </Box>
           </Paper>
           <Paper>
             <EarningsSummaryChart />
