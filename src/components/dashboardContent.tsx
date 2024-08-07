@@ -13,7 +13,7 @@ const DashboardContent = ({ children }: { children: React.ReactNode }) => {
           boxShadow: 1,
           display: "flex",
           flexWrap: "wrap",
-          justifyContent: "center",
+          justifyContent: "space-between",
         }}
       >
         <Box
@@ -114,7 +114,7 @@ const DashboardContent = ({ children }: { children: React.ReactNode }) => {
                   width: "100%",
                 }}
               >
-                <Typography
+                <Box
                   sx={{
                     width: "100%",
                     display: "flex",
@@ -122,7 +122,7 @@ const DashboardContent = ({ children }: { children: React.ReactNode }) => {
                     alignItems: "center",
                   }}
                 >
-                  <Box
+                  <Typography
                     sx={{
                       display: "flex",
                       gap: "10px",
@@ -138,13 +138,13 @@ const DashboardContent = ({ children }: { children: React.ReactNode }) => {
                     />
                     <span>{"Group A"}</span>
                     <span style={{ justifySelf: "end" }}>54</span>
-                  </Box>{" "}
-                </Typography>
+                  </Typography>
+                </Box>
               </Box>
             </Box>
           </Paper>
         </Box>
-        <Box sx={{ margin: "10px", width: "70%" }}>
+        <Box sx={{ margin: "10px", width: "72%" }}>
           <Paper sx={{ p: 2, width: "100%" }}>{children}</Paper>
           <Paper>
             <EarningsSummaryChart />
