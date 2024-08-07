@@ -1,11 +1,11 @@
-import { Box, Button, Checkbox, FormControlLabel } from "@mui/material";
-import TextField from "@mui/material/TextField";
-import Link from "next/link";
+import { Box } from "@mui/material";
+
+import Image from "next/image";
 
 function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         width: "100%",
         height: "100dvh",
         display: "flex",
@@ -13,8 +13,8 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
         alignItems: "center",
       }}
     >
-      <div
-        style={{
+      <Box
+        sx={{
           width: "50%",
           backgroundColor: "#191D38",
           display: "flex",
@@ -24,8 +24,8 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
           color: "white",
         }}
       >
-        <div>LOGO HRE</div>
-      </div>
+        <Image src="/Logo.png" alt="logo" width={300} height={200} />
+      </Box>
 
       <Box
         component="form"
@@ -44,7 +44,7 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
       >
         {children}
       </Box>
-    </div>
+    </Box>
   );
 }
 

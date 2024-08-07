@@ -1,5 +1,13 @@
-import { Box, Button, Checkbox, FormControlLabel } from "@mui/material";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Divider,
+  FormControlLabel,
+  Typography,
+} from "@mui/material";
 import TextField from "@mui/material/TextField";
+import Image from "next/image";
 import Link from "next/link";
 
 function Login() {
@@ -16,15 +24,23 @@ function Login() {
           width: "80%",
         }}
       >
-        <div style={{ display: "flex", gap: "3px", margin: "10px, 0px" }}>
-          <span>LOGO</span>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: "5px",
+            margin: "10px, 0px",
+            p: 2,
+          }}
+        >
+          <Image src="/Logo.png" alt="logo" width={100} height={50} />
           <div>Book Rent</div>
-        </div>
-        <div style={{ color: "black", marginTop: "10px" }}>
+        </Box>
+        <Typography sx={{ color: "black", marginTop: "10px" }}>
           Login into book rent
-        </div>
+        </Typography>
       </Box>
-      <hr style={{ width: "80%", height: "1px", backgroundColor: "black" }} />
+      <Divider sx={{ width: "80%" }} />
       <TextField
         id="outlined-email"
         label="Email"
@@ -41,7 +57,7 @@ function Login() {
       <FormControlLabel
         control={<Checkbox />}
         label="Remeber me"
-        sx={{ color: "black", width: "80%", margin: "10px, 0" }}
+        sx={{ color: "black", width: "80%", margin: "10px, 0", py: 2, px:1 }}
       />
       <Button
         sx={{ width: "80%", padding: "10px", color: "white" }}

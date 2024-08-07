@@ -5,6 +5,8 @@ import {
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from "material-react-table";
+import Image from "next/image";
+import { Box, Typography } from "@mui/material";
 
 type Table = {
   No: string;
@@ -69,6 +71,30 @@ const Example = () => {
         accessorKey: "Owner",
         header: "Owner",
         size: 200,
+        Cell(props) {
+          const owner = props.cell.getValue() as string;
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                padding: "0.5rem",
+                color: "green",
+                borderRadius: "0.5rem",
+              }}
+            >
+              <Image
+                style={{ borderRadius: "50%" }}
+                src={`https://api.dicebear.com/9.x/initials/svg?seed=${owner}`}
+                width={50}
+                height={50}
+                alt="avatar"
+              />
+              <Typography>{owner}</Typography>
+            </Box>
+          );
+        },
       },
       {
         accessorKey: "status",

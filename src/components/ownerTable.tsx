@@ -1,8 +1,11 @@
 "use client";
+import { Box, Switch, Typography } from "@mui/material";
 import {
   MaterialReactTable,
+  MRT_ColumnDef,
   useMaterialReactTable,
 } from "material-react-table";
+import Image from "next/image";
 import { useMemo } from "react";
 
 const data = [
@@ -89,14 +92,63 @@ const data = [
 ];
 
 const Example = () => {
-  const columns = useMemo(
+  const columns = useMemo<MRT_ColumnDef<(typeof data)[number]>[]>(
     () => [
       { accessorKey: "No", header: "No." },
       { accessorKey: "Author", header: "Author" },
-      { accessorKey: "Owner", header: "Owner" },
+      {
+        accessorKey: "Owner",
+        header: "Owner",
+        Cell(props) {
+          const owner = props.cell.getValue() as string;
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                padding: "0.5rem",
+                color: "green",
+                borderRadius: "0.5rem",
+              }}
+            >
+              <Image
+                style={{ borderRadius: "50%" }}
+                src={`https://api.dicebear.com/9.x/initials/svg?seed=${owner}`}
+                width={50}
+                height={50}
+                alt="avatar"
+              />
+              <Typography>{owner}</Typography>
+            </Box>
+          );
+        },
+      },
       { accessorKey: "Category", header: "Category" },
       { accessorKey: "BookName", header: "Book Name" },
-      { accessorKey: "Status", header: "Status" },
+      {
+        accessorKey: "Status",
+        header: "Status",
+
+        Cell: ({ cell }) => {
+          const status = cell.getValue() as string;
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                padding: "0.5rem",
+                color: "green",
+                borderRadius: "0.5rem",
+              }}
+            >
+              <Typography>{status}</Typography>
+              <Switch color="success" defaultChecked />
+            </Box>
+          );
+        },
+      },
     ],
     []
   );

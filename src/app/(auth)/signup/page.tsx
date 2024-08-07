@@ -1,5 +1,13 @@
-import { Box, Button, Checkbox, FormControlLabel } from "@mui/material";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Divider,
+  FormControlLabel,
+  Typography,
+} from "@mui/material";
 import TextField from "@mui/material/TextField";
+import Image from "next/image";
 import Link from "next/link";
 
 function Signup() {
@@ -16,15 +24,24 @@ function Signup() {
           width: "80%",
         }}
       >
-        <div style={{ display: "flex", gap: "3px", margin: "10px, 0px" }}>
-          <span>LOGO</span>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: "5px",
+            margin: "10px, 0px",
+            p: 2,
+          }}
+        >
+          <Image src="/Logo.png" alt="logo" width={100} height={50} />
           <div>Book Rent</div>
-        </div>
-        <div style={{ color: "black", marginTop: "10px" }}>
-          sign up into book rent
-        </div>
+        </Box>
+        <Typography sx={{ color: "black", marginTop: "30px" }}>
+          Sign Up Into Book Rent
+        </Typography>
       </Box>
-      <hr style={{ width: "80%", height: "1px", backgroundColor: "black" }} />
+      <Divider sx={{ width: "80%", marginBottom: "10px" }} />
+
       <TextField
         id="outlined-email"
         label="Email"
@@ -61,7 +78,7 @@ function Signup() {
         required
         control={<Checkbox />}
         label="I accept terms and conditions"
-        sx={{ color: "black", width: "80%", margin: "10px, 0" }}
+        sx={{ color: "black", width: "80%", margin: "10px, 0", py: 2, px: 1 }}
       />
       <Button
         sx={{ width: "80%", padding: "10px", color: "white" }}
@@ -69,6 +86,7 @@ function Signup() {
       >
         sign up
       </Button>
+
       <div style={{ marginTop: "10px", color: "black" }}>
         Already have an account{" "}
         <Link href={"/login"} style={{ color: "blue" }}>
