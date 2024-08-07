@@ -49,7 +49,10 @@ const Sidebar = ({
   );
   const [open, setOpen] = useState(true);
 
-  const role = location?.href?.includes("admin") ? "admin" : "owner";
+  // this is for  testing purpose only
+  //TODO: check user using jwt token
+
+  const role = lists[0].href.includes("admin") ? "admin" : "owner";
 
   if (!open) {
     return (
