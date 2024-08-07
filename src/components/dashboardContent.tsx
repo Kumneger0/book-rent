@@ -144,7 +144,7 @@ const DashboardContent = ({ children }: { children: React.ReactNode }) => {
             </Box>
           </Paper>
         </Box>
-        <Box sx={{ margin: "10px", width: "72%" }}>
+        <Box sx={{ margin: "10px", width: "70%" }}>
           <Paper sx={{ p: 2, width: "100%" }}>{children}</Paper>
           <Paper>
             <EarningsSummaryChart />

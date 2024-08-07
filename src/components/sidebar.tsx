@@ -30,6 +30,7 @@ import { Herr_Von_Muellerhoff } from "next/font/google";
 import Image from "next/image";
 import { useState } from "react";
 
+
 const drawerWidth = 300;
 
 const Sidebar = ({
@@ -48,7 +49,7 @@ const Sidebar = ({
   );
   const [open, setOpen] = useState(true);
 
-  const role = location.href.includes("admin") ? "admin" : "owner";
+  const role = location?.href?.includes("admin") ? "admin" : "owner";
 
   if (!open) {
     return (
