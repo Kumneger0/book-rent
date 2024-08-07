@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
+import { Toaster } from "react-hot-toast";
+
 const inter = Inter({ subsets: ["latin"] });
 
 import NextTopLoader from "nextjs-toploader";
@@ -29,6 +31,7 @@ export default function RootLayout({
       >
         <NextTopLoader />
         {children}
+        <Toaster />
       </body>
     </html>
   );

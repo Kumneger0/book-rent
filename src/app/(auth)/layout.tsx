@@ -10,7 +10,9 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
         height: "100dvh",
         display: "flex",
         justifyContent: "center",
+        flexWrap: "wrap",
         alignItems: "center",
+        overflowY: "scroll",
       }}
     >
       <Box
@@ -21,6 +23,7 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
           justifyContent: "center",
           alignItems: "center",
           height: "100dvh",
+          minWidth: "500px",
           color: "white",
         }}
       >

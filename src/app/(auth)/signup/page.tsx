@@ -1,12 +1,9 @@
+import SignUPForm from "@/components/singupForm";
 import {
   Box,
-  Button,
-  Checkbox,
   Divider,
-  FormControlLabel,
-  Typography,
+  Typography
 } from "@mui/material";
-import TextField from "@mui/material/TextField";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -42,50 +39,7 @@ function Signup() {
       </Box>
       <Divider sx={{ width: "80%", marginBottom: "10px" }} />
 
-      <TextField
-        id="outlined-email"
-        label="Email"
-        type="email"
-        style={{ width: "80%", marginTop: "10px" }}
-      />
-      <TextField
-        id="outlined-password-input"
-        label="Password"
-        type="password"
-        autoComplete="current-password"
-        style={{ width: "80%" }}
-      />
-      <TextField
-        id="outlined-confirm-password-input"
-        label="Confirm Password"
-        type="password"
-        autoComplete="current-confirm-password"
-        style={{ width: "80%" }}
-      />
-      <TextField
-        id="outlined-location-input"
-        label="Location"
-        type="text"
-        style={{ width: "80%" }}
-      />
-      <TextField
-        id="outlined-phonenum-input"
-        label="Phone Number"
-        type="tel"
-        style={{ width: "80%" }}
-      />
-      <FormControlLabel
-        required
-        control={<Checkbox />}
-        label="I accept terms and conditions"
-        sx={{ color: "black", width: "80%", margin: "10px, 0", py: 2, px: 1 }}
-      />
-      <Button
-        sx={{ width: "80%", padding: "10px", color: "white" }}
-        variant="contained"
-      >
-        sign up
-      </Button>
+      <SignUPForm />
 
       <div style={{ marginTop: "10px", color: "black" }}>
         Already have an account{" "}
