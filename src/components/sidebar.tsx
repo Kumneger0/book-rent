@@ -24,7 +24,7 @@ import {
   useTheme,
 } from "@mui/material";
 import Divider from "@mui/material/Divider";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Herr_Von_Muellerhoff } from "next/font/google";
 import Image from "next/image";
@@ -47,6 +47,8 @@ const Sidebar = ({
     useMediaQuery(theme.breakpoints.up("lg"))
   );
   const [open, setOpen] = useState(true);
+
+  const role = location.href.includes("admin") ? "admin" : "owner";
 
   if (!open) {
     return (
@@ -164,7 +166,13 @@ const Sidebar = ({
             }}
           >
             <Tooltip
-              title={<ListItemText primary="Login As Admin" />}
+              title={
+                <ListItemText
+                  primary={
+                    role === "admin" ? "Login as owner" : "Login as admin"
+                  }
+                />
+              }
               placement="right"
             >
               <ListItemIcon>
@@ -316,7 +324,16 @@ const Sidebar = ({
           <ListItemIcon>
             <LoginIcon sx={{ color: "white" }} />
           </ListItemIcon>
-          <ListItemText primary="Login as Book Owner" />
+          <Link
+            style={{ color: "white", textDecoration: "none" }}
+            href={"/login"}
+          >
+            <ListItemText
+              primary={`${
+                role === "admin" ? "Login as Owner" : "Login as Admin"
+              }`}
+            />
+          </Link>
         </ListItem>
         <Divider
           sx={{ width: "80%", margin: "10px auto", borderColor: "gray" }}
