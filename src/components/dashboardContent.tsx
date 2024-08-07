@@ -1,25 +1,30 @@
 import { Box, Divider, Grid, Paper, Typography } from "@mui/material";
 import { EarningsSummaryChart } from "./chart";
 import { PieChartWithPaddingAngle } from "./charts";
-import Example from "./liveBookStatusTable";
 import SharedHeader from "./sharedHead";
+import CircleIcon from "@mui/icons-material/Circle";
 
-const DashboardContent = () => {
+const DashboardContent = ({ children }: { children: React.ReactNode }) => {
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <SharedHeader>Admin/Dashboard</SharedHeader>
-      <Grid container spacing={1}>
-        <Grid
+      <Box
+        sx={{
+          borderRadius: 3,
+          boxShadow: 1,
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
+        <Box
           sx={{
             p: 2,
             borderRadius: "20px",
-            width: "200px",
             backgroundColor: "white",
-            margin: "20px",
+            margin: "10px",
+            width: "25%",
+            minWidth: "300px",
           }}
-          item
-          xs={3}
-          md={3}
         >
           <Paper sx={{ p: 2, backgroundColor: "white" }}>
             <Typography
@@ -117,45 +122,35 @@ const DashboardContent = () => {
                     alignItems: "center",
                   }}
                 >
-                  <span>{"Group A"}</span> <span>54</span>
-                </Typography>
-
-                <Typography
-                  sx={{
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "space-around",
-                    alignItems: "center",
-                  }}
-                >
-                  <span>{"Group A"}</span> <span>54</span>
-                </Typography>
-                <Typography
-                  sx={{
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "space-around",
-                    alignItems: "center",
-                  }}
-                >
-                  <span>{"Group A"}</span> <span>54</span>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: "10px",
+                      justifyContent: "start",
+                      alignItems: "center",
+                    }}
+                  >
+                    <CircleIcon
+                      fontSize="large"
+                      sx={{
+                        color: "green",
+                      }}
+                    />
+                    <span>{"Group A"}</span>
+                    <span style={{ justifySelf: "end" }}>54</span>
+                  </Box>{" "}
                 </Typography>
               </Box>
             </Box>
           </Paper>
-        </Grid>
-        <Grid item sx={{ margin: "10px" }} xs={8} md={8}>
-          <Paper sx={{ p: 2, width: "100%" }}>
-            <Box>
-              <h3>List of Book Status</h3>
-              <Example />
-            </Box>
-          </Paper>
+        </Box>
+        <Box sx={{ margin: "10px", width: "70%" }}>
+          <Paper sx={{ p: 2, width: "100%" }}>{children}</Paper>
           <Paper>
             <EarningsSummaryChart />
           </Paper>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </Box>
   );
 };

@@ -9,7 +9,7 @@ type SeriesData = React.ComponentProps<
 >["series"][number]["data"];
 
 const data = [
-  { label: "Group A", value: 54, color: "blue" },
+  { label: "Group A", value: 54, color: "#006AFF" },
   { label: "Group B", value: 20, color: "green" },
   { label: "Group C", value: 25, color: "red" },
 ] satisfies SeriesData;

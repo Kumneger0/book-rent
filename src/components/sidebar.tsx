@@ -17,41 +17,32 @@ import {
   ListItemText,
   Toolbar,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import Divider from "@mui/material/Divider";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { Herr_Von_Muellerhoff } from "next/font/google";
 
 const drawerWidth = 279;
 
-const lists = [
-  {
-    itemName: "Dashboard",
-    icon: <SpaceDashboardOutlinedIcon />,
-  },
-  {
-    itemName: "Books",
-    icon: <LibraryBooksRoundedIcon />,
-  },
-  {
-    itemName: "Owners",
-    icon: <AccountCircleOutlinedIcon />,
-  },
-  {
-    itemName: "Others",
-    icon: <ControlPointRoundedIcon />,
-  },
-  {
-    itemName: "Others",
-    icon: <ControlPointRoundedIcon />,
-  },
-];
-
-const Sidebar = () => {
+const Sidebar = ({
+  lists,
+}: {
+  lists: {
+    itemName: string;
+    icon: JSX.Element;
+    href: string;
+  }[];
+}) => {
   const pathname = usePathname();
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.up("lg"));
 
   return (
     <Drawer
+      hidden={!matches}
       variant="permanent"
       sx={{
         width: drawerWidth,
@@ -75,16 +66,13 @@ const Sidebar = () => {
         sx={{ width: "80%", margin: "10px auto", borderColor: "gray" }}
       />
       <List>
-        {lists.map(({ icon, itemName }, index) => (
+        {lists.map(({ icon, itemName, href }, index) => (
           <ListItem
             sx={{
               borderRadius: "10px",
               width: "90%",
               margin: "10px auto",
-              backgroundColor:
-                pathname === `/${itemName.toLowerCase()}`
-                  ? "#00ABFF"
-                  : "transparent",
+              backgroundColor: pathname === href ? "#00ABFF" : "transparent",
             }}
             key={itemName}
           >
@@ -96,7 +84,7 @@ const Sidebar = () => {
                 color: "white",
                 textDecoration: "none",
               }}
-              href={`/${itemName.toLowerCase()}`}
+              href={href}
             >
               <ListItemText primary={itemName} />
             </Link>

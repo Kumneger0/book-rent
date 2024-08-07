@@ -7,8 +7,9 @@ import {
 } from "material-react-table";
 import Image from "next/image";
 import { Box, Typography } from "@mui/material";
+import CircleIcon from "@mui/icons-material/Circle";
 
-type Table = {
+type TableAdmin = {
   No: string;
   BookNo: number;
   Owner: string;
@@ -16,7 +17,7 @@ type Table = {
   price: string;
 };
 
-const data: Table[] = [
+const tableAdmin: TableAdmin[] = [
   {
     No: "1",
     BookNo: 123,
@@ -54,8 +55,48 @@ const data: Table[] = [
   },
 ];
 
+type TableOwner = (Omit<TableAdmin, "Owner"> & { BookName: string })[];
+
+const tableOwner: TableOwner = [
+  {
+    No: "1",
+    BookNo: 123,
+    BookName: "John Doe",
+    status: "rented",
+    price: "$10",
+  },
+  {
+    No: "2",
+    BookNo: 456,
+    BookName: "Jane Smith",
+    status: "free",
+    price: "$15",
+  },
+  {
+    No: "3",
+    BookNo: 789,
+    BookName: "Alice Johnson",
+    status: "rented",
+    price: "$8",
+  },
+  {
+    No: "4",
+    BookNo: 101,
+    BookName: "Bob Brown",
+    status: "free",
+    price: "$20",
+  },
+  {
+    No: "5",
+    BookNo: 102,
+    BookName: "Charlie Davis",
+    status: "rented",
+    price: "$12",
+  },
+];
+
 const Example = () => {
-  const columns = useMemo<MRT_ColumnDef<Table>[]>(
+  const columns = useMemo<MRT_ColumnDef<TableAdmin>[]>(
     () => [
       {
         accessorKey: "No",
@@ -100,6 +141,27 @@ const Example = () => {
         accessorKey: "status",
         header: "Status",
         size: 100,
+        Cell(props) {
+          const status = props.cell.getValue() as string;
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                color: status === "rented" ? "red" : "#006AFF",
+              }}
+            >
+              <CircleIcon
+                fontSize="large"
+                sx={{
+                  color: status === "rented" ? "red" : "#006AFF",
+                }}
+              />
+              <Typography>{status}</Typography>
+            </Box>
+          );
+        },
       },
       {
         accessorKey: "price",
@@ -112,7 +174,7 @@ const Example = () => {
 
   const table = useMaterialReactTable({
     columns,
-    data,
+    data: tableAdmin,
     enablePagination: false,
     enableFullScreenToggle: false,
   });
@@ -121,3 +183,66 @@ const Example = () => {
 };
 
 export default Example;
+
+export const TableOwner = () => {
+  const columns = useMemo<MRT_ColumnDef<TableOwner[number]>[]>(
+    () => [
+      {
+        accessorKey: "No",
+        header: "No",
+        size: 50,
+      },
+      {
+        accessorKey: "BookNo",
+        header: "Book No",
+        size: 100,
+      },
+      {
+        accessorKey: "BookName",
+        header: "Book Name",
+        size: 200,
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        size: 100,
+        Cell(props) {
+          const status = props.cell.getValue() as string;
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                color: status === "rented" ? "red" : "#006AFF",
+              }}
+            >
+              <CircleIcon
+                fontSize="large"
+                sx={{
+                  color: status === "rented" ? "red" : "#006AFF",
+                }}
+              />
+              <Typography>{status}</Typography>
+            </Box>
+          );
+        },
+      },
+      {
+        accessorKey: "price",
+        header: "Price",
+        size: 100,
+      },
+    ],
+    []
+  );
+
+  const table = useMaterialReactTable({
+    columns,
+    data: tableOwner,
+    enablePagination: false,
+    enableFullScreenToggle: false,
+  });
+
+  return <MaterialReactTable table={table} />;
+};

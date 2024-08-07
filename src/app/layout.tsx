@@ -17,7 +17,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        style={{ backgroundColor: "#cfd7e6", margin: "0", padding: "0" }}
+        style={{
+          backgroundColor: "#cfd7e6",
+          margin: "0",
+          padding: "0",
+          overflowX: "hidden",
+        }}
         className={inter.className}
       >
         {children}
