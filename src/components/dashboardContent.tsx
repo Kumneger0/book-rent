@@ -1,11 +1,55 @@
-import { Box, Divider, Grid, Paper, Typography } from "@mui/material";
+import { prisma } from "@/db";
+import { verify } from "@/lib/utils";
+import { UserType } from "@/types";
+import CircleIcon from "@mui/icons-material/Circle";
+import { Box, Divider, Paper, Typography } from "@mui/material";
+import { cookies } from "next/headers";
 import { EarningsSummaryChart } from "./chart";
 import { PieChartWithPaddingAngle } from "./charts";
-import SharedHeader from "./sharedHead";
-import CircleIcon from "@mui/icons-material/Circle";
+import { $Enums } from "@prisma/client";
 
+const DashboardContent = async ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const token = cookies().get("token")!;
+  const decoded = await verify<UserType>(token.value)!;
+  const user = await prisma.user.findFirst({
+    where: {
+      email: decoded.email,
+    },
+    include: {
+      Book: {
+        select: {
+          category: true,
+        },
+      },
+    },
+  });
 
-const DashboardContent = ({ children }: { children: React.ReactNode }) => {
+  const numberOfBooksByCategory = user?.Book.reduce((acc, book) => {
+    const category = book.category;
+    if (!acc[category]) {
+      acc[category] = 0;
+    }
+    acc[category]++;
+    return acc;
+  }, {} as Record<$Enums.Category, number>);
+
+  const data = Object.entries(numberOfBooksByCategory ?? {}).map(
+    ([label, value]) => ({
+      label,
+      value,
+      color:
+        label === "fiction"
+          ? "#006AFF"
+          : label === "business"
+          ? "green"
+          : "red",
+    })
+  );
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <Box
@@ -105,42 +149,49 @@ const DashboardContent = ({ children }: { children: React.ReactNode }) => {
               }}
             >
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <PieChartWithPaddingAngle />
+                <PieChartWithPaddingAngle
+                  booksCategory={numberOfBooksByCategory}
+                />
               </Box>
               <Box
                 sx={{
+                  width: "100%",
                   display: "flex",
                   flexDirection: "column",
-                  alignItems: "center",
-                  width: "100%",
+                  gap: "10px",
                 }}
               >
-                <Box
-                  sx={{
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "space-around",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography
+                {data?.map((item) => (
+                  <Box
+                    key={item.label}
                     sx={{
+                      width: "100%",
                       display: "flex",
-                      gap: "10px",
-                      justifyContent: "start",
+                      justifyContent: "space-between",
                       alignItems: "center",
                     }}
                   >
-                    <CircleIcon
-                      fontSize="large"
+                    <Typography
                       sx={{
-                        color: "green",
+                        display: "flex",
+                        gap: "10px",
+                        justifyContent: "start",
+                        alignItems: "center",
                       }}
-                    />
-                    <span>{"Group A"}</span>
-                    <span style={{ justifySelf: "end" }}>54</span>
-                  </Typography>
-                </Box>
+                    >
+                      <CircleIcon
+                        fontSize="large"
+                        sx={{
+                          color: item.color,
+                        }}
+                      />
+                      <span>{item.label}</span>
+                    </Typography>
+                    <Typography>
+                      <span style={{ justifySelf: "end" }}>{item.value}</span>
+                    </Typography>
+                  </Box>
+                ))}
               </Box>
             </Box>
           </Paper>

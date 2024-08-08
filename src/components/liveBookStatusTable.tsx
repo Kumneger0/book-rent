@@ -1,13 +1,15 @@
 "use client";
-import { useMemo } from "react";
+import CircleIcon from "@mui/icons-material/Circle";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { Box, Button, Typography } from "@mui/material";
 import {
   MaterialReactTable,
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from "material-react-table";
 import Image from "next/image";
-import { Box, Typography } from "@mui/material";
-import CircleIcon from "@mui/icons-material/Circle";
+import { useMemo } from "react";
+import ModeEditOutlineIcon from "@mui/icons-material/ModeEditOutline";
 
 type TableAdmin = {
   No: string;
@@ -166,6 +168,30 @@ export const TableOwner = ({
         accessorKey: "price",
         header: "Price",
         size: 100,
+      },
+      {
+        accessorKey: "action",
+        header: "Action",
+        size: 100,
+        Cell: ({ row }) => (
+          <Box sx={{ display: "flex", gap: "1rem" }}>
+            <Button
+              onClick={() => {
+                console.log("Action button clicked for row:", row.original);
+              }}
+            >
+              <ModeEditOutlineIcon sx={{ color: "black" }} fontSize="medium" />
+            </Button>
+
+            <Button
+              onClick={() => {
+                console.log("Action button clicked for row:", row.original);
+              }}
+            >
+              <DeleteIcon sx={{ color: "red" }} fontSize="medium" />
+            </Button>
+          </Box>
+        ),
       },
     ],
     []

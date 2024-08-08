@@ -2,19 +2,21 @@
 
 import Stack from "@mui/material/Stack";
 import { PieChart } from "@mui/x-charts/PieChart";
+import { $Enums } from "@prisma/client";
 import * as React from "react";
 
-type SeriesData = React.ComponentProps<
-  typeof PieChart
->["series"][number]["data"];
+export function PieChartWithPaddingAngle({
+  booksCategory,
+}: {
+  booksCategory: Record<$Enums.Category, number> | undefined;
+}) {
+  const data = Object.entries(booksCategory ?? {}).map(([label, value]) => ({
+    label,
+    value,
+    color:
+      label === "fiction" ? "#006AFF" : label === "business" ? "green" : "red",
+  }));
 
-const data = [
-  { label: "Group A", value: 54, color: "#006AFF" },
-  { label: "Group B", value: 20, color: "green" },
-  { label: "Group C", value: 25, color: "red" },
-] satisfies SeriesData;
-
-export function PieChartWithPaddingAngle() {
   return (
     <Stack direction="row">
       <PieChart

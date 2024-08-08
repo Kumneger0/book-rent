@@ -94,7 +94,7 @@ export default function UploadBookModal({ setBook }: { setBook: BookSetter }) {
               >
                 <MenuItem value={"fiction"}>fiction</MenuItem>
                 <MenuItem value={"selfHelp"}>selfHelp</MenuItem>
-                <MenuItem value={"business"}>selfHelp</MenuItem>
+                <MenuItem value={"business"}>business</MenuItem>
               </Select>
             </FormControl>
             <Button
