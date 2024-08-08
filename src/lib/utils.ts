@@ -1,7 +1,10 @@
-import crypto from "crypto";
-import { z } from "zod";
-import jwt from "jsonwebtoken";
+import { prisma } from "@/db";
 import { env } from "@/env";
+import { UserType } from "@/types";
+import crypto from "crypto";
+import { jwtVerify } from "jose";
+import jwt from "jsonwebtoken";
+import { z } from "zod";
 
 export function hashPassword(password: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -70,6 +73,29 @@ export function VerifyUserJwt<T extends Record<string, unknown>>(
     const user = jwt.verify(token, env.JWTPRIVATEKEY);
     return user as T;
   } catch (err) {
+    console.log(err);
     return null;
   }
+}
+
+export async function verify<T extends Record<string, unknown>>(
+  token: string
+): Promise<T> {
+  const { payload } = await jwtVerify(
+    token,
+    new TextEncoder().encode(env.JWTPRIVATEKEY)
+  );
+
+  return payload as T;
+}
+
+export async function getUser(token: string | undefined) {
+  if (!token) return null;
+  const decoded = verify(token) as unknown as UserType;
+  const user = await prisma.user.findFirst({
+    where: {
+      email: decoded.email,
+    },
+  });
+  return user;
 }

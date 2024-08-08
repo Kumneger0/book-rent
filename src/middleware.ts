@@ -1,17 +1,26 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { verify } from "./lib/utils";
+import { UserType } from "./types";
 
-export function middleware(req: NextRequest) {
-  //TODO: check if user is logged in and check if user is admin for now user query params for testing
-  const role = req.nextUrl.searchParams.get("role");
+export async function middleware(req: NextRequest) {
+  const token = req.cookies.get("token");
 
-  if (role === "admin") {
-    return NextResponse.redirect(new URL("/admin/dashboard", req.url));
-  }
+  if (!token) return NextResponse.redirect(new URL("/login", req.url));
 
-  if (role === "owner") {
-    return NextResponse.redirect(new URL("/owner/dashboard", req.url));
+  const user = await verify<UserType>(token?.value);
+
+  if (!user) return NextResponse.redirect(new URL("/login", req.url));
+
+  const pathname = req.nextUrl.pathname;
+
+  if (!pathname.startsWith(`/${user.role}`)) {
+    return NextResponse.redirect(new URL(`/${user?.role}/dashboard`, req.url));
   }
 
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: ["/admin/:path*", "/owner/:path*", "/user/:path*"],
+};

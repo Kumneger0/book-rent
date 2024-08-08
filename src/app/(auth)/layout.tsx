@@ -1,8 +1,19 @@
+import { getUser } from "@/lib/utils";
 import { Box } from "@mui/material";
+import { cookies } from "next/headers";
 
 import Image from "next/image";
+import { redirect } from "next/navigation";
 
-function AuthLayout({ children }: { children: React.ReactNode }) {
+async function AuthLayout({ children }: { children: React.ReactNode }) {
+  const token = cookies().get("token")?.value;
+  const user = await getUser(token);
+
+  if (user) {
+    const pathToRedirect = `/${user?.role}/dashboard`;
+    return redirect(pathToRedirect);
+  }
+
   return (
     <Box
       sx={{

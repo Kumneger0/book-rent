@@ -1,14 +1,10 @@
 "use client";
 
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import LibraryBooksRoundedIcon from "@mui/icons-material/LibraryBooksRounded";
 import LoginIcon from "@mui/icons-material/Login";
+import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import SettingsIcon from "@mui/icons-material/Settings";
-import SpaceDashboardOutlinedIcon from "@mui/icons-material/SpaceDashboardOutlined";
-import MenuIcon from "@mui/icons-material/Menu";
 
-import ControlPointRoundedIcon from "@mui/icons-material/ControlPointRounded";
 import {
   Button,
   Drawer,
@@ -24,24 +20,26 @@ import {
   useTheme,
 } from "@mui/material";
 import Divider from "@mui/material/Divider";
-import { usePathname, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { Herr_Von_Muellerhoff } from "next/font/google";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-
+import toast from "react-hot-toast";
 
 const drawerWidth = 300;
 
 const Sidebar = ({
   lists,
+  role,
 }: {
   lists: {
     itemName: string;
     icon: JSX.Element;
     href: string;
   }[];
+  role: string;
 }) => {
+  const router = useRouter();
   const pathname = usePathname();
   const theme = useTheme();
   const [matches, setMatches] = useState(
@@ -49,10 +47,24 @@ const Sidebar = ({
   );
   const [open, setOpen] = useState(true);
 
-  // this is for  testing purpose only
-  //TODO: check user using jwt token
-
-  const role = lists[0].href.includes("admin") ? "admin" : "owner";
+  async function logout() {
+    try {
+      const response = await fetch("/api/user/logout", {
+        method: "post",
+      });
+      const data = (await response.json()) as {
+        status: "success" | "error";
+        data: { message: string };
+      };
+      if (data.status == "success") {
+        router.push("/login");
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      }
+    }
+  }
 
   if (!open) {
     return (
@@ -203,9 +215,11 @@ const Sidebar = ({
           }}
         >
           <Tooltip title={<ListItemText primary="Logout" />} placement="right">
-            <ListItemIcon>
-              <LoginIcon sx={{ color: "white" }} />
-            </ListItemIcon>
+            <Button onClick={logout} sx={{ color: "white" }}>
+              <ListItemIcon>
+                <LoginIcon sx={{ color: "white" }} />
+              </ListItemIcon>
+            </Button>
           </Tooltip>
         </ListItem>
       </Drawer>
@@ -357,10 +371,12 @@ const Sidebar = ({
           justifySelf: "center",
         }}
       >
-        <ListItemIcon>
-          <LoginIcon sx={{ color: "white" }} />
-        </ListItemIcon>
-        <ListItemText primary="Logout" />
+        <Button onClick={logout} sx={{ color: "white" }}>
+          <ListItemIcon>
+            <LoginIcon sx={{ color: "white" }} />
+          </ListItemIcon>
+          <ListItemText primary="Logout" />
+        </Button>
       </ListItem>
     </Drawer>
   );
