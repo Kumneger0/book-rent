@@ -82,20 +82,31 @@ export const data = [
     approved: true,
   },
 ];
-import { Box, Button, Switch, Typography } from "@mui/material";
-import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { Box, Button, Switch, Typography } from "@mui/material";
 
 import {
   MaterialReactTable,
   MRT_ColumnDef,
   useMaterialReactTable,
 } from "material-react-table";
-import React, { useMemo } from "react";
 import Image from "next/image";
+import { useMemo } from "react";
 import BasicModal from "./viewAutorModal";
 
-function OwnerTable() {
+function OwnerTable({
+  data,
+}: {
+  data: {
+    no: number;
+    owner: string;
+    upload: number;
+    location: string;
+    status: string;
+    action: string;
+    approved: boolean;
+  }[];
+}) {
   const columns = useMemo<MRT_ColumnDef<(typeof data)[number]>[]>(
     () => [
       { accessorKey: "no", header: "No." },
@@ -157,7 +168,7 @@ function OwnerTable() {
 
         Cell: ({ row }) => (
           <Box sx={{ display: "flex", gap: "1rem" }}>
-            <BasicModal author={row.original}/>
+            <BasicModal author={row.original} />
             <Button
               onClick={() => {
                 console.log("Action button clicked for row:", row.original);

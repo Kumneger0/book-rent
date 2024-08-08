@@ -1,5 +1,7 @@
+import { prisma } from "@/db";
 import { LoginSchema, UserSchema } from "@/lib/utils";
 import { Box } from "@mui/material";
+import { $Enums } from "@prisma/client";
 import { ComponentProps } from "react";
 import { z } from "zod";
 
@@ -13,3 +15,15 @@ export type APIResponse = {
 export type UserType = z.infer<typeof UserSchema>;
 
 export type UserTypeLOGIN = z.infer<typeof LoginSchema>;
+
+export type BookType = Awaited<ReturnType<typeof prisma.book.findMany>>;
+
+export interface BookTable extends Pick<BookType[number], never> {
+  owner: {
+    fullName: string;
+  };
+}
+
+export type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & {};

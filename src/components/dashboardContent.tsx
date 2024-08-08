@@ -4,6 +4,7 @@ import { PieChartWithPaddingAngle } from "./charts";
 import SharedHeader from "./sharedHead";
 import CircleIcon from "@mui/icons-material/Circle";
 
+
 const DashboardContent = ({ children }: { children: React.ReactNode }) => {
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -144,7 +145,7 @@ const DashboardContent = ({ children }: { children: React.ReactNode }) => {
             </Box>
           </Paper>
         </Box>
-        <Box sx={{ margin: "10px", width: "70%" }}>
+        <Box sx={{ margin: "10px", width: "71%" }}>
           <Paper sx={{ p: 2, width: "100%" }}>{children}</Paper>
           <Paper>
             <EarningsSummaryChart />

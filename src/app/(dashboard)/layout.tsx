@@ -6,8 +6,9 @@ import { Box, CssBaseline } from "@mui/material";
 import React from "react";
 
 import ControlPointRoundedIcon from "@mui/icons-material/ControlPointRounded";
-import { getUser } from "@/lib/utils";
+import { getUser, verify } from "@/lib/utils";
 import { cookies } from "next/headers";
+import { UserType } from "@/types";
 
 const lists = {
   admin: [
@@ -65,14 +66,14 @@ const lists = {
 async function App({ children }: { children: React.ReactNode }) {
   const token = cookies().get("token");
 
-  const userRole = (await getUser(token?.value))?.role ?? "user";
+  const decoded = await verify<UserType>(token?.value ?? "");
 
-  const sidebarList = lists[userRole];
+  const sidebarList = lists[decoded.role ?? "user"];
 
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <Sidebar role={userRole} lists={sidebarList} />
+      <Sidebar role={decoded.role ?? "user"} lists={sidebarList} />
       <Box
         component="main"
         sx={{ flexGrow: 1, p: 3, maxWidth: "1600px", mx: "auto" }}

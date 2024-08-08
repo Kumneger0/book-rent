@@ -10,6 +10,7 @@ export async function middleware(req: NextRequest) {
 
   const user = await verify<UserType>(token?.value);
 
+
   if (!user) return NextResponse.redirect(new URL("/login", req.url));
 
   const pathname = req.nextUrl.pathname;

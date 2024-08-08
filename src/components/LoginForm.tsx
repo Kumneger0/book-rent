@@ -34,6 +34,7 @@ function LoginForm() {
 
       if (data.status === "success") {
         toast.success(data.data.message);
+        router.refresh();
       } else {
         toast.error(data.data.message);
       }

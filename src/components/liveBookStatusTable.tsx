@@ -11,7 +11,7 @@ import CircleIcon from "@mui/icons-material/Circle";
 
 type TableAdmin = {
   No: string;
-  BookNo: number;
+  BookNo: string | number;
   Owner: string;
   status: "rented" | "free";
   price: string;
@@ -95,7 +95,7 @@ const tableOwner: TableOwner = [
   },
 ];
 
-const Example = () => {
+const Example = ({ data }: { data: TableAdmin[] }) => {
   const columns = useMemo<MRT_ColumnDef<TableAdmin>[]>(
     () => [
       {
@@ -174,7 +174,7 @@ const Example = () => {
 
   const table = useMaterialReactTable({
     columns,
-    data: tableAdmin,
+    data,
     enablePagination: false,
     enableFullScreenToggle: false,
   });

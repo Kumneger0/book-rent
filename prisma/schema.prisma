@@ -7,16 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id          Int      @id @default(autoincrement())
-  fullName    String
-  email       String   @unique
-  password    String
-  location    String
-  phoneNumber String
-  role        Role     @default(user)
+enum BookStatus {
+  rented
+  free
+}
 
-  @@map("users")
+enum Category {
+  fiction
+  selfHelp
+  business
 }
 
 enum Role {
@@ -25,3 +24,32 @@ enum Role {
   owner
 }
 
+model User {
+  id          Int    @id @default(autoincrement())
+  fullName    String
+  email       String @unique
+  password    String
+  location    String
+  phoneNumber String
+  Book        Book[]
+  role        Role   @default(user)
+  approved    Boolean  @default(false)
+  isActive   Boolean  @default(true)
+
+  @@map("users")
+}
+
+model Book {
+  id         Int        @id @default(autoincrement())
+  bookNo     String     @unique
+  author     String
+  owner      User       @relation(fields: [ownerId], references: [id])
+  ownerId    Int
+  isApproved Boolean    @default(false)
+  bookName   String
+  status     BookStatus @default(free)
+  category   Category
+  price      Int
+
+  @@map("books")
+}

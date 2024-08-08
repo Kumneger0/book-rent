@@ -1,3 +1,4 @@
+import { prisma } from "@/db";
 import { getUser } from "@/lib/utils";
 import { Box } from "@mui/material";
 import { cookies } from "next/headers";
