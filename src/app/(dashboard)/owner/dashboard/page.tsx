@@ -1,17 +1,46 @@
-import React from "react";
 import DashboardContent from "@/components/dashboardContent";
-import Example, { TableOwner } from "@/components/liveBookStatusTable";
-import { Box } from "@mui/material";
+import { TableOwner } from "@/components/liveBookStatusTable";
 import SharedHeader from "@/components/sharedHead";
+import { prisma } from "@/db";
+import { verify } from "@/lib/utils";
+import { UserType } from "@/types";
+import { Box } from "@mui/material";
+import { cookies } from "next/headers";
 
-function Dashboard() {
+async function Dashboard() {
+  const token = cookies().get("token")!;
+  const user = await verify<UserType>(token.value)!;
+  const books = await prisma.user.findFirst({
+    where: {
+      email: user.email,
+    },
+    include: {
+      Book: {
+        select: {
+          id: true,
+          bookNo: true,
+          bookName: true,
+          status: true,
+          price: true,
+        },
+      },
+    },
+  });
+
+  const booksToDisplay = books?.Book.map((book, i) => ({
+    No: String(book.id),
+    BookNo: i,
+    BookName: book.bookName,
+    status: book.status,
+    price: String(book.price),
+  }));
   return (
     <>
       <SharedHeader>Owner/Dashboard</SharedHeader>
       <DashboardContent>
         <Box>
           <h3>Live Book Status</h3>
-          <TableOwner />
+          <TableOwner data={booksToDisplay ?? []} />
         </Box>
       </DashboardContent>
     </>

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   TextField,
   Autocomplete,
@@ -14,17 +14,64 @@ import {
 // import UpgradeIcon from "@mui/icons-material/Upgrade";
 import { Button, Input, Box, Typography } from "@mui/material";
 import UploadIcon from "@mui/icons-material/Upload";
+import UploadBookModal from "./uploadBookModal";
+import { APIResponse } from "@/types";
 
-const books = [{ title: "Book 1" }, { title: "Book 2" }];
+const books = [
+  { name: "Book 1", author: "author name", category: "category" },
+  { name: "Book 1", author: "author name", category: "category" },
+];
 
 function UploadBook() {
+  const [book, setBook] = useState<{
+    name: string;
+    author: string;
+    category: string;
+  }>();
+
+  const [bookQuantity, setBookQuantity] = useState<number>(0);
+  const [bookPrice, setBookPrice] = useState<number>(0);
+
+  async function handleBookUpload() {
+    const bookToUpload = {
+      name: book?.name,
+      author: book?.author,
+      category: book?.category,
+      quantity: bookQuantity,
+      price: bookPrice,
+    };
+    try {
+      const response = await fetch("/api/books", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bookToUpload),
+      });
+      const data = (await response.json()) as APIResponse;
+      if (data.status === "success") {
+        alert("Book uploaded successfully");
+      } else {
+        alert("Book upload failed");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   return (
     <Box sx={{ width: "80%", margin: "0 auto" }}>
       <Box sx={{ width: 300, margin: "0 auto", textAlign: "center" }}>
         <h2>Upload New Book</h2>
         <Autocomplete
-          options={books}
-          getOptionLabel={(option) => option.title}
+          open
+          disableCloseOnSelect
+          disablePortal
+          onSelect={(e) => e.stopPropagation()}
+          options={books.map((book) => ({
+            label: book.name,
+            value: book.name,
+          }))}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -36,26 +83,27 @@ function UploadBook() {
           PaperComponent={(props) => (
             <Box
               style={{
-                backgroundColor: "white",
+                backgroundColor: "slate",
                 padding: "10px",
+                borderRadius: "10px",
+                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
               }}
               {...props}
             >
-              {books.map((book) => (
-                <Typography key={book.title} sx={{ marginBottom: "10px" }}>
-                  {book.title}
+              {(book ? books.concat([book]) : books).map((book) => (
+                <Typography
+                  onClick={(e) => e.stopPropagation()}
+                  key={book.name}
+                  sx={{ marginBottom: "10px" }}
+                >
+                  {book.name}
                 </Typography>
               ))}
               <Divider
                 sx={{ width: "100%", margin: "10px 0", color: "gray" }}
               />
-              <Button
-                sx={{ my: 2, mx: "auto" }}
-                variant="outlined"
-                color="primary"
-              >
-                Add
-              </Button>
+
+              <UploadBookModal setBook={setBook} />
             </Box>
           )}
         />
@@ -76,6 +124,7 @@ function UploadBook() {
               labelId="demo-simple-select-label"
               id="demo-simple-select"
               label="Book Quantity"
+              onChange={(e) => setBookQuantity(Number(e.target.value))}
             >
               <MenuItem value={10}>Ten</MenuItem>
               <MenuItem value={20}>Twenty</MenuItem>
@@ -88,6 +137,9 @@ function UploadBook() {
             id="outlined-adornment-weight"
             aria-describedby="outlined-weight-helper-text"
             placeholder="Rent Price for 2 weeks"
+            value={bookPrice}
+            type="number"
+            onChange={(e) => setBookPrice(Number(e.target.value))}
           />
         </Box>
       </Box>
@@ -121,6 +173,7 @@ function UploadBook() {
         </Box>
         <Box sx={{ p: 2, my: 3 }} display="flex" alignItems="center">
           <Button
+            onClick={handleBookUpload}
             color="primary"
             sx={{ py: 3, px: 5, borderRadius: "20px" }}
             variant="contained"

@@ -99,3 +99,9 @@ export async function getUser(token: string | undefined) {
   });
   return user;
 }
+
+export const addBookSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  author: z.string().min(1, "Author is required"),
+  category: z.string().min(1, "Category is required"),
+});

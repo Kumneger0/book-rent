@@ -32,9 +32,13 @@ function Signup() {
           }}
         >
           <Image src="/Logo.png" alt="logo" width={100} height={50} />
-          <div>Book Rent</div>
+          <Typography sx={{ fontWeight: 400, fontSize: "28px", px: 2 }}>
+            Book Rent
+          </Typography>
         </Box>
-        <Typography sx={{ color: "black", marginTop: "30px" }}>
+        <Typography
+          sx={{ color: "black", marginTop: "30px", fontSize: "20px" }}
+        >
           Sign Up Into Book Rent
         </Typography>
       </Box>
@@ -44,7 +48,7 @@ function Signup() {
 
       <div style={{ marginTop: "10px", color: "black", paddingBottom: "20px" }}>
         Already have an account{" "}
-        <Link href={"/login"} style={{ color: "blue" }}>
+        <Link href={"/login"} style={{ color: "blue", textDecoration: "none" }}>
           login
         </Link>
       </div>

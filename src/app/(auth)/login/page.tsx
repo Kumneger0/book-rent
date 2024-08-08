@@ -35,9 +35,13 @@ function Login() {
           }}
         >
           <Image src="/Logo.png" alt="logo" width={100} height={50} />
-          <div>Book Rent</div>
+          <Typography sx={{ fontWeight: 400, fontSize: "28px", px: 2 }}>
+            Book Rent
+          </Typography>
         </Box>
-        <Typography sx={{ color: "black", marginTop: "10px" }}>
+        <Typography
+          sx={{ color: "black", marginTop: "10px", fontSize: "20px" }}
+        >
           Login into book rent
         </Typography>
       </Box>
@@ -45,7 +49,10 @@ function Login() {
       <LoginForm />
       <div style={{ marginTop: "10px", color: "black" }}>
         haven not an account{" "}
-        <Link href={"/signup"} style={{ color: "blue" }}>
+        <Link
+          href={"/signup"}
+          style={{ color: "blue", textDecoration: "none" }}
+        >
           singup
         </Link>
       </div>

@@ -17,83 +17,7 @@ type TableAdmin = {
   price: string;
 };
 
-const tableAdmin: TableAdmin[] = [
-  {
-    No: "1",
-    BookNo: 123,
-    Owner: "John Doe",
-    status: "rented",
-    price: "$10",
-  },
-  {
-    No: "2",
-    BookNo: 456,
-    Owner: "Jane Smith",
-    status: "free",
-    price: "$15",
-  },
-  {
-    No: "3",
-    BookNo: 789,
-    Owner: "Alice Johnson",
-    status: "rented",
-    price: "$8",
-  },
-  {
-    No: "4",
-    BookNo: 101,
-    Owner: "Bob Brown",
-    status: "free",
-    price: "$20",
-  },
-  {
-    No: "5",
-    BookNo: 102,
-    Owner: "Charlie Davis",
-    status: "rented",
-    price: "$12",
-  },
-];
-
 type TableOwner = (Omit<TableAdmin, "Owner"> & { BookName: string })[];
-
-const tableOwner: TableOwner = [
-  {
-    No: "1",
-    BookNo: 123,
-    BookName: "John Doe",
-    status: "rented",
-    price: "$10",
-  },
-  {
-    No: "2",
-    BookNo: 456,
-    BookName: "Jane Smith",
-    status: "free",
-    price: "$15",
-  },
-  {
-    No: "3",
-    BookNo: 789,
-    BookName: "Alice Johnson",
-    status: "rented",
-    price: "$8",
-  },
-  {
-    No: "4",
-    BookNo: 101,
-    BookName: "Bob Brown",
-    status: "free",
-    price: "$20",
-  },
-  {
-    No: "5",
-    BookNo: 102,
-    BookName: "Charlie Davis",
-    status: "rented",
-    price: "$12",
-  },
-];
 
 const Example = ({ data }: { data: TableAdmin[] }) => {
   const columns = useMemo<MRT_ColumnDef<TableAdmin>[]>(
@@ -184,8 +108,18 @@ const Example = ({ data }: { data: TableAdmin[] }) => {
 
 export default Example;
 
-export const TableOwner = () => {
-  const columns = useMemo<MRT_ColumnDef<TableOwner[number]>[]>(
+export const TableOwner = ({
+  data,
+}: {
+  data: {
+    No: string;
+    BookNo: number;
+    BookName: string;
+    status: "rented" | "free";
+    price: string;
+  }[];
+}) => {
+  const columns = useMemo<MRT_ColumnDef<(typeof data)[number]>[]>(
     () => [
       {
         accessorKey: "No",
@@ -207,7 +141,7 @@ export const TableOwner = () => {
         header: "Status",
         size: 100,
         Cell(props) {
-          const status = props.cell.getValue() as string;
+          const status = props.cell.getValue() as "rented" | "free";
           return (
             <Box
               sx={{
@@ -239,7 +173,7 @@ export const TableOwner = () => {
 
   const table = useMaterialReactTable({
     columns,
-    data: tableOwner,
+    data,
     enablePagination: false,
     enableFullScreenToggle: false,
   });
