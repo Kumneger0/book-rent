@@ -1,6 +1,7 @@
-import { hashPassword } from "@/app/lib/utils";
-import { UserType } from "@/components/singupForm";
+import { hashPassword } from "@/lib/utils";
+
 import { prisma } from "@/db";
+import { UserType } from "@/types";
 import { NextRequest } from "next/server";
 
 export const POST = async (req: NextRequest) => {

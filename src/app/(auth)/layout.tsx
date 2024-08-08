@@ -7,12 +7,11 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
     <Box
       sx={{
         width: "100%",
-        height: "100dvh",
+        minHeighteight: "100dvh",
         display: "flex",
         justifyContent: "center",
         flexWrap: "wrap",
         alignItems: "center",
-        overflowY: "scroll",
       }}
     >
       <Box
@@ -22,7 +21,8 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          height: "100dvh",
+          minHeight: "100dvh",
+          padding: "2rem 0",
           minWidth: "500px",
           color: "white",
         }}
@@ -36,6 +36,7 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
           "& .MuiTextField-root": { m: 1, width: "25ch" },
           width: "50%",
           backgroundColor: "white",
+          padding: "2rem 0",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",

@@ -19,6 +19,7 @@ function Signup() {
           gap: "2px",
           flexDirection: "column",
           width: "80%",
+          height: "100dvh",
         }}
       >
         <Box
@@ -41,7 +42,7 @@ function Signup() {
 
       <SignUPForm />
 
-      <div style={{ marginTop: "10px", color: "black" }}>
+      <div style={{ marginTop: "10px", color: "black", paddingBottom: "20px" }}>
         Already have an account{" "}
         <Link href={"/login"} style={{ color: "blue" }}>
           login

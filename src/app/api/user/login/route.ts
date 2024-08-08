@@ -1,9 +1,12 @@
-import { hashPassword, verifyPassword } from "@/app/lib/utils";
-import { UserType } from "@/components/singupForm";
+import { SignUserJwt, verifyPassword } from "@/lib/utils";
+
+import { cookies } from "next/headers";
+
 import { prisma } from "@/db";
+import { UserTypeLOGIN } from "@/types";
 
 export const POST = async (req: Request) => {
-  const body = (await req?.json()) as unknown as UserType;
+  const body = (await req?.json()) as unknown as UserTypeLOGIN;
   const originalPassword = body.password;
   try {
     const user = await prisma.user.findFirst({
@@ -21,10 +24,9 @@ export const POST = async (req: Request) => {
         { status: 400 }
       );
 
-    const isPasswordMatch = await verifyPassword(
-      originalPassword,
-      user.password
-    );
+    const { password, ...userWithoutPass } = user;
+
+    const isPasswordMatch = await verifyPassword(originalPassword, password);
 
     if (!isPasswordMatch)
       return new Response(
@@ -35,6 +37,15 @@ export const POST = async (req: Request) => {
         { status: 400 }
       );
 
+    const token = SignUserJwt(userWithoutPass);
+
+    cookies().set("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
     return new Response(
       JSON.stringify({
         status: "success",
@@ -42,6 +53,7 @@ export const POST = async (req: Request) => {
       })
     );
   } catch (err) {
+    console.log(err);
     return new Response(
       JSON.stringify({
         status: "error",

@@ -1,3 +1,4 @@
+import LoginForm from "@/components/LoginForm";
 import {
   Box,
   Button,
@@ -41,30 +42,7 @@ function Login() {
         </Typography>
       </Box>
       <Divider sx={{ width: "80%" }} />
-      <TextField
-        id="outlined-email"
-        label="Email"
-        type="email"
-        style={{ width: "80%", marginTop: "10px" }}
-      />
-      <TextField
-        id="outlined-password-input"
-        label="Password"
-        type="password"
-        autoComplete="current-password"
-        style={{ width: "80%" }}
-      />
-      <FormControlLabel
-        control={<Checkbox />}
-        label="Remeber me"
-        sx={{ color: "black", width: "80%", margin: "10px, 0", py: 2, px:1 }}
-      />
-      <Button
-        sx={{ width: "80%", padding: "10px", color: "white" }}
-        variant="contained"
-      >
-        Login
-      </Button>
+      <LoginForm />
       <div style={{ marginTop: "10px", color: "black" }}>
         haven not an account{" "}
         <Link href={"/signup"} style={{ color: "blue" }}>
