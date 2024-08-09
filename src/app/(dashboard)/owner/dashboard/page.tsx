@@ -28,6 +28,7 @@ async function Dashboard() {
   });
 
   const booksToDisplay = books?.Book.map((book, i) => ({
+    id: book.id,
     No: String(book.id),
     BookNo: i,
     BookName: book.bookName,

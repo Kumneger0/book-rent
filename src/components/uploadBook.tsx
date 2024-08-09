@@ -16,6 +16,8 @@ import { Button, Input, Box, Typography } from "@mui/material";
 import UploadIcon from "@mui/icons-material/Upload";
 import UploadBookModal from "./uploadBookModal";
 import { APIResponse } from "@/types";
+import BasicModal from "./bookUploalSuccessModal";
+import toast from "react-hot-toast";
 
 const books = [
   { name: "Book 1", author: "author name", category: "category" },
@@ -28,9 +30,11 @@ function UploadBook() {
     author: string;
     category: string;
   }>();
+  const [open, setOpen] = React.useState(false);
 
   const [bookQuantity, setBookQuantity] = useState<number>(0);
   const [bookPrice, setBookPrice] = useState<number>(0);
+  const [isSuccess, setIsSuccess] = useState(true);
 
   async function handleBookUpload() {
     const bookToUpload = {
@@ -50,9 +54,9 @@ function UploadBook() {
       });
       const data = (await response.json()) as APIResponse;
       if (data.status === "success") {
-        alert("Book uploaded successfully");
+        setOpen(true);
       } else {
-        alert("Book upload failed");
+        toast.error("We Failed to upload your book try again");
       }
     } catch (e) {
       console.error(e);
@@ -172,14 +176,11 @@ function UploadBook() {
           </label>
         </Box>
         <Box sx={{ p: 2, my: 3 }} display="flex" alignItems="center">
-          <Button
-            onClick={handleBookUpload}
-            color="primary"
-            sx={{ py: 3, px: 5, borderRadius: "20px" }}
-            variant="contained"
-          >
-            Submit
-          </Button>
+          <BasicModal
+            onSubmit={handleBookUpload}
+            open={open}
+            setOpen={setOpen}
+          />
         </Box>
       </Box>
     </Box>

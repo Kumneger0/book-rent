@@ -10,6 +10,9 @@ import {
 import Image from "next/image";
 import { useMemo } from "react";
 import ModeEditOutlineIcon from "@mui/icons-material/ModeEditOutline";
+import { APIResponse } from "@/types";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 type TableAdmin = {
   No: string;
@@ -114,6 +117,7 @@ export const TableOwner = ({
   data,
 }: {
   data: {
+    id: number;
     No: string;
     BookNo: number;
     BookName: string;
@@ -121,6 +125,29 @@ export const TableOwner = ({
     price: string;
   }[];
 }) => {
+  const router = useRouter();
+  const deleteBook = async (bookID: number) => {
+    try {
+      const response = await fetch("/api/books/delete", {
+        method: "delete",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: bookID }),
+      });
+      const data = (await response.json()) as APIResponse;
+      if (data.status == "success") {
+        toast.success("You have Deleted the file successfully");
+        router.refresh();
+      }
+      if (data.status == "error") {
+        toast.error("Failed to Delete your book");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const columns = useMemo<MRT_ColumnDef<(typeof data)[number]>[]>(
     () => [
       {
@@ -173,7 +200,7 @@ export const TableOwner = ({
         accessorKey: "action",
         header: "Action",
         size: 100,
-        Cell: ({ row }) => (
+        Cell: ({ row, cell }) => (
           <Box sx={{ display: "flex", gap: "1rem" }}>
             <Button
               onClick={() => {
@@ -183,11 +210,7 @@ export const TableOwner = ({
               <ModeEditOutlineIcon sx={{ color: "black" }} fontSize="medium" />
             </Button>
 
-            <Button
-              onClick={() => {
-                console.log("Action button clicked for row:", row.original);
-              }}
-            >
+            <Button onClick={() => deleteBook(Number(row.original.id))}>
               <DeleteIcon sx={{ color: "red" }} fontSize="medium" />
             </Button>
           </Box>

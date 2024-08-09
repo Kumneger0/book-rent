@@ -85,7 +85,7 @@ const DashboardContent = async ({
               This Month Statistics
             </Typography>
             <Typography sx={{ marginTop: "-10px" }} variant="subtitle1">
-              Tue, 14 Nov, 2024, 11.30 AM
+              {new Date().toLocaleString()}
             </Typography>
             <Box
               sx={{
