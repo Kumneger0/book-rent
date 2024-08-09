@@ -1,9 +1,17 @@
 import SharedHeader from "@/components/sharedHead";
 import UploadBook from "@/components/uploadBook";
+import { verify } from "@/lib/utils";
 import { Box } from "@mui/material";
+import { User } from "@prisma/client";
+import { cookies } from "next/headers";
 import React from "react";
+import { getBooks } from "../dashboard/page";
 
-function BookUpload() {
+async function BookUpload() {
+  const token = cookies().get("token")!;
+  const user = await verify<User>(token.value)!;
+  const books = await getBooks({ email: user.email });
+
   return (
     <>
       <SharedHeader>Owner/UploadBook</SharedHeader>
@@ -17,7 +25,8 @@ function BookUpload() {
           padding: "10px",
         }}
       >
-        <UploadBook />;
+        {/* @ts-ignore */}
+        <UploadBook books={books ?? []} />;
       </Box>
     </>
   );

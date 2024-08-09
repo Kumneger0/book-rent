@@ -35,7 +35,8 @@ model User {
   role        Role    @default(user)
   approved    Boolean @default(false)
   isActive    Boolean @default(true)
-  wallet      Int
+  wallet      Int      @default(0)
+  
 
   @@map("users")
 }
@@ -51,7 +52,7 @@ model Book {
   status     BookStatus @default(free)
   category   Category
   price      Int
-  quantity   Int
+  quantity   Int         @default(0)
 
   @@map("books")
 }

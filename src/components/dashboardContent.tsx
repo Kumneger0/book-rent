@@ -1,12 +1,11 @@
 import { prisma } from "@/db";
 import { verify } from "@/lib/utils";
-import { User } from "@/types";
 import CircleIcon from "@mui/icons-material/Circle";
 import { Box, Divider, Paper, Typography } from "@mui/material";
 import { cookies } from "next/headers";
 import { EarningsSummaryChart } from "./chart";
 import { PieChartWithPaddingAngle } from "./charts";
-import { $Enums } from "@prisma/client";
+import { $Enums, User } from "@prisma/client";
 
 const DashboardContent = async ({
   children,

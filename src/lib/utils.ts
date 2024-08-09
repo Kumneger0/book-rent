@@ -109,12 +109,21 @@ export const addBookSchema = z.object({
   category: z.string().min(1, "Category is required"),
 });
 
+type ParamType = { name: string; value: string };
+
 export function useCreateQueryString(
   searchParams: ReadonlyURLSearchParams
-): (name: string, value: string) => string {
-  return (name: string, value: string) => {
+): (param: ParamType[] | ParamType) => string {
+  return (param: ParamType[] | ParamType) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set(name, value);
+    if (Array.isArray(param)) {
+      param.forEach(({ name, value }) => {
+        params.set(name, value);
+      });
+    }
+    if (!Array.isArray(param)) {
+      params.set(param.name, param.name);
+    }
     return params.toString();
   };
 }

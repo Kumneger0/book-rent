@@ -2,8 +2,9 @@ import { prisma } from "@/db";
 import { verify } from "@/lib/utils";
 import { User } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+import { defineManageOwnerAbilty } from "@/abilities";
 
-export async function POST(req: NextRequest) {
+export async function PUT(req: NextRequest) {
   try {
     const token = req.cookies.get("token");
     const user = await verify<User>(token?.value ?? "");
@@ -30,31 +31,38 @@ export async function POST(req: NextRequest) {
         },
       });
     }
+    const ablity = defineManageOwnerAbilty(userFromDB);
 
-    const book = (await req.json()) as {
-      name: string;
-      author: string;
-      category: "business" | "fiction" | "selfHelp";
-      quantity: number;
-      price: number;
-    };
-
-    const newBook = await prisma.book.create({
-      data: {
-        bookName: book.name,
-        author: book.author,
-        category: book.category,
-        bookNo: crypto.randomUUID().toString(),
-        ownerId: userFromDB.id,
-        price: book.price,
-      },
-    });
-
+    if (ablity.can("update", "Book")) {
+      const { id, ...data } = (await req.json()) as {
+        bookName: string;
+        quantity: string;
+        status: "free" | "rented";
+        price: string;
+        id: number;
+      };
+      const updatedBook = await prisma.book.update({
+        where: {
+          id: id,
+        },
+        data: {
+          ...data,
+          quantity: Number(data.quantity),
+          price: Number(data.price),
+        },
+      });
+      return NextResponse.json({
+        status: "success",
+        data: {
+          message: "successfully uploaded",
+          data: updatedBook,
+        },
+      });
+    }
     return NextResponse.json({
-      status: "success",
+      status: "error",
       data: {
-        message: "Book uploaded successfully",
-        book: newBook,
+        message: "you are no authorized to perform this action",
       },
     });
   } catch (e) {

@@ -1,13 +1,10 @@
-import * as React from "react";
+import { MUITypes } from "@/types";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
-import { TextField } from "@mui/material";
-import { data } from "./owner-Table";
-import { MUITypes } from "@/types";
+import Typography from "@mui/material/Typography";
 import Image from "next/image";
+import * as React from "react";
 
 const style: MUITypes = {
   position: "absolute" as "absolute",
@@ -29,26 +26,31 @@ const style: MUITypes = {
   justifyContent: "center",
 };
 
-export default function BasicModal({
-  open,
-  setOpen,
-  onSubmit,
-}: {
+interface ModalProps extends React.PropsWithChildren {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onSubmit: () => void;
-}) {
+}
+
+export default function BasicModal({
+  open,
+  setOpen,
+  children,
+  onSubmit,
+  ...props
+}: ModalProps & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const handleClose = () => setOpen(false);
 
   return (
     <div>
       <Button
+        {...props}
         onClick={onSubmit}
         color="primary"
         sx={{ py: 3, px: 5, borderRadius: "20px" }}
         variant="contained"
       >
-        Submit
+        {children}
       </Button>
       <Modal
         open={open}

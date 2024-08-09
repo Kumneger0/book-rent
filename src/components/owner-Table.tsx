@@ -37,18 +37,26 @@ export function getFuncToUpdate() {
         data: { message: string };
       };
       if (data.status == "success") {
+        toast.success("success");
+        return { status: "success" };
       }
       if (data.status == "error") {
         toast.error(data.data.message);
       }
     } catch (err) {
-      console.error(err);
+
       if (err instanceof Error) {
         const message = err.message;
         toast.error(message, {
           position: "top-right",
         });
+        return;
       }
+      toast.error("There was an error occured", {
+        position: "top-right",
+      });
+         return null;
+
     }
   };
 }

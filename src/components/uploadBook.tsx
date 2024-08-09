@@ -18,33 +18,29 @@ import UploadBookModal from "./uploadBookModal";
 import { APIResponse } from "@/types";
 import BasicModal from "./bookUploalSuccessModal";
 import toast from "react-hot-toast";
+import { Book } from "@prisma/client";
 
-const books = [
-  { name: "Book 1", author: "author name", category: "category" },
-  { name: "Book 1", author: "author name", category: "category" },
-];
-
-function UploadBook() {
-  const [book, setBook] = useState<{
+function UploadBook({ books }: { books: Partial<Book>[] }) {
+  const [newBook, setBook] = useState<{
     name: string;
     author: string;
     category: string;
   }>();
   const [open, setOpen] = React.useState(false);
-
+  const [isUploading, setIsUploading] = useState(false);
   const [bookQuantity, setBookQuantity] = useState<number>(0);
   const [bookPrice, setBookPrice] = useState<number>(0);
-  const [isSuccess, setIsSuccess] = useState(true);
 
   async function handleBookUpload() {
     const bookToUpload = {
-      name: book?.name,
-      author: book?.author,
-      category: book?.category,
+      name: newBook?.name,
+      author: newBook?.author,
+      category: newBook?.category,
       quantity: bookQuantity,
       price: bookPrice,
     };
     try {
+      setIsUploading(true);
       const response = await fetch("/api/books", {
         method: "POST",
         headers: {
@@ -60,6 +56,8 @@ function UploadBook() {
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      setIsUploading(false);
     }
   }
 
@@ -72,9 +70,9 @@ function UploadBook() {
           disableCloseOnSelect
           disablePortal
           onSelect={(e) => e.stopPropagation()}
-          options={books.map((book) => ({
-            label: book.name,
-            value: book.name,
+          options={books?.map((book) => ({
+            label: book.bookName,
+            value: book.bookName,
           }))}
           renderInput={(params) => (
             <TextField
@@ -94,13 +92,31 @@ function UploadBook() {
               }}
               {...props}
             >
-              {(book ? books.concat([book]) : books).map((book) => (
+              {(newBook
+                ? books.concat([
+                    {
+                      bookName: newBook.name,
+                      author: newBook.author,
+                      category: newBook.category as
+                        | "fiction"
+                        | "selfHelp"
+                        | "business",
+                      bookNo: "",
+                      id: 0,
+                      isApproved: false,
+                      ownerId: 0,
+                      price: 0,
+                      status: "free",
+                    },
+                  ])
+                : books
+              ).map((book) => (
                 <Typography
                   onClick={(e) => e.stopPropagation()}
-                  key={book.name}
+                  key={book.id}
                   sx={{ marginBottom: "10px" }}
                 >
-                  {book.name}
+                  {book.bookName}
                 </Typography>
               ))}
               <Divider
@@ -177,10 +193,13 @@ function UploadBook() {
         </Box>
         <Box sx={{ p: 2, my: 3 }} display="flex" alignItems="center">
           <BasicModal
+            disabled={isUploading}
             onSubmit={handleBookUpload}
             open={open}
             setOpen={setOpen}
-          />
+          >
+            {isUploading ? "please wait ...." : "submit"}
+          </BasicModal>
         </Box>
       </Box>
     </Box>

@@ -12,8 +12,9 @@ import { useMemo } from "react";
 import ModeEditOutlineIcon from "@mui/icons-material/ModeEditOutline";
 import { APIResponse } from "@/types";
 import toast from "react-hot-toast";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCreateQueryString } from "@/lib/utils";
+import BasicModal from "./editBook";
 
 type TableAdmin = {
   No: string;
@@ -122,12 +123,13 @@ export const TableOwner = ({
     id: number;
     No: string;
     BookNo: number;
-    BookName: string;
+    bookName: string;
     status: "rented" | "free";
     price: string;
   }[];
 }) => {
   const router = useRouter();
+  const pathname = usePathname();
 
   const searchParams = useSearchParams();
 
@@ -168,7 +170,7 @@ export const TableOwner = ({
         size: 100,
       },
       {
-        accessorKey: "BookName",
+        accessorKey: "bookName",
         header: "Book Name",
         size: 200,
       },
@@ -209,9 +211,15 @@ export const TableOwner = ({
         size: 100,
         Cell: ({ row, cell }) => (
           <Box sx={{ display: "flex", gap: "1rem" }}>
-            <Button onClick={() => {}}>
-              <ModeEditOutlineIcon sx={{ color: "black" }} fontSize="medium" />
-            </Button>
+            <BasicModal
+              book={{
+                bookName: row.original.bookName,
+                price: Number(row.original.price),
+                quantity: 0,
+                status: row.original.status,
+                id:row.original.id
+              }}
+            />
 
             <Button onClick={() => deleteBook(Number(row.original.id))}>
               <DeleteIcon sx={{ color: "red" }} fontSize="medium" />
@@ -228,7 +236,26 @@ export const TableOwner = ({
     data,
     enablePagination: false,
     enableFullScreenToggle: false,
-    onColumnFiltersChange: (data) => {},
+    onColumnFiltersChange: (data) => {
+      const filters =
+        typeof data == "function"
+          ? (data([]) as {
+              id: string;
+              value: string;
+            }[])
+          : [];
+
+      if (!filters.length) return;
+
+      const searchParamURL = createQueryString(
+        filters?.map(({ id, value }) => ({
+          name: id,
+          value: String(value),
+        }))
+      );
+
+      router.push(pathname + "?" + searchParamURL);
+    },
   });
 
   return <MaterialReactTable table={table} />;
