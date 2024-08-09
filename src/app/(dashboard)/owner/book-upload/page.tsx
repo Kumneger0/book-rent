@@ -1,11 +1,10 @@
 import SharedHeader from "@/components/sharedHead";
 import UploadBook from "@/components/uploadBook";
-import { verify } from "@/lib/utils";
+import { getBooks, verify } from "@/lib/utils";
 import { Box } from "@mui/material";
 import { User } from "@prisma/client";
 import { cookies } from "next/headers";
 import React from "react";
-import { getBooks } from "../dashboard/page";
 
 async function BookUpload() {
   const token = cookies().get("token")!;

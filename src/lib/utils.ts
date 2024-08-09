@@ -127,3 +127,47 @@ export function useCreateQueryString(
     return params.toString();
   };
 }
+
+export async function getBooks({
+  email,
+  filterBy,
+}: {
+  email: string;
+  filterBy?: {
+    bookName: string;
+    status: string;
+  };
+}) {
+  const books = await prisma.user.findFirst({
+    where: {
+      email: email,
+      Book: {
+        every: {
+          bookName: {
+            contains: filterBy?.bookName,
+          },
+        },
+      },
+    },
+    include: {
+      Book: {
+        select: {
+          id: true,
+          bookNo: true,
+          bookName: true,
+          status: true,
+          price: true,
+        },
+      },
+    },
+  });
+
+  return books?.Book.map((book, i) => ({
+    id: book.id,
+    No: String(book.id),
+    BookNo: i,
+    bookName: book.bookName,
+    status: book.status,
+    price: String(book.price),
+  }));
+}
