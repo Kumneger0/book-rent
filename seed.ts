@@ -132,8 +132,6 @@ async function main() {
       });
     }
   }
-
-  console.log("Seeding completed successfully.");
 }
 
 main()
@@ -141,5 +139,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
     const books = await prisma.book.findMany();
-    console.log(books);
   });

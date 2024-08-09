@@ -8,7 +8,7 @@ import React from "react";
 import ControlPointRoundedIcon from "@mui/icons-material/ControlPointRounded";
 import { getUser, verify } from "@/lib/utils";
 import { cookies } from "next/headers";
-import { UserType } from "@/types";
+import { User } from "@prisma/client";
 
 const lists = {
   admin: [
@@ -66,7 +66,7 @@ const lists = {
 async function App({ children }: { children: React.ReactNode }) {
   const token = cookies().get("token");
 
-  const decoded = await verify<UserType>(token?.value ?? "");
+  const decoded = await verify<User>(token?.value ?? "");
 
   const sidebarList = lists[decoded.role ?? "user"];
 

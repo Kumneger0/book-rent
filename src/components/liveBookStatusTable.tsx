@@ -12,7 +12,8 @@ import { useMemo } from "react";
 import ModeEditOutlineIcon from "@mui/icons-material/ModeEditOutline";
 import { APIResponse } from "@/types";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCreateQueryString } from "@/lib/utils";
 
 type TableAdmin = {
   No: string;
@@ -106,6 +107,7 @@ const Example = ({ data }: { data: TableAdmin[] }) => {
     data,
     enablePagination: false,
     enableFullScreenToggle: false,
+    manualFiltering: true,
   });
 
   return <MaterialReactTable table={table} />;
@@ -126,6 +128,11 @@ export const TableOwner = ({
   }[];
 }) => {
   const router = useRouter();
+
+  const searchParams = useSearchParams();
+
+  const createQueryString = useCreateQueryString(searchParams);
+
   const deleteBook = async (bookID: number) => {
     try {
       const response = await fetch("/api/books/delete", {
@@ -202,11 +209,7 @@ export const TableOwner = ({
         size: 100,
         Cell: ({ row, cell }) => (
           <Box sx={{ display: "flex", gap: "1rem" }}>
-            <Button
-              onClick={() => {
-                console.log("Action button clicked for row:", row.original);
-              }}
-            >
+            <Button onClick={() => {}}>
               <ModeEditOutlineIcon sx={{ color: "black" }} fontSize="medium" />
             </Button>
 
@@ -225,6 +228,7 @@ export const TableOwner = ({
     data,
     enablePagination: false,
     enableFullScreenToggle: false,
+    onColumnFiltersChange: (data) => {},
   });
 
   return <MaterialReactTable table={table} />;

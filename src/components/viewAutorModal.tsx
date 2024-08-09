@@ -5,7 +5,6 @@ import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import { TextField } from "@mui/material";
-import { data } from "./owner-Table";
 import { MUITypes } from "@/types";
 
 const style: MUITypes = {
@@ -23,11 +22,7 @@ const style: MUITypes = {
   gap: "1rem",
 };
 
-export default function BasicModal({
-  author,
-}: {
-  author: (typeof data)[number];
-}) {
+export default function BasicModal({ author }: { author: any }) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);

@@ -1,89 +1,8 @@
 "use client";
-export const data = [
-  {
-    no: 1,
-    owner: "Nardos T",
-    upload: 15,
-    location: "Addis Ababa",
-    status: "Active",
-    action: "Approve",
-    approved: false,
-  },
-  {
-    no: 2,
-    owner: "Abel G",
-    upload: 20,
-    location: "Dire Dawa",
-    status: "Active",
-    action: "Review",
-    approved: false,
-  },
-  {
-    no: 3,
-    owner: "Selam A",
-    upload: 8,
-    location: "Bahir Dar",
-    status: "Active",
-    action: "Approve",
-    approved: false,
-  },
-  {
-    no: 1,
-    owner: "Nardos T",
-    upload: 15,
-    location: "Addis Ababa",
-    status: "Active",
-    action: "Approve",
-    approved: false,
-  },
-  {
-    no: 2,
-    owner: "Abel G",
-    upload: 20,
-    location: "Dire Dawa",
-    status: "Active",
-    action: "Review",
-    approved: true,
-  },
-  {
-    no: 3,
-    owner: "Selam A",
-    upload: 8,
-    location: "Bahir Dar",
-    status: "Active",
-    action: "Approve",
-    approved: true,
-  },
-  {
-    no: 1,
-    owner: "Nardos T",
-    upload: 15,
-    location: "Addis Ababa",
-    status: "Active",
-    action: "Approve",
-    approved: true,
-  },
-  {
-    no: 2,
-    owner: "Abel G",
-    upload: 20,
-    location: "Dire Dawa",
-    status: "Active",
-    action: "Review",
-    approved: true,
-  },
-  {
-    no: 3,
-    owner: "Selam A",
-    upload: 8,
-    location: "Bahir Dar",
-    status: "Active",
-    action: "Approve",
-    approved: true,
-  },
-];
+import { Can } from "@casl/react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, Button, Switch, Typography } from "@mui/material";
+import { defineManageOwnerAbilty } from "../abilities";
 
 import {
   MaterialReactTable,
@@ -91,13 +10,54 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import Image from "next/image";
-import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { use, useMemo } from "react";
+import toast from "react-hot-toast";
+import { UserContext } from "./UserContextWrapper";
 import BasicModal from "./viewAutorModal";
+
+export function getFuncToUpdate() {
+  return async (
+    url: string,
+    {
+      body,
+      method,
+    }: { body: RequestInit["body"]; method: RequestInit["method"] }
+  ) => {
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body,
+      });
+      const data = (await response.json()) as {
+        status: "success" | "error";
+        data: { message: string };
+      };
+      if (data.status == "success") {
+      }
+      if (data.status == "error") {
+        toast.error(data.data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      if (err instanceof Error) {
+        const message = err.message;
+        toast.error(message, {
+          position: "top-right",
+        });
+      }
+    }
+  };
+}
 
 function OwnerTable({
   data,
 }: {
   data: {
+    id: string | number;
     no: number;
     owner: string;
     upload: number;
@@ -107,6 +67,10 @@ function OwnerTable({
     approved: boolean;
   }[];
 }) {
+  const { user } = use(UserContext);
+  const ablity = defineManageOwnerAbilty(user!);
+  const router = useRouter();
+
   const columns = useMemo<MRT_ColumnDef<(typeof data)[number]>[]>(
     () => [
       { accessorKey: "no", header: "No." },
@@ -143,8 +107,8 @@ function OwnerTable({
       {
         accessorKey: "status",
         header: "Status",
-        Cell: ({ cell }) => {
-          const status = cell.getValue() as string;
+        Cell: ({ cell, row }) => {
+          const status = cell.getValue() as "active" | "not active";
           return (
             <Box
               sx={{
@@ -157,7 +121,29 @@ function OwnerTable({
               }}
             >
               <Typography>{status}</Typography>
-              <Switch color="success" defaultChecked />
+              <Can this={"User"} I={"disable"} ability={ablity}>
+                {() => (
+                  <Switch
+                    defaultChecked={status == "active"}
+                    onChange={async (e, checked) => {
+                      const updateOwner = getFuncToUpdate();
+                      await updateOwner("/api/owner/disable", {
+                        body: JSON.stringify({
+                          id: row.original.id,
+                          isActive: checked,
+                        }),
+                        method: "post",
+                      });
+                      router.refresh();
+                    }}
+                    color={
+                      (cell.getValue() as "active" | "not active") == "active"
+                        ? "success"
+                        : "error"
+                    }
+                  />
+                )}
+              </Can>
             </Box>
           );
         },
@@ -169,26 +155,44 @@ function OwnerTable({
         Cell: ({ row }) => (
           <Box sx={{ display: "flex", gap: "1rem" }}>
             <BasicModal author={row.original} />
-            <Button
-              onClick={() => {
-                console.log("Action button clicked for row:", row.original);
-              }}
-            >
-              <DeleteIcon sx={{ color: "red" }} fontSize="medium" />
-            </Button>
-            <Button
-              variant={!row.original.approved ? "outlined" : "contained"}
-              sx={{
-                backgroundColor: !row.original.approved ? "gray" : null,
-                color: "white",
-              }}
-              color="primary"
-              onClick={() => {
-                console.log("Action button clicked for row:", row.original);
-              }}
-            >
-              {row.original.approved ? "Approved" : "Approve"}
-            </Button>
+            <Can this={"User"} I={"delete"} ability={ablity}>
+              <Button
+                onClick={async () => {
+                  const deleteOwner = getFuncToUpdate();
+                  await deleteOwner("/api/owner/delete", {
+                    method: "delete",
+                    body: JSON.stringify({ id: row.original.id }),
+                  });
+                  router.refresh()
+                }}
+              >
+                <DeleteIcon sx={{ color: "red" }} fontSize="medium" />
+              </Button>
+            </Can>
+
+            <Can this={"User"} I={"approve"} ability={ablity}>
+              <Button
+                variant={!row.original.approved ? "outlined" : "contained"}
+                sx={{
+                  backgroundColor: !row.original.approved ? "gray" : null,
+                  color: "white",
+                }}
+                color="primary"
+                onClick={async () => {
+                  const updateOwner = getFuncToUpdate();
+                  await updateOwner("/api/owner/approve", {
+                    body: JSON.stringify({
+                      id: row.original.id,
+                      isApprove: !row.original.approved,
+                    }),
+                    method: "post",
+                  });
+                  router.refresh();
+                }}
+              >
+                {row.original.approved ? "Approved" : "Approve"}
+              </Button>
+            </Can>
           </Box>
         ),
       },
@@ -206,3 +210,5 @@ function OwnerTable({
   return <MaterialReactTable table={table} />;
 }
 export default OwnerTable;
+
+

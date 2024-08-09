@@ -1,6 +1,6 @@
 import { prisma } from "@/db";
 import { verify } from "@/lib/utils";
-import { UserType } from "@/types";
+import { User } from "@/types";
 import CircleIcon from "@mui/icons-material/Circle";
 import { Box, Divider, Paper, Typography } from "@mui/material";
 import { cookies } from "next/headers";
@@ -14,7 +14,7 @@ const DashboardContent = async ({
   children: React.ReactNode;
 }) => {
   const token = cookies().get("token")!;
-  const decoded = await verify<UserType>(token.value)!;
+  const decoded = await verify<User>(token.value)!;
   const user = await prisma.user.findFirst({
     where: {
       email: decoded.email,

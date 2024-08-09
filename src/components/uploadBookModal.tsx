@@ -88,9 +88,7 @@ export default function UploadBookModal({ setBook }: { setBook: BookSetter }) {
                 variant="filled"
                 sx={{ color: "black" }}
                 name="category"
-                onChange={() => {
-                  console.log("hello");
-                }}
+                onChange={() => {}}
               >
                 <MenuItem value={"fiction"}>fiction</MenuItem>
                 <MenuItem value={"selfHelp"}>selfHelp</MenuItem>

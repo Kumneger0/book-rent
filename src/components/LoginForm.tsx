@@ -6,14 +6,14 @@ import toast from "react-hot-toast";
 import { z } from "zod";
 import SignUpButton from "./formSubmitButon";
 import { APIResponse } from "@/types";
+import { useState } from "react";
 
 function LoginForm() {
   const router = useRouter();
+  const [errors, setZodError] = useState<z.ZodError>();
 
   const formAction = async (formData: FormData) => {
     const formDataObj = Object.fromEntries(formData.entries());
-
-    console.log(formDataObj);
 
     if (Object.keys(formDataObj).length === 0) {
       toast.error("please fill all fields");
@@ -34,34 +34,49 @@ function LoginForm() {
 
       if (data.status === "success") {
         toast.success(data.data.message);
-        router.refresh();
+        router.push("/");
       } else {
         toast.error(data.data.message);
       }
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        setZodError(err);
+        return;
+      }
+      if (err instanceof Error) {
+        toast.error(err.message);
       }
     }
   };
 
+  const emailError = errors?.issues.find((err) =>
+    err.path.includes("email")
+  )?.message;
+  const passwordErorr = errors?.issues.find((err) =>
+    err.path.includes("password")
+  )?.message;
+
   return (
     <Box sx={{ width: "80%", marginTop: "10px" }}>
       <TextField
+        error={!!emailError}
         id="outlined-email"
         label="Email"
         type="email"
         required
         name="email"
         style={{ width: "100%", marginTop: "10px" }}
+        helperText={emailError}
       />
       <TextField
+        error={!!passwordErorr}
         id="outlined-password-input"
         label="Password"
         type="password"
         name="password"
         required
         autoComplete="current-password"
+        helperText={passwordErorr}
         style={{ width: "100%", marginTop: "10px" }}
       />
       <FormControlLabel

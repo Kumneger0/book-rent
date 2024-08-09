@@ -1,18 +1,17 @@
 "use client";
 import { z } from "zod";
 
-import React from "react";
-import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
-import { useFormStatus } from "react-dom";
+import { Checkbox, FormControlLabel, TextField } from "@mui/material";
 import { useRouter } from "next/navigation";
+import React from "react";
 
-import toast, { Toaster } from "react-hot-toast";
 import { UserSchema } from "@/lib/utils";
+import toast from "react-hot-toast";
 import SignUpButton from "./formSubmitButon";
 
 function SignUPForm() {
   const router = useRouter();
-  const [zodError, setZodError] = React.useState<z.ZodError | string>();
+  const [zodError, setZodError] = React.useState<z.ZodError>();
 
   async function formAction(formData: FormData) {
     const formDataObj = Object.fromEntries(formData.entries());
@@ -49,19 +48,33 @@ function SignUPForm() {
     }
   }
 
+  const emailError = zodError?.issues.find((err) =>
+    err.path.includes("email")
+  )?.message;
+  const passwordErorr = zodError?.issues.find((err) =>
+    err.path.includes("password")
+  )?.message;
+  const nameError = zodError?.issues.find((err) =>
+    err.path.includes("fullName")
+  )?.message;
+  const location = zodError?.issues.find((err) =>
+    err.path.includes("fullName")
+  )?.message;
+  const confirmPassword = zodError?.issues.find((err) =>
+    err.path.includes("confirmPassword")
+  )?.message;
+  const termsError = zodError?.issues.find((err) =>
+    err.path.includes("terms")
+  )?.message;
+  const phonenumError = zodError?.issues.find((err) =>
+    err.path.includes("phoneNumber")
+  )?.message;
+
   return (
     <div style={{ width: "80%", margin: "0 auto" }}>
-      {zodError && (
-        <div style={{ padding: "10px", margin: "20px 0" }}>
-          <div style={{ color: "red" }}>
-            {typeof zodError !== "string" &&
-              zodError.issues.map((issue) => (
-                <div key={issue.path[0]}>{issue.message}</div>
-              ))}
-          </div>
-        </div>
-      )}
       <TextField
+        error={!!nameError}
+        helperText={nameError}
         id="outlined-full-name"
         label="Full Name"
         type="text"
@@ -71,6 +84,8 @@ function SignUPForm() {
       />
 
       <TextField
+        error={!!emailError}
+        helperText={!!emailError}
         id="outlined-email"
         label="Email"
         type="email"
@@ -79,6 +94,8 @@ function SignUPForm() {
         style={{ width: "100%", marginTop: "10px" }}
       />
       <TextField
+        error={!!passwordErorr}
+        helperText={!!passwordErorr}
         id="outlined-password-input"
         label="Password"
         type="password"
@@ -88,6 +105,8 @@ function SignUPForm() {
         style={{ width: "100%" }}
       />
       <TextField
+        error={!!confirmPassword}
+        helperText={confirmPassword}
         id="outlined-confirm-password-input"
         label="Confirm Password"
         type="password"
@@ -97,6 +116,8 @@ function SignUPForm() {
         style={{ width: "100%" }}
       />
       <TextField
+        error={!!location}
+        helperText={!!location}
         id="outlined-location-input"
         label="Location"
         type="text"
@@ -105,6 +126,8 @@ function SignUPForm() {
         style={{ width: "100%" }}
       />
       <TextField
+        error={!!phonenumError}
+        helperText={!!phonenumError}
         id="outlined-phonenum-input"
         label="Phone Number"
         type="tel"
@@ -114,6 +137,7 @@ function SignUPForm() {
       />
       <FormControlLabel
         required
+        name="terms"
         control={<Checkbox />}
         label="I accept terms and conditions"
         sx={{ color: "black", width: "100%", margin: "10px, 0", py: 2, px: 1 }}

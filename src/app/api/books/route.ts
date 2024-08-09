@@ -1,12 +1,12 @@
 import { prisma } from "@/db";
 import { verify } from "@/lib/utils";
-import { UserType } from "@/types";
+import { User } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
     const token = req.cookies.get("token");
-    const user = await verify<UserType>(token?.value ?? "");
+    const user = await verify<User>(token?.value ?? "");
     if (!user) {
       return NextResponse.json({
         status: "error",

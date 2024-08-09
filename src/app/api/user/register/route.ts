@@ -1,13 +1,16 @@
 import { hashPassword } from "@/lib/utils";
 
 import { prisma } from "@/db";
-import { UserType } from "@/types";
 import { NextRequest } from "next/server";
+import { User } from "@prisma/client";
 
 export const POST = async (req: NextRequest) => {
-  const body = (await req?.json()) as unknown as UserType;
+  const body = (await req?.json()) as unknown as User & {
+    confirmPassword: string;
+    terms: string;
+  };
 
-  const { confirmPassword, ...userData } = body;
+  const { confirmPassword, terms, ...userData } = body;
 
   if (!userData)
     return new Response(
@@ -52,6 +55,7 @@ export const POST = async (req: NextRequest) => {
       { status: 200 }
     );
   } catch (err) {
+    console.log(err);
     return new Response(
       JSON.stringify({
         status: "error",

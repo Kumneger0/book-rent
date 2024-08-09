@@ -5,8 +5,9 @@ import { Box } from "@mui/material";
 
 async function Owners() {
   const owners = (await prisma.user.findMany({ where: { role: "owner" } })).map(
-    (owner) =>
-      ({
+    (owner) => {
+      return {
+        id: owner.id,
         no: owner.id,
         action: owner.approved ? "approve" : "review",
         owner: owner.fullName,
@@ -15,6 +16,7 @@ async function Owners() {
         location: owner.location,
         approved: owner.approved,
       } satisfies {
+        id: string | number;
         no: number;
         owner: string;
         upload: number;
@@ -22,7 +24,8 @@ async function Owners() {
         status: string;
         action: string;
         approved: boolean;
-      })
+      };
+    }
   );
 
   return (

@@ -1,15 +1,14 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { verify } from "./lib/utils";
-import { UserType } from "./types";
+import { User } from "@prisma/client";
 
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get("token");
 
   if (!token) return NextResponse.redirect(new URL("/login", req.url));
 
-  const user = await verify<UserType>(token?.value);
-
+  const user = await verify<User>(token?.value);
 
   if (!user) return NextResponse.redirect(new URL("/login", req.url));
 
