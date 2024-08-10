@@ -9,7 +9,7 @@ import React from "react";
 async function BookUpload() {
   const token = cookies().get("token")!;
   const user = await verify<User>(token.value)!;
-  const books = await getBooks({ email: user.email });
+  const { books, tableBooks } = await getBooks({ email: user.email });
 
   return (
     <>
@@ -26,7 +26,7 @@ async function BookUpload() {
       >
         <UploadBook
           books={
-            books?.map((book) => ({
+            tableBooks?.map((book) => ({
               ...book,
               price: Number(book.price),
               bookNo: book.BookNo.toString(),
