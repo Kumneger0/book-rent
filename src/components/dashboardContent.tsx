@@ -6,12 +6,21 @@ import { cookies } from "next/headers";
 import { EarningsSummaryChart } from "./chart";
 import { PieChartWithPaddingAngle } from "./charts";
 import { $Enums, User } from "@prisma/client";
+import { EarningsSummaryChartProps } from "@/types";
+
+interface DashboardProps extends React.PropsWithChildren {
+  income: {
+    name: "This Month" | "Last Month";
+    income: number;
+  }[];
+  earningsSummaryChartProps: EarningsSummaryChartProps;
+}
 
 const DashboardContent = async ({
   children,
-}: {
-  children: React.ReactNode;
-}) => {
+  income,
+  earningsSummaryChartProps,
+}: DashboardProps) => {
   const token = cookies().get("token")!;
   const decoded = await verify<User>(token.value)!;
   const user = await prisma.user.findFirst({
@@ -48,6 +57,13 @@ const DashboardContent = async ({
           : "red",
     })
   );
+
+  const lastMonthIncome = income.find(
+    (item) => item.name === "Last Month"
+  )?.income;
+  const thisMonthIncome = income.find(
+    (item) => item.name === "This Month"
+  )?.income;
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -114,13 +130,13 @@ const DashboardContent = async ({
                   }}
                   variant="h4"
                 >
-                  ETB 9460.00
+                  ETB {thisMonthIncome}
                 </Typography>
                 <Typography sx={{ color: "#525256", display: "block" }}>
-                  compared to 9940 last month
+                  compared to {lastMonthIncome} last month
                 </Typography>
                 <Typography sx={{ color: "#525256", display: "block" }}>
-                  Last Month Income ETB 25658.00
+                  Last Month Income ETB {lastMonthIncome}
                 </Typography>
               </Box>
             </Box>
@@ -198,7 +214,7 @@ const DashboardContent = async ({
         <Box sx={{ margin: "10px", width: "71%" }}>
           <Paper sx={{ p: 2, width: "100%" }}>{children}</Paper>
           <Paper>
-            <EarningsSummaryChart />
+            <EarningsSummaryChart {...earningsSummaryChartProps} />
           </Paper>
         </Box>
       </Box>

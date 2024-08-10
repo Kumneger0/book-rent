@@ -13,7 +13,7 @@ type AppAbility = PureAbility<
   PrismaQuery
 >;
 
-export function defineManageOwnerAbilty(user: User): AppAbility {
+export function defineAbilty(user: User): AppAbility {
   const { can, cannot, build } = new AbilityBuilder<AppAbility>(
     createPrismaAbility
   );

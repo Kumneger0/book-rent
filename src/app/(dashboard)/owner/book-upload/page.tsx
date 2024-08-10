@@ -24,8 +24,15 @@ async function BookUpload() {
           padding: "10px",
         }}
       >
-        {/* @ts-ignore */}
-        <UploadBook books={books ?? []} />;
+        <UploadBook
+          books={
+            books?.map((book) => ({
+              ...book,
+              price: Number(book.price),
+              bookNo: book.BookNo.toString(),
+            })) ?? []
+          }
+        />
       </Box>
     </>
   );

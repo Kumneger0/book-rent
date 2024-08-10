@@ -1,4 +1,4 @@
-import OwnerTable from "@/components/owner-Table";
+import AdminOwnerTable from "@/components/AdminOwnerTable";
 import SharedHeader from "@/components/sharedHead";
 import { prisma } from "@/db";
 import { Box } from "@mui/material";
@@ -35,7 +35,7 @@ async function Owners() {
         sx={{ p: 2, borderRadius: 1, boxShadow: 1, backgroundColor: "white" }}
       >
         <h3>List of Owners</h3>
-        <OwnerTable data={owners} />
+        <AdminOwnerTable data={owners} />
       </Box>
     </Box>
   );

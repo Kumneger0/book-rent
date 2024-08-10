@@ -2,25 +2,17 @@
 import React from "react";
 import { Box, Paper, Typography, Grid } from "@mui/material";
 import { LineChart } from "@mui/x-charts";
+import { EarningsSummaryChartProps } from "@/types";
 
-const data = {
-  xAxis: [1, 2, 3, 5, 8, 10],
-  series: [
-    {
-      data: [2, 5.5, 2, 8.5, 1.5, 5],
-      area: true,
-      label: "Last 6 months",
-      color: "#94d1e0",
-    },
-    {
-      data: [1.5, 3.5, 2.5, 7, 1, 4.5],
-      label: "Same period last year",
-      color: "#46595e",
-    },
-  ],
-};
+const monthes = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+const lastSixMontes = [2000, 5500, 2000, 8500, 1500, 5000];
+const samePeriodLastYear = [1500, 3500, 2500, 7000, 1000, 4500];
 
-export const EarningsSummaryChart = () => {
+export const EarningsSummaryChart = ({
+  lastSixMontes,
+  monthes,
+  samePeriodLastYear,
+}: EarningsSummaryChartProps) => {
   return (
     <Box sx={{ flexGrow: 1, width: "100%", marginTop: "10px" }}>
       <Paper
@@ -35,12 +27,34 @@ export const EarningsSummaryChart = () => {
         <Typography variant="h6" gutterBottom>
           Earning Summary
         </Typography>
-        <Typography variant="subtitle2" gutterBottom>
-          Mar 2022 - Oct 2024
-        </Typography>
+        <Typography variant="subtitle2" gutterBottom></Typography>
+
         <LineChart
-          xAxis={[{ data: data.xAxis }]}
-          series={data.series}
+          xAxis={[
+            {
+              id: "Years",
+              data: monthes,
+              scaleType: "point",
+            },
+          ]}
+          series={[
+            {
+              id: "lastSixMontes",
+              label: "Last 6 months",
+              data: lastSixMontes,
+              stack: "total",
+              area: true,
+              showMark: false,
+            },
+            {
+              id: "samePeriodLastYear",
+              label: "Same Period Last Year",
+              data: samePeriodLastYear,
+              stack: "total",
+              area: true,
+              showMark: false,
+            },
+          ]}
           sx={{ width: "100%" }}
           height={300}
         />
@@ -48,3 +62,11 @@ export const EarningsSummaryChart = () => {
     </Box>
   );
 };
+
+
+
+
+
+
+
+

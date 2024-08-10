@@ -2,7 +2,7 @@
 import { Can } from "@casl/react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, Button, Switch, Typography } from "@mui/material";
-import { defineManageOwnerAbilty } from "../abilities";
+import { defineAbilty } from "../abilities";
 
 import {
   MaterialReactTable,
@@ -11,9 +11,9 @@ import {
 } from "material-react-table";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { use, useMemo } from "react";
+import { useMemo } from "react";
 import toast from "react-hot-toast";
-import { UserContext } from "./UserContextWrapper";
+import { useUserContext } from "./UserContextWrapper";
 import BasicModal from "./viewAutorModal";
 
 export function getFuncToUpdate() {
@@ -44,7 +44,6 @@ export function getFuncToUpdate() {
         toast.error(data.data.message);
       }
     } catch (err) {
-
       if (err instanceof Error) {
         const message = err.message;
         toast.error(message, {
@@ -55,13 +54,12 @@ export function getFuncToUpdate() {
       toast.error("There was an error occured", {
         position: "top-right",
       });
-         return null;
-
+      return null;
     }
   };
 }
 
-function OwnerTable({
+function AdminOwnerTable({
   data,
 }: {
   data: {
@@ -75,8 +73,8 @@ function OwnerTable({
     approved: boolean;
   }[];
 }) {
-  const { user } = use(UserContext);
-  const ablity = defineManageOwnerAbilty(user!);
+  const { user } = useUserContext();
+  const ablity = defineAbilty(user!);
   const router = useRouter();
 
   const columns = useMemo<MRT_ColumnDef<(typeof data)[number]>[]>(
@@ -171,7 +169,7 @@ function OwnerTable({
                     method: "delete",
                     body: JSON.stringify({ id: row.original.id }),
                   });
-                  router.refresh()
+                  router.refresh();
                 }}
               >
                 <DeleteIcon sx={{ color: "red" }} fontSize="medium" />
@@ -217,6 +215,6 @@ function OwnerTable({
 
   return <MaterialReactTable table={table} />;
 }
-export default OwnerTable;
+export default AdminOwnerTable;
 
 

@@ -1,8 +1,8 @@
 import { prisma } from "@/db";
 import { verify } from "@/lib/utils";
-import { User } from "@prisma/client";
+import { $Enums, User } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
-import { defineManageOwnerAbilty } from "@/abilities";
+import { defineAbilty } from "@/abilities";
 
 export async function PUT(req: NextRequest) {
   try {
@@ -31,13 +31,13 @@ export async function PUT(req: NextRequest) {
         },
       });
     }
-    const ablity = defineManageOwnerAbilty(userFromDB);
+    const ablity = defineAbilty(userFromDB);
 
     if (ablity.can("update", "Book")) {
       const { id, ...data } = (await req.json()) as {
         bookName: string;
         quantity: string;
-        status: "free" | "rented";
+        category: $Enums.Category;
         price: string;
         id: number;
       };

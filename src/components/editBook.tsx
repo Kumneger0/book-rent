@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 import { z } from "zod";
 import SubmitButton from "./formSubmitButon";
-import { getFuncToUpdate } from "./owner-Table";
+import { getFuncToUpdate } from "./AdminOwnerTable";
 
 const style: MUITypes = {
   position: "absolute" as "absolute",
@@ -35,14 +35,18 @@ const style: MUITypes = {
 const bookFormSchema = z.object({
   bookName: z.string().min(1, { message: "please enter book name" }),
   quantity: z.string({ message: "pleae enter how many quatties you have" }),
-  status: z.enum(["free", "rented"], { message: "please enter book status" }),
+  category: z.enum(["fiction", "selfHelp", "business"], {
+    message: "please enter book status",
+  }),
   price: z.string({ message: "please enter book price" }),
 });
 
 export default function BasicModal({
   book,
 }: {
-  book: Pick<Book, "bookName" | "quantity" | "status" | "price" | "id">;
+  book: Pick<Book, "bookName" | "quantity" | "category" | "price" | "id"> & {
+    status: "free" | "rented" | "waiting approval";
+  };
 }) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
@@ -107,16 +111,12 @@ export default function BasicModal({
                 label="status *"
                 variant="filled"
                 sx={{ color: "black" }}
-                name="status"
-                defaultValue={book.status}
-                onChange={() => {}}
+                name="category"
+                defaultValue={book.category}
               >
-                <MenuItem selected={book.status == "free"} value={"free"}>
-                  free
-                </MenuItem>
-                <MenuItem selected={book.status == "rented"} value={"rented"}>
-                  rented
-                </MenuItem>
+                <MenuItem value={"fiction"}>fiction</MenuItem>
+                <MenuItem value={"selfHelp"}>selfHelp</MenuItem>
+                <MenuItem value={"business"}>business</MenuItem>
               </Select>
             </FormControl>
 

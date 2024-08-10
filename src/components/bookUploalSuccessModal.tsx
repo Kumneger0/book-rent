@@ -1,10 +1,12 @@
 import { MUITypes } from "@/types";
+import { Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
 import Image from "next/image";
 import * as React from "react";
+import { useUserContext } from "./UserContextWrapper";
 
 const style: MUITypes = {
   position: "absolute" as "absolute",
@@ -41,17 +43,32 @@ export default function BasicModal({
 }: ModalProps & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const handleClose = () => setOpen(false);
 
+  const { user } = useUserContext();
+
   return (
     <div>
-      <Button
-        {...props}
-        onClick={onSubmit}
-        color="primary"
-        sx={{ py: 3, px: 5, borderRadius: "20px" }}
-        variant="contained"
+      <Tooltip
+        placement="top"
+        title={
+          user?.approved ? (
+            <Typography sx={{ fontWeight: 400 }}>Upload Book</Typography>
+          ) : (
+            <Typography sx={{ fontWeight: 400 }}>
+              You are not approved yet
+            </Typography>
+          )
+        }
       >
-        {children}
-      </Button>
+        <Button
+          {...props}
+          onClick={onSubmit}
+          color="primary"
+          sx={{ py: 3, px: 5, borderRadius: "20px" }}
+          variant="contained"
+        >
+          {children}
+        </Button>
+      </Tooltip>
       <Modal
         open={open}
         onClose={handleClose}

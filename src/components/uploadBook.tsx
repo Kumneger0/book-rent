@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   TextField,
   Autocomplete,
@@ -10,6 +10,8 @@ import {
   Select,
   MenuItem,
   OutlinedInput,
+  Tooltip,
+  Alert,
 } from "@mui/material";
 // import UpgradeIcon from "@mui/icons-material/Upgrade";
 import { Button, Input, Box, Typography } from "@mui/material";
@@ -19,6 +21,7 @@ import { APIResponse } from "@/types";
 import BasicModal from "./bookUploalSuccessModal";
 import toast from "react-hot-toast";
 import { Book } from "@prisma/client";
+import { useUserContext } from "./UserContextWrapper";
 
 function UploadBook({ books }: { books: Partial<Book>[] }) {
   const [newBook, setBook] = useState<{
@@ -30,7 +33,7 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
   const [isUploading, setIsUploading] = useState(false);
   const [bookQuantity, setBookQuantity] = useState<number>(0);
   const [bookPrice, setBookPrice] = useState<number>(0);
-
+  const inputFileRef = useRef<HTMLInputElement>(null);
   async function handleBookUpload() {
     const bookToUpload = {
       name: newBook?.name,
@@ -39,14 +42,33 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
       quantity: bookQuantity,
       price: bookPrice,
     };
+
+    if (
+      Object.keys(bookToUpload).some(
+        (key) => bookToUpload[key as keyof typeof bookToUpload] === undefined
+      )
+    ) {
+      toast.error("Please fill all the fields");
+      return;
+    }
+
+    const file = inputFileRef.current?.files?.[0];
+    if (!file) {
+      toast.error("Please select a file");
+      return;
+    }
+
+    if(file.size > 1024 * 1024 * 2) {
+      toast.error("File size is too large (max 2mb)");
+      return;
+    }
+
     try {
       setIsUploading(true);
-      const response = await fetch("/api/books", {
+      const response = await fetch(`/api/books?filename=${file.name}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(bookToUpload),
+
+        body: JSON.stringify({ ...bookToUpload, file }),
       });
       const data = (await response.json()) as APIResponse;
       if (data.status === "success") {
@@ -61,8 +83,24 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
     }
   }
 
+  const { user } = useUserContext();
+
   return (
     <Box sx={{ width: "80%", margin: "0 auto" }}>
+      {!user?.approved && (
+        <Alert
+          sx={{
+            fontSize: "1.2rem",
+          }}
+          severity="error"
+          color="error"
+        >
+          {" "}
+          We noticed that your account is currently awaiting approval. Please
+          wait for confirmation of approval before proceeding with book uploads{" "}
+        </Alert>
+      )}
+
       <Box sx={{ width: 300, margin: "0 auto", textAlign: "center" }}>
         <h2>Upload New Book</h2>
         <Autocomplete
@@ -84,11 +122,13 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
           sx={{ marginBottom: 2 }}
           PaperComponent={(props) => (
             <Box
-              style={{
+              sx={{
                 backgroundColor: "slate",
                 padding: "10px",
                 borderRadius: "10px",
                 boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                maxheight: "400px",
+                overflowY: "auto",
               }}
               {...props}
             >
@@ -134,7 +174,7 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
           width: "100%",
           maxWidth: "800px",
           justifyContent: "space-arround",
-          margin: "0 auto",
+          margin: "100px auto",
         }}
       >
         <Box sx={{ minWidth: 300, mt: "150px", mx: "auto" }}>
@@ -179,6 +219,8 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
             type="file"
             accept="image/*"
             style={{ display: "none" }}
+            name="coverImage"
+            ref={inputFileRef}
             id="upload-book-cover"
           />
           <label htmlFor="upload-book-cover">
@@ -193,7 +235,7 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
         </Box>
         <Box sx={{ p: 2, my: 3 }} display="flex" alignItems="center">
           <BasicModal
-            disabled={isUploading}
+            disabled={isUploading || user?.approved}
             onSubmit={handleBookUpload}
             open={open}
             setOpen={setOpen}

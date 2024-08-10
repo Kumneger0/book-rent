@@ -1,6 +1,6 @@
 import { prisma } from "@/db";
 import { env } from "@/env";
-import { User } from "@prisma/client";
+import { EarningsSummaryChartProps } from "@/types";
 import crypto from "crypto";
 import { jwtVerify } from "jose";
 import jwt from "jsonwebtoken";
@@ -156,6 +156,8 @@ export async function getBooks({
           bookName: true,
           status: true,
           price: true,
+          isApproved: true,
+          category: true,
         },
       },
     },
@@ -168,5 +170,101 @@ export async function getBooks({
     bookName: book.bookName,
     status: book.status,
     price: String(book.price),
+    approved: book.isApproved,
+    category: book.category,
   }));
 }
+
+export async function getIncome(userId: number) {
+  const income = await prisma.monthlyIncome.findMany({
+    where: {
+      userId: userId,
+    },
+    orderBy: {
+      month: "asc",
+    },
+  });
+  console.log(income);
+
+  return income;
+}
+
+export async function getTotalIncome() {
+  try {
+    const totalIncome = await prisma.monthlyIncome.findMany();
+    return totalIncome;
+  } catch (err) {
+    console.log(err);
+    return [];
+  }
+}
+
+export const fillerSixMonthsChartData = (
+  income: Pick<
+    Awaited<ReturnType<typeof getIncome>>[number],
+    "income" | "month" | "year"
+  >[]
+) => {
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
+
+  const earningsSummaryChartMonthes: EarningsSummaryChartProps["monthes"] =
+    income
+      .map(({ year, month }) => {
+        if (year === currentYear && month >= currentMonth) return null;
+        const date = new Date(0, month, year).toLocaleDateString("en-US", {
+          month: "short",
+        });
+
+        return { date, month, year: year };
+      })
+      .filter(
+        (item): item is { date: string; month: number; year: number } =>
+          item !== null
+      )
+      .map(({ date }) => date)
+      .slice(-6);
+
+  const lastSixMontes: EarningsSummaryChartProps["lastSixMontes"] = income
+    .filter(({ year, month }) => {
+      if (year === currentYear && month >= currentMonth) return null;
+
+      return year == currentYear;
+    })
+    .map(({ income }) => income)
+    .slice(-6);
+
+  const samePeriodLastYear: EarningsSummaryChartProps["samePeriodLastYear"] =
+    income
+      .filter(({ year, month }) => {
+        if (year === currentYear && month >= currentMonth) return null;
+
+        return year == currentYear - 1;
+      })
+      .map(({ income }) => income)
+      .slice(-6);
+  return {
+    lastSixMontes,
+    samePeriodLastYear,
+    monthes: earningsSummaryChartMonthes,
+  } satisfies EarningsSummaryChartProps;
+};
+
+export async function combineEachUserMontheyIncome(
+  income: NonNullable<Awaited<ReturnType<typeof getTotalIncome>>>
+) {
+  const combinedData = income.reduce((acc, curr) => {
+    const { month, year, income } = curr;
+    const key = `${month}-${year}`;
+    if (!acc[key]) {
+      acc[key] = {
+        month,
+        year,
+        income: 0,
+      };
+    }
+    acc[key].income += income;
+    return acc;
+  }, {} as Record<string, { month: number; year: number; income: number }>);
+  return Object.values(combinedData);
+} 

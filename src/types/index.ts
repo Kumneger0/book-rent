@@ -24,6 +24,14 @@ export interface BookTable extends Pick<BookType[number], never> {
   };
 }
 
+
+export type EarningsSummaryChartProps = {
+  monthes: string[];
+  lastSixMontes: number[];
+  samePeriodLastYear: number[];
+};
+
+
 export type Prettify<T> = {
   [K in keyof T]: T[K];
 } & {};

@@ -1,4 +1,4 @@
-import { defineManageOwnerAbilty } from "@/abilities";
+import { defineAbilty } from "@/abilities";
 import { prisma } from "@/db";
 import { verify } from "@/lib/utils";
 import { User } from "@prisma/client";
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       });
     const user = await verify<User>(token.value);
 
-    const ablity = defineManageOwnerAbilty(user);
+    const ablity = defineAbilty(user);
 
     if (ablity.can("disable", "User")) {
       const json = (await req.json()) as { id: number; isActive: boolean };

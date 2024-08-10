@@ -4,7 +4,7 @@ import { hashPassword } from "@/lib/utils";
 const mockUsers = [
   {
     fullName: "John Doe",
-    email: "john@example.com",
+    email: "john@exampl02e.com",
     password: "password123",
     location: "New York",
     phoneNumber: "1234567890",
@@ -12,7 +12,7 @@ const mockUsers = [
   },
   {
     fullName: "Jane Smith",
-    email: "jane@example.com",
+    email: "jane@exampl02e.com",
     password: "password456",
     location: "Los Angeles",
     phoneNumber: "0987654321",
@@ -20,7 +20,7 @@ const mockUsers = [
   },
   {
     fullName: "Bob Johnson",
-    email: "bob@example.com",
+    email: "bob@example02.com",
     password: "password789",
     location: "Chicago",
     phoneNumber: "5555555555",
@@ -28,7 +28,7 @@ const mockUsers = [
   },
   {
     fullName: "Alice Williams",
-    email: "alice@example.com",
+    email: "alice@examp02le.com",
     password: "password012",
     location: "San Francisco",
     phoneNumber: "1112223333",
@@ -36,7 +36,7 @@ const mockUsers = [
   },
   {
     fullName: "Tom Brown",
-    email: "tom@example.com",
+    email: "tom@example02.com",
     password: "password345",
     location: "Boston",
     phoneNumber: "4445556666",
@@ -92,9 +92,158 @@ const mockBooks = [
   },
 ] as const;
 
+const mockMonthlyIncomeData = [
+  // 2023
+  {
+    userId: 1,
+    month: 1,
+    year: 2023,
+    income: 2000,
+  },
+  {
+    userId: 1,
+    month: 2,
+    year: 2023,
+    income: 2200,
+  },
+  {
+    userId: 1,
+    month: 3,
+    year: 2023,
+    income: 3000,
+  },
+  {
+    userId: 1,
+    month: 4,
+    year: 2023,
+    income: 2500,
+  },
+  {
+    userId: 1,
+    month: 5,
+    year: 2023,
+    income: 2800,
+  },
+  {
+    userId: 1,
+    month: 6,
+    year: 2023,
+    income: 3100,
+  },
+  {
+    userId: 1,
+    month: 7,
+    year: 2023,
+    income: 2700,
+  },
+  {
+    userId: 1,
+    month: 8,
+    year: 2023,
+    income: 3200,
+  },
+  {
+    userId: 1,
+    month: 9,
+    year: 2023,
+    income: 2900,
+  },
+  {
+    userId: 1,
+    month: 10,
+    year: 2023,
+    income: 3400,
+  },
+  {
+    userId: 1,
+    month: 11,
+    year: 2023,
+    income: 3000,
+  },
+  {
+    userId: 1,
+    month: 12,
+    year: 2023,
+    income: 3500,
+  },
+  // 2024
+  {
+    userId: 1,
+    month: 1,
+    year: 2024,
+    income: 2800,
+  },
+  {
+    userId: 1,
+    month: 2,
+    year: 2024,
+    income: 3200,
+  },
+  {
+    userId: 1,
+    month: 3,
+    year: 2024,
+    income: 3000,
+  },
+  {
+    userId: 1,
+    month: 4,
+    year: 2024,
+    income: 3500,
+  },
+  {
+    userId: 1,
+    month: 5,
+    year: 2024,
+    income: 2900,
+  },
+  {
+    userId: 1,
+    month: 6,
+    year: 2024,
+    income: 3700,
+  },
+  {
+    userId: 1,
+    month: 7,
+    year: 2024,
+    income: 3100,
+  },
+  {
+    userId: 1,
+    month: 8,
+    year: 2024,
+    income: 3800,
+  },
+  {
+    userId: 1,
+    month: 9,
+    year: 2024,
+    income: 3300,
+  },
+  {
+    userId: 1,
+    month: 10,
+    year: 2024,
+    income: 4000,
+  },
+  {
+    userId: 1,
+    month: 11,
+    year: 2024,
+    income: 3600,
+  },
+  {
+    userId: 1,
+    month: 12,
+    year: 2024,
+    income: 4200,
+  },
+];
+
 async function main() {
-  await prisma.user.deleteMany();
-  await prisma.book.deleteMany();
+  // await prisma.user.deleteMany();
+  // await prisma.book.deleteMany();
 
   for (const user of mockUsers) {
     await prisma.user.create({
@@ -105,6 +254,11 @@ async function main() {
         location: user.location,
         phoneNumber: user.phoneNumber,
         role: user.role,
+        MonthlyIncome: {
+          create: mockMonthlyIncomeData.map(({ userId, ...rest }) => ({
+            ...rest,
+          })),
+        },
       },
     });
   }
@@ -134,9 +288,40 @@ async function main() {
   }
 }
 
-main()
-  .catch((e) => console.error(e))
-  .finally(async () => {
-    await prisma.$disconnect();
-    const books = await prisma.book.findMany();
-  });
+// main()
+//   .catch((e) => console.error(e))
+//   .finally(async () => {
+//     await prisma.$disconnect();
+//     const books = await prisma.book.findMany();
+//   });
+
+
+
+
+
+
+
+
+// (async () => {
+//   const deleteData = await prisma.monthlyIncome.deleteMany();
+//   console.log(deleteData);
+//   const ownersUsers = await prisma.user.findMany({
+//     where: {
+//       role: "owner",
+//     },
+//   });
+
+//   for (const owner of ownersUsers) {
+//     for (const income of mockMonthlyIncomeData) {
+//       const data = await prisma.monthlyIncome.create({
+//         data: {
+//           userId: owner.id,
+//           month: income.month,
+//           year: income.year,
+//           income: Math.floor(Math.random() * 10000),
+//         },
+//       });
+//       console.log(data);
+//     }
+//   }
+// })();
