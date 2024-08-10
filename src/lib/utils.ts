@@ -92,12 +92,11 @@ export async function verify<T extends Record<string, unknown>>(
   return payload as T;
 }
 
-export async function getUser(token: string | undefined) {
-  if (!token) return null;
-  const decoded = verify(token) as unknown as User;
+export async function getUser(email: string | undefined) {
+  if (!email) return null;
   const user = await prisma.user.findFirst({
     where: {
-      email: decoded.email,
+      email: email,
     },
   });
   return user;

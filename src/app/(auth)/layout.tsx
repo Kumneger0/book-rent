@@ -8,7 +8,8 @@ import { redirect } from "next/navigation";
 
 async function AuthLayout({ children }: { children: React.ReactNode }) {
   const token = cookies().get("token")?.value;
-  const user = await getUser(token);
+  const decoded = token ? await getUser(token) : null;
+  const user = await getUser(decoded?.email);
 
   if (user) {
     const pathToRedirect = `/${user?.role}/dashboard`;

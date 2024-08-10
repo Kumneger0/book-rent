@@ -21,7 +21,5 @@ export const POST = async (req: NextRequest, res: NextResponse) => {
     response.cookies.delete("token");
 
     return response;
-  } catch (error) {
-    User;
-  }
+  } catch (error) {}
 };

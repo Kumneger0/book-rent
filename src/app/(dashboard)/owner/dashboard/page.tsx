@@ -1,7 +1,6 @@
 import DashboardContent from "@/components/dashboardContent";
 import { TableOwner } from "@/components/liveBookStatusTable";
 import SharedHeader from "@/components/sharedHead";
-import { prisma } from "@/db";
 import { getBooks, verify } from "@/lib/utils";
 import { Box } from "@mui/material";
 import { User } from "@prisma/client";
