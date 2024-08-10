@@ -4,8 +4,42 @@ import { prisma } from "@/db";
 import { Box } from "@mui/material";
 import React from "react";
 
-async function Books() {
+// owner=fklalkf&category=fljaflkj&bookName=falfjl&author=fjafklaj&bookNo=fljalkfjl
+
+
+async function Books({
+  searchParams,
+}: {
+  searchParams: Record<string, string>;
+}) {
+
+ const owner = searchParams.owner
+ const category = searchParams.category
+ const bookName = searchParams.bookName;
+ const author = searchParams.author;
+ const bookNo = searchParams.bookNo;
+
   const books = await prisma.book.findMany({
+    where: {
+      owner: {
+        fullName: {
+          contains: owner,
+          mode: "insensitive",
+        },
+      },
+      author: {
+        contains: author,
+        mode: "insensitive",
+      },
+      bookName: {
+        contains: bookName,
+        mode: "insensitive",
+      },
+      bookNo: {
+        contains: bookNo,
+        mode: "insensitive",
+      },
+    },
     include: {
       owner: {
         select: {

@@ -10,8 +10,31 @@ import {
   getTotalIncome,
 } from "@/lib/utils";
 
-async function Dashboard() {
+async function Dashboard({
+  searchParams,
+}: {
+  searchParams: Record<string, string>;
+}) {
+  const owner = searchParams.Owner;
+  const price = Number(searchParams.price);
+  const bookNo = searchParams.BookNo;
+
   const books = await prisma.book.findMany({
+    where: {
+      owner: {
+        fullName: {
+          contains: owner ?? " ",
+          mode: "insensitive",
+        },
+      },
+      price: {
+        lte: isNaN(price) ? 10000000 : price,
+      },
+      bookNo: {
+        contains: bookNo,
+        mode: "insensitive",
+      },
+    },
     include: {
       owner: {
         select: {

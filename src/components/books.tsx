@@ -1,5 +1,6 @@
 "use client";
-import { BookType, BookTable, Prettify } from "@/types";
+import { useCreateQueryString } from "@/lib/utils";
+import { BookTable } from "@/types";
 import { Box, Switch, Typography } from "@mui/material";
 import {
   MaterialReactTable,
@@ -7,9 +8,16 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import Image from "next/image";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
 const Example = ({ data }: { data: BookTable[] }) => {
+  const searchParams = useSearchParams();
+  const createQueryString = useCreateQueryString(searchParams);
+
+  const pathname = usePathname();
+  const router = useRouter();
+
   const columns = useMemo<MRT_ColumnDef<(typeof data)[number]>[]>(
     () => [
       { accessorKey: "bookNo", header: "No." },
@@ -77,6 +85,29 @@ const Example = ({ data }: { data: BookTable[] }) => {
     data: data.map((data) => ({ ...data, owner: data.owner.fullName })),
     enablePagination: false,
     enableFullScreenToggle: false,
+    manualFiltering: true,
+    onColumnFiltersChange: (data) => {
+      const filters =
+        typeof data == "function"
+          ? (data([]) as {
+              id: string;
+              value: string;
+            }[])
+          : [];
+
+      if (!filters.length) {
+        router.push(pathname);
+        return;
+      }
+      const searchParamURL = createQueryString(
+        filters?.map(({ id, value }) => ({
+          name: id,
+          value: String(value),
+        }))
+      );
+
+      router.push(pathname + "?" + searchParamURL);
+    },
   });
 
   return <MaterialReactTable table={table} />;

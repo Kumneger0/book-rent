@@ -144,6 +144,7 @@ export async function getBooks({
         every: {
           bookName: {
             contains: filterBy?.bookName,
+            mode: "insensitive",
           },
         },
       },

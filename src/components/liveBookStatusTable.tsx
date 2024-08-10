@@ -1,9 +1,7 @@
 "use client";
 import { useCreateQueryString } from "@/lib/utils";
-import { APIResponse } from "@/types";
 import CircleIcon from "@mui/icons-material/Circle";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -12,8 +10,6 @@ import {
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import toast from "react-hot-toast";
-import BasicModal from "./editBook";
 
 type TableAdmin = {
   No: string;
@@ -23,9 +19,13 @@ type TableAdmin = {
   price: string;
 };
 
-type TableOwner = (Omit<TableAdmin, "Owner"> & { BookName: string })[];
-
 const Example = ({ data }: { data: TableAdmin[] }) => {
+  const searchParams = useSearchParams();
+  const createQueryString = useCreateQueryString(searchParams);
+
+  const pathname = usePathname();
+  const router = useRouter();
+
   const columns = useMemo<MRT_ColumnDef<TableAdmin>[]>(
     () => [
       {
@@ -108,6 +108,29 @@ const Example = ({ data }: { data: TableAdmin[] }) => {
     enablePagination: false,
     enableFullScreenToggle: false,
     manualFiltering: true,
+    onColumnFiltersChange: (data) => {
+      const filters =
+        typeof data == "function"
+          ? (data([]) as {
+              id: string;
+              value: string;
+            }[])
+          : [];
+
+      if (!filters.length) {
+        router.push(pathname);
+        return;
+      }
+
+      const searchParamURL = createQueryString(
+        filters?.map(({ id, value }) => ({
+          name: id,
+          value: String(value),
+        }))
+      );
+
+      router.push(pathname + "?" + searchParamURL);
+    },
   });
 
   return <MaterialReactTable table={table} />;

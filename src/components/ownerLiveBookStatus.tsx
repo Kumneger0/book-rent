@@ -146,7 +146,10 @@ export const TableOwner = ({ data }: TableProps) => {
             }[])
           : [];
 
-      if (!filters.length) return;
+    if (!filters.length) {
+      router.push(pathname);
+      return;
+    }
 
       const searchParamURL = createQueryString(
         filters?.map(({ id, value }) => ({
