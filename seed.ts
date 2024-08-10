@@ -288,12 +288,12 @@ async function main() {
   }
 }
 
-// main()
-//   .catch((e) => console.error(e))
-//   .finally(async () => {
-//     await prisma.$disconnect();
-//     const books = await prisma.book.findMany();
-//   });
+main()
+  .catch((e) => console.error(e))
+  .finally(async () => {
+    await prisma.$disconnect();
+    const books = await prisma.book.findMany();
+  });
 
 
 

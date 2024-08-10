@@ -4,6 +4,7 @@ import SharedHeader from "@/components/sharedHead";
 import {
   combineEachUserMontheyIncome,
   fillerSixMonthsChartData,
+  getBOOKpieChart,
   getBooks,
   getIncome,
   getTotalIncome,
@@ -25,15 +26,15 @@ async function Dashboard({
   const bookName = searchParams?.bookName;
   const status = searchParams?.status;
 
-  const books = (
-    await getBooks({
-      email: user?.email ?? "",
-      filterBy: {
-        bookName,
-        status,
-      },
-    })
-  )?.map((book) => ({
+  const { books, tableBooks: bookTable } = await getBooks({
+    email: user?.email ?? "",
+    filterBy: {
+      bookName,
+      status,
+    },
+  });
+
+  const tableBooks = bookTable?.map((book) => ({
     ...book,
     status: book.approved
       ? (book.status as "rented" | "free" | "waiting approval")
@@ -72,16 +73,20 @@ async function Dashboard({
 
   const chartData = fillerSixMonthsChartData(income);
 
+  const { data, numberOfBooksByCategory } = getBOOKpieChart(books ?? []);
+
   return (
     <>
       <SharedHeader>Owner/Dashboard</SharedHeader>
       <DashboardContent
+        numberOfBooksByCategory={numberOfBooksByCategory}
+        pieChartData={data}
         earningsSummaryChartProps={chartData}
         income={incomeData}
       >
         <Box>
           <h3>Live Book Status</h3>
-          <OwnerLiveBookStatus data={books ?? []} />
+          <OwnerLiveBookStatus data={tableBooks ?? []} />
         </Box>
       </DashboardContent>
     </>

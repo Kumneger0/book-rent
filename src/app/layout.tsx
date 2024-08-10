@@ -6,12 +6,12 @@ import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
-import NextTopLoader from "nextjs-toploader";
-import { getUser, verify } from "@/lib/utils";
 import UserContextWrapper from "@/components/UserContextWrapper";
-import { cookies } from "next/headers";
 import { prisma } from "@/db";
+import { VerifyUserJwt } from "@/lib/utils";
 import { User } from "@prisma/client";
+import { cookies } from "next/headers";
+import NextTopLoader from "nextjs-toploader";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 async function getCurrentUser() {
   const token = cookies().get("token");
 
-  const user = token?.value ? ((await verify(token?.value)) as User) : null;
+  const user = token?.value ? (VerifyUserJwt(token?.value) as User) : null;
 
   const fromDb = await prisma.user.findFirst({
     where: {

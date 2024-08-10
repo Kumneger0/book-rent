@@ -1,5 +1,5 @@
 "use client";
-import { useCreateQueryString } from "@/lib/utils";
+import { useCreateQueryString, onColumnFiltersChange } from "@/lib/utils";
 import { APIResponse } from "@/types";
 import CircleIcon from "@mui/icons-material/Circle";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -30,8 +30,12 @@ export type TableProps = {
 export const TableOwner = ({ data }: TableProps) => {
   const router = useRouter();
   const pathname = usePathname();
-
   const searchParams = useSearchParams();
+
+  const columnFilterState = Array.from(searchParams.keys()).map((key) => ({
+    id: key,
+    value: searchParams.get(key),
+  }));
 
   const createQueryString = useCreateQueryString(searchParams);
 
@@ -138,27 +142,10 @@ export const TableOwner = ({ data }: TableProps) => {
     enablePagination: false,
     enableFullScreenToggle: false,
     onColumnFiltersChange: (data) => {
-      const filters =
-        typeof data == "function"
-          ? (data([]) as {
-              id: string;
-              value: string;
-            }[])
-          : [];
-
-    if (!filters.length) {
-      router.push(pathname);
-      return;
-    }
-
-      const searchParamURL = createQueryString(
-        filters?.map(({ id, value }) => ({
-          name: id,
-          value: String(value),
-        }))
-      );
-
-      router.push(pathname + "?" + searchParamURL);
+      onColumnFiltersChange({ createQueryString, data, pathname, router });
+    },
+    state: {
+      columnFilters: columnFilterState,
     },
   });
 

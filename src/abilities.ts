@@ -22,6 +22,7 @@ export function defineAbilty(user: User): AppAbility {
     can("disable", "User").because("Admin can disable owners");
     can("approve", "User").because("admin can approve book owner");
     can("delete", "User").because("Admin cad delete owner");
+    can("approve", "Book").because("Admin can approve book");
   }
 
   if (user.role == "owner") {

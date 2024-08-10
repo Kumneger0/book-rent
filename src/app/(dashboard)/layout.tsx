@@ -5,10 +5,10 @@ import SpaceDashboardOutlinedIcon from "@mui/icons-material/SpaceDashboardOutlin
 import { Box, CssBaseline } from "@mui/material";
 import React from "react";
 
+import { VerifyUserJwt } from "@/lib/utils";
 import ControlPointRoundedIcon from "@mui/icons-material/ControlPointRounded";
-import { getUser, verify } from "@/lib/utils";
-import { cookies } from "next/headers";
 import { User } from "@prisma/client";
+import { cookies } from "next/headers";
 
 const lists = {
   admin: [
@@ -66,14 +66,14 @@ const lists = {
 async function App({ children }: { children: React.ReactNode }) {
   const token = cookies().get("token");
 
-  const decoded = await verify<User>(token?.value ?? "");
+  const decoded = VerifyUserJwt<User>(token?.value ?? "");
 
-  const sidebarList = lists[decoded.role ?? "user"];
+  const sidebarList = lists[decoded?.role ?? "user"];
 
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <Sidebar role={decoded.role ?? "user"} lists={sidebarList} />
+      <Sidebar role={decoded?.role ?? "user"} lists={sidebarList} />
       <Box
         component="main"
         sx={{ flexGrow: 1, p: 3, maxWidth: "1600px", mx: "auto" }}

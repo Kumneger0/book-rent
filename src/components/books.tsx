@@ -1,6 +1,7 @@
 "use client";
-import { useCreateQueryString } from "@/lib/utils";
+import { onColumnFiltersChange, useCreateQueryString } from "@/lib/utils";
 import { BookTable } from "@/types";
+import { Can } from "@casl/react";
 import { Box, Switch, Typography } from "@mui/material";
 import {
   MaterialReactTable,
@@ -10,10 +11,15 @@ import {
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
+import { useUserContext } from "./UserContextWrapper";
+import { defineAbilty } from "@/abilities";
+import { getFuncToUpdate } from "./AdminOwnerTable";
 
 const Example = ({ data }: { data: BookTable[] }) => {
   const searchParams = useSearchParams();
   const createQueryString = useCreateQueryString(searchParams);
+  const { user } = useUserContext();
+  const ablity = defineAbilty(user!);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -56,7 +62,7 @@ const Example = ({ data }: { data: BookTable[] }) => {
         accessorKey: "status",
         header: "Status",
 
-        Cell: ({ cell }) => {
+        Cell: ({ cell, row }) => {
           const status = cell.getValue() as string;
           return (
             <Box
@@ -69,8 +75,26 @@ const Example = ({ data }: { data: BookTable[] }) => {
                 borderRadius: "0.5rem",
               }}
             >
-              <Typography>{status}</Typography>
-              <Switch color="success" defaultChecked />
+              <Can this={"Book"} I={"approve"} ability={ablity}>
+                <Typography>
+                  {row.original.isApproved ? "active" : "not active"}
+                </Typography>
+                <Switch
+                  onChange={async (e, checked) => {
+                    const updateOwner = getFuncToUpdate();
+                    await updateOwner("/api/books/approve", {
+                      body: JSON.stringify({
+                        id: row.original.id,
+                        isApproved: checked,
+                      }),
+                      method: "PUT",
+                    });
+                    router.refresh();
+                  }}
+                  color="success"
+                  defaultChecked
+                />
+              </Can>
             </Box>
           );
         },
@@ -87,26 +111,12 @@ const Example = ({ data }: { data: BookTable[] }) => {
     enableFullScreenToggle: false,
     manualFiltering: true,
     onColumnFiltersChange: (data) => {
-      const filters =
-        typeof data == "function"
-          ? (data([]) as {
-              id: string;
-              value: string;
-            }[])
-          : [];
-
-      if (!filters.length) {
-        router.push(pathname);
-        return;
-      }
-      const searchParamURL = createQueryString(
-        filters?.map(({ id, value }) => ({
-          name: id,
-          value: String(value),
-        }))
-      );
-
-      router.push(pathname + "?" + searchParamURL);
+      onColumnFiltersChange({
+        createQueryString,
+        data,
+        pathname,
+        router,
+      });
     },
   });
 

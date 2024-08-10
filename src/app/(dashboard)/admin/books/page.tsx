@@ -13,8 +13,7 @@ async function Books({
   searchParams: Record<string, string>;
 }) {
 
- const owner = searchParams.owner
- const category = searchParams.category
+ const owner = searchParams.owner;
  const bookName = searchParams.bookName;
  const author = searchParams.author;
  const bookNo = searchParams.bookNo;

@@ -1,5 +1,5 @@
 "use client";
-import { useCreateQueryString } from "@/lib/utils";
+import { onColumnFiltersChange, useCreateQueryString } from "@/lib/utils";
 import CircleIcon from "@mui/icons-material/Circle";
 import { Box, Typography } from "@mui/material";
 import {
@@ -25,6 +25,11 @@ const Example = ({ data }: { data: TableAdmin[] }) => {
 
   const pathname = usePathname();
   const router = useRouter();
+
+  const columnFilterState = Array.from(searchParams.keys()).map((key) => ({
+    id: key,
+    value: searchParams.get(key),
+  }));
 
   const columns = useMemo<MRT_ColumnDef<TableAdmin>[]>(
     () => [
@@ -109,27 +114,10 @@ const Example = ({ data }: { data: TableAdmin[] }) => {
     enableFullScreenToggle: false,
     manualFiltering: true,
     onColumnFiltersChange: (data) => {
-      const filters =
-        typeof data == "function"
-          ? (data([]) as {
-              id: string;
-              value: string;
-            }[])
-          : [];
-
-      if (!filters.length) {
-        router.push(pathname);
-        return;
-      }
-
-      const searchParamURL = createQueryString(
-        filters?.map(({ id, value }) => ({
-          name: id,
-          value: String(value),
-        }))
-      );
-
-      router.push(pathname + "?" + searchParamURL);
+      onColumnFiltersChange({ createQueryString, data, pathname, router });
+    },
+    state: {
+      columnFilters: columnFilterState,
     },
   });
 

@@ -1,5 +1,5 @@
 import { prisma } from "@/db";
-import { verify } from "@/lib/utils";
+import { verify, VerifyUserJwt } from "@/lib/utils";
 import CircleIcon from "@mui/icons-material/Circle";
 import { Box, Divider, Paper, Typography } from "@mui/material";
 import { cookies } from "next/headers";
@@ -7,63 +7,40 @@ import { EarningsSummaryChart } from "./chart";
 import { PieChartWithPaddingAngle } from "./charts";
 import { $Enums, User } from "@prisma/client";
 import { EarningsSummaryChartProps } from "@/types";
-
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownWardIcon from "@mui/icons-material/ArrowDownward";
 interface DashboardProps extends React.PropsWithChildren {
   income: {
     name: "This Month" | "Last Month";
     income: number;
   }[];
   earningsSummaryChartProps: EarningsSummaryChartProps;
+  pieChartData: {
+    label: string;
+    value: number;
+    color: string;
+  }[];
+  numberOfBooksByCategory: Record<$Enums.Category, number>;
 }
 
 const DashboardContent = async ({
   children,
   income,
   earningsSummaryChartProps,
+  numberOfBooksByCategory,
+  pieChartData,
 }: DashboardProps) => {
-  const token = cookies().get("token")!;
-  const decoded = await verify<User>(token.value)!;
-  const user = await prisma.user.findFirst({
-    where: {
-      email: decoded.email,
-    },
-    include: {
-      Book: {
-        select: {
-          category: true,
-        },
-      },
-    },
-  });
-
-  const numberOfBooksByCategory = user?.Book.reduce((acc, book) => {
-    const category = book.category;
-    if (!acc[category]) {
-      acc[category] = 0;
-    }
-    acc[category]++;
-    return acc;
-  }, {} as Record<$Enums.Category, number>);
-
-  const data = Object.entries(numberOfBooksByCategory ?? {}).map(
-    ([label, value]) => ({
-      label,
-      value,
-      color:
-        label === "fiction"
-          ? "#006AFF"
-          : label === "business"
-          ? "green"
-          : "red",
-    })
-  );
-
   const lastMonthIncome = income.find(
     (item) => item.name === "Last Month"
   )?.income;
   const thisMonthIncome = income.find(
     (item) => item.name === "This Month"
   )?.income;
+
+  function calculatePercent(thisMonthIncome: number, lastMonthIncome: number) {
+    const difference = thisMonthIncome - lastMonthIncome;
+    return Math.trunc(Math.abs(difference / lastMonthIncome) * 100);
+  }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -126,11 +103,40 @@ const DashboardContent = async ({
                   sx={{
                     color: "black",
                     fontWeight: "bold",
-                    display: "block",
+                    display: "flex",
                   }}
                   variant="h4"
                 >
-                  ETB {thisMonthIncome}
+                  <span>ETB {thisMonthIncome}</span>
+                  {Number(lastMonthIncome) > Number(thisMonthIncome) ? (
+                    <span>
+                      <ArrowDownWardIcon color="error" />{" "}
+                      <span style={{ color: "red" }}>
+                        {calculatePercent(
+                          thisMonthIncome ?? 0,
+                          lastMonthIncome ?? 0
+                        )}
+                        %
+                      </span>
+                    </span>
+                  ) : (
+                    <span style={{ display: "flex" }}>
+                      <ArrowUpwardIcon color="success" />{" "}
+                      <span
+                        style={{
+                          color: "green",
+                          fontWeight: "lighter",
+                          fontSize: "0.8em",
+                        }}
+                      >
+                        {calculatePercent(
+                          thisMonthIncome ?? 0,
+                          lastMonthIncome ?? 0
+                        )}
+                        %
+                      </span>
+                    </span>
+                  )}
                 </Typography>
                 <Typography sx={{ color: "#525256", display: "block" }}>
                   compared to {lastMonthIncome} last month
@@ -176,7 +182,7 @@ const DashboardContent = async ({
                   gap: "10px",
                 }}
               >
-                {data?.map((item) => (
+                {pieChartData?.map((item) => (
                   <Box
                     key={item.label}
                     sx={{

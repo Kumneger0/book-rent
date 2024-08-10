@@ -1,15 +1,13 @@
-import { prisma } from "@/db";
-import { getUser } from "@/lib/utils";
 import { Box } from "@mui/material";
 import { cookies } from "next/headers";
 
+import { VerifyUserJwt } from "@/lib/utils";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
 async function AuthLayout({ children }: { children: React.ReactNode }) {
   const token = cookies().get("token")?.value;
-  const decoded = token ? await getUser(token) : null;
-  const user = await getUser(decoded?.email);
+  const user = VerifyUserJwt(token);
 
   if (user) {
     const pathToRedirect = `/${user?.role}/dashboard`;

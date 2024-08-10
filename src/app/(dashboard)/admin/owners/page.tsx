@@ -27,6 +27,9 @@ async function Owners({
           mode: "insensitive",
         },
       },
+      include: {
+        Book: true,
+      },
     })
   ).map((owner) => {
     return {
@@ -35,7 +38,7 @@ async function Owners({
       action: owner.approved ? "approve" : "review",
       owner: owner.fullName,
       status: owner.isActive ? "active" : "not active",
-      upload: 15,
+      upload: owner.Book.length,
       location: owner.location,
       approved: owner.approved,
     } satisfies {

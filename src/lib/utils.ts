@@ -4,8 +4,11 @@ import { EarningsSummaryChartProps } from "@/types";
 import crypto from "crypto";
 import { jwtVerify } from "jose";
 import jwt from "jsonwebtoken";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ReadonlyURLSearchParams } from "next/navigation";
 import { z } from "zod";
+import { MRT_Updater, MRT_ColumnFiltersState } from "material-react-table";
+import { Book, $Enums } from "@prisma/client";
 
 export function hashPassword(password: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -71,8 +74,9 @@ export function SignUserJwt<T extends Record<string, unknown>>(user: T) {
 }
 
 export function VerifyUserJwt<T extends Record<string, unknown>>(
-  token: string
+  token: string | undefined
 ) {
+  if (!token) return null;
   try {
     const user = jwt.verify(token, env.JWTPRIVATEKEY);
     return user as T;
@@ -150,30 +154,23 @@ export async function getBooks({
       },
     },
     include: {
-      Book: {
-        select: {
-          id: true,
-          bookNo: true,
-          bookName: true,
-          status: true,
-          price: true,
-          isApproved: true,
-          category: true,
-        },
-      },
+      Book: true,
     },
   });
 
-  return books?.Book.map((book, i) => ({
-    id: book.id,
-    No: String(book.id),
-    BookNo: i,
-    bookName: book.bookName,
-    status: book.status,
-    price: String(book.price),
-    approved: book.isApproved,
-    category: book.category,
-  }));
+  return {
+    books: books?.Book,
+    tableBooks: books?.Book.map((book, i) => ({
+      id: book.id,
+      No: String(book.id),
+      BookNo: i,
+      bookName: book.bookName,
+      status: book.status,
+      price: String(book.price),
+      approved: book.isApproved,
+      category: book.category,
+    })),
+  };
 }
 
 export async function getIncome(userId: number) {
@@ -268,4 +265,63 @@ export async function combineEachUserMontheyIncome(
     return acc;
   }, {} as Record<string, { month: number; year: number; income: number }>);
   return Object.values(combinedData);
-} 
+}
+
+export function onColumnFiltersChange({
+  data,
+  pathname,
+  router,
+  createQueryString,
+}: {
+  data: MRT_Updater<MRT_ColumnFiltersState>;
+  pathname: string;
+  router: AppRouterInstance;
+  createQueryString: (param: { name: string; value: string }[]) => string;
+}) {
+  const filters =
+    typeof data == "function"
+      ? (data([]) as {
+          id: string;
+          value: string;
+        }[])
+      : [];
+
+  if (!filters.length) {
+    router.push(pathname);
+    return;
+  }
+
+  const searchParamURL = createQueryString(
+    filters?.map(({ id, value }) => ({
+      name: id,
+      value: String(value),
+    }))
+  );
+
+  router.push(pathname + "?" + searchParamURL);
+}
+
+export function getBOOKpieChart(book: Book[]) {
+  const numberOfBooksByCategory = book.reduce((acc, book) => {
+    const category = book.category;
+    if (!acc[category]) {
+      acc[category] = 0;
+    }
+    acc[category]++;
+    return acc;
+  }, {} as Record<$Enums.Category, number>);
+
+  const data = Object.entries(numberOfBooksByCategory ?? {}).map(
+    ([label, value]) => ({
+      label,
+      value,
+      color:
+        label === "fiction"
+          ? "#006AFF"
+          : label === "business"
+          ? "green"
+          : "red",
+    })
+  );
+  return { data, numberOfBooksByCategory };
+}

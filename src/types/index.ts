@@ -22,6 +22,8 @@ export interface BookTable extends Pick<BookType[number], never> {
   owner: {
     fullName: string;
   };
+  id: number;
+  isApproved: boolean;
 }
 
 
