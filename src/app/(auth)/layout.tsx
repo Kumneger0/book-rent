@@ -21,11 +21,12 @@ async function AuthLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<Box
 			sx={{
-				width: '100%',
 				display: 'flex',
-				justifyContent: 'center',
+				height: '100dvh',
 				flexWrap: 'wrap',
-				alignItems: 'center'
+				[`@media (max-width: 768px)`]: {
+					flexDirection: 'column'
+				}
 			}}
 		>
 			<Box
@@ -35,10 +36,12 @@ async function AuthLayout({ children }: { children: React.ReactNode }) {
 					display: 'flex',
 					justifyContent: 'center',
 					alignItems: 'center',
-					minHeight: '100dvh',
 					padding: '2rem 0',
 					minWidth: '500px',
-					color: 'white'
+					color: 'white',
+					[`@media (max-width: 768px)`]: {
+						width: '100%'
+					}
 				}}
 			>
 				<Image src="/Logo.png" alt="logo" width={300} height={200} />
@@ -47,15 +50,16 @@ async function AuthLayout({ children }: { children: React.ReactNode }) {
 			<Box
 				component="form"
 				sx={{
-					'& .MuiTextField-root': { m: 1, width: '25ch' },
-					width: '50%',
-					backgroundColor: 'white',
+					flex: 1,
 					padding: '2rem 0',
 					display: 'flex',
 					justifyContent: 'center',
 					alignItems: 'center',
 					flexDirection: 'column',
-					height: '100dvh'
+					'& > *': { marginBottom: '9px' },
+					[`@media (max-width: 768px)`]: {
+						backgroundColor: 'green'
+					}
 				}}
 				noValidate
 				autoComplete="off"

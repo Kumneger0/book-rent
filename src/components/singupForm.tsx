@@ -33,7 +33,7 @@ function SignUPForm() {
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({...user, role})
+				body: JSON.stringify({ ...user, role })
 			});
 			const data = (await response.json()) as {
 				status: 'success' | 'error';
@@ -88,7 +88,7 @@ function SignUPForm() {
 				type="email"
 				name="email"
 				required
-				style={{ width: '100%', marginTop: '10px' }}
+				style={{ width: '100%', margin: '10px 0' }}
 			/>
 			<TextField
 				error={!!passwordErorr}
@@ -99,7 +99,7 @@ function SignUPForm() {
 				name="password"
 				required
 				autoComplete="current-password"
-				style={{ width: '100%' }}
+				style={{ width: '100%', margin: '10px 0' }}
 			/>
 			<TextField
 				error={!!confirmPassword}
@@ -110,7 +110,7 @@ function SignUPForm() {
 				name="confirmPassword"
 				required
 				autoComplete="current-confirm-password"
-				style={{ width: '100%' }}
+				style={{ width: '100%', margin: '10px 0' }}
 			/>
 			<TextField
 				error={!!location}
@@ -120,7 +120,7 @@ function SignUPForm() {
 				type="text"
 				name="location"
 				required
-				style={{ width: '100%' }}
+				style={{ width: '100%', margin: '10px 0' }}
 			/>
 			<TextField
 				error={!!phonenumError}
@@ -130,7 +130,7 @@ function SignUPForm() {
 				type="tel"
 				name="phoneNumber"
 				required
-				style={{ width: '100%' }}
+				style={{ width: '100%', margin: '10px 0' }}
 			/>
 
 			<FormControl fullWidth>

@@ -15,7 +15,9 @@ function Signup() {
 					gap: '2px',
 					flexDirection: 'column',
 					width: '80%',
-					height: '100dvh'
+					[`@media (max-width: 768px)`]: {
+						width: '100%'
+					}
 				}}
 			>
 				<Box

@@ -12,7 +12,7 @@ import NextTopLoader from 'nextjs-toploader';
 
 export const metadata: Metadata = {
 	metadataBase: new URL('https://book-rent-challenge.vercel.app/'),
-	title: 'Rent Books Online | [Your Website Name]',
+	title: 'Rent Books Online | book-rent-challenge.vercel.app',
 	description:
 		'Discover a vast digital library of books to rent. Instant access to your favorite reads',
 	keywords: 'online book rental, rent ebooks, digital library, ebook rental, instant access',
@@ -49,7 +49,7 @@ export default async function RootLayout({
 		<html lang="en">
 			<body
 				style={{
-					backgroundColor: 'white',
+					backgroundColor: '#f5eded',
 					margin: '0',
 					padding: '0',
 					overflowX: 'hidden'
