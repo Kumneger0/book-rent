@@ -4,10 +4,6 @@ import { Box, Paper, Typography, Grid } from '@mui/material';
 import { LineChart } from '@mui/x-charts';
 import { EarningsSummaryChartProps } from '@/types';
 
-const monthes = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-const lastSixMontes = [2000, 5500, 2000, 8500, 1500, 5000];
-const samePeriodLastYear = [1500, 3500, 2500, 7000, 1000, 4500];
-
 export const EarningsSummaryChart = ({
 	lastSixMontes,
 	monthes,

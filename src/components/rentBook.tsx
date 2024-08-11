@@ -9,19 +9,28 @@ import { useFormStatus } from 'react-dom';
 
 type User = Awaited<ReturnType<typeof getCurrentUser>>;
 
-function RentBookButton({
-	bookID,
-	author,
-	price
-}: {
+interface RentAndReturnBookButtonProps extends React.PropsWithChildren {
 	bookID: number;
 	price: Number;
 	author: number;
-}) {
+	url: string;
+	isReturn?: boolean;
+}
+
+function RentAndReturnBookButton({
+	bookID,
+	author,
+	price,
+	url,
+	children,
+	isReturn = false
+}: RentAndReturnBookButtonProps) {
 	const { user } = useUserContext();
 	const router = useRouter();
 
-	const isAlreadyRented = (user as User)?.rentedBooks.some(({ id }) => id == bookID);
+	const isAlreadyRented = isReturn
+		? false
+		: (user as User)?.rentedBooks.some(({ id }) => id == bookID);
 
 	const handleBookRent = async () => {
 		if (!user) {
@@ -29,7 +38,7 @@ function RentBookButton({
 			return;
 		}
 		const updater = getFuncToUpdate();
-		const result = await updater('/api/books/rent', {
+		const result = await updater(url, {
 			method: 'PUT',
 			body: JSON.stringify({
 				bookId: bookID,
@@ -42,18 +51,22 @@ function RentBookButton({
 
 	return (
 		<form>
-			<SubmitButton onSubmit={(fdata) => handleBookRent()} disabled={isAlreadyRented} />
+			<SubmitButton onSubmit={(fdata) => handleBookRent()} disabled={isAlreadyRented}>
+				{children}
+			</SubmitButton>
 		</form>
 	);
 }
 
-export default RentBookButton;
+export default RentAndReturnBookButton;
 
 function SubmitButton({
 	onSubmit,
+	children,
 	...props
 }: React.ComponentProps<typeof Button> & {
 	onSubmit: (formData: FormData) => void;
+	children: React.ReactNode;
 }) {
 	const { pending } = useFormStatus();
 
@@ -68,7 +81,7 @@ function SubmitButton({
 			color="primary"
 			fullWidth
 		>
-			Rent Book
+			{children}
 		</Button>
 	);
 }

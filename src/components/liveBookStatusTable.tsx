@@ -10,6 +10,7 @@ import {
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useMemo } from 'react';
+import { useDebouncedCallback } from 'use-debounce';
 
 type TableAdmin = {
 	No: string;
@@ -23,6 +24,7 @@ const Example = ({ data }: { data: TableAdmin[] }) => {
 	const searchParams = useSearchParams();
 	const createQueryString = useCreateQueryString(searchParams);
 
+	const debouncedOnColumnFiltersChange = useDebouncedCallback(onColumnFiltersChange, 400);
 	const pathname = usePathname();
 	const router = useRouter();
 
@@ -114,7 +116,7 @@ const Example = ({ data }: { data: TableAdmin[] }) => {
 		enableFullScreenToggle: false,
 		manualFiltering: true,
 		onColumnFiltersChange: (data) => {
-			onColumnFiltersChange({ createQueryString, data, pathname, router });
+			debouncedOnColumnFiltersChange({ createQueryString, data, pathname, router });
 		},
 		state: {
 			columnFilters: columnFilterState

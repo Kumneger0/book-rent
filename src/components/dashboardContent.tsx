@@ -35,7 +35,9 @@ const DashboardContent = async ({
 
 	function calculatePercent(thisMonthIncome: number, lastMonthIncome: number) {
 		const difference = thisMonthIncome - lastMonthIncome;
-		return Math.trunc(Math.abs(difference / lastMonthIncome) * 100);
+		if (lastMonthIncome <= 0 && thisMonthIncome >= 1) return 100;
+		const percent = Math.trunc(Math.abs(difference / lastMonthIncome) * 100);
+		return isNaN(percent) ? 0 : percent;
 	}
 
 	return (

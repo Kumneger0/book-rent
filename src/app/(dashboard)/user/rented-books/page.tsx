@@ -2,6 +2,7 @@ import { getCurrentUser } from '@/actions';
 import { Box, Grid, Typography } from '@mui/material';
 import Image from 'next/image';
 import React from 'react';
+import ReturnBook from '@/components/rentBook';
 
 async function Page() {
 	const user = await getCurrentUser();
@@ -47,6 +48,8 @@ async function Page() {
 								<Image
 									src={book.coverImage}
 									alt={book.bookName}
+									width={300}
+									height={300}
 									style={{ width: '100%', height: '200px', objectFit: 'cover' }}
 								/>
 								<Typography
@@ -60,6 +63,15 @@ async function Page() {
 								<Typography variant="body2" color="text.secondary">
 									Author: {book.author}
 								</Typography>
+								<ReturnBook
+									url={'/api/books/return'}
+									author={book.ownerId}
+									price={book.price}
+									bookID={book.id}
+									isReturn
+								>
+									Return book
+								</ReturnBook>
 							</Box>
 						</Grid>
 					))}

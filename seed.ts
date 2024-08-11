@@ -244,7 +244,7 @@ const mockMonthlyIncomeData = [
 async function main() {
 	await prisma.user.deleteMany();
 	await prisma.book.deleteMany();
-	await prisma.monthlyIncome.deleteMany()
+	await prisma.monthlyIncome.deleteMany();
 
 	for (const user of mockUsers) {
 		await prisma.user.create({
@@ -290,12 +290,12 @@ async function main() {
 	}
 }
 
-main()
-	.catch((e) => console.error(e))
-	.finally(async () => {
-		await prisma.$disconnect();
-		const books = await prisma.book.findMany();
-	});
+// main()
+// 	.catch((e) => console.error(e))
+// 	.finally(async () => {
+// 		await prisma.$disconnect();
+// 		const books = await prisma.book.findMany();
+// 	});
 
 // (async () => {
 //   const deleteData = await prisma.monthlyIncome.deleteMany();
@@ -319,4 +319,14 @@ main()
 //       console.log(data);
 //     }
 //   }
+// })();
+
+// (async () => {
+// 	const updateBookQuantity = await prisma.book.updateMany({
+// 		data: {
+// 			quantity: {
+// 				increment: 100
+// 			}
+// 		}
+// 	});
 // })();

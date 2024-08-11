@@ -44,11 +44,11 @@ export async function PUT(req: NextRequest) {
 				price: number;
 			};
 
-			if (!bookId || !authorId || !price)
+			if (!bookId)
 				return NextResponse.json(
 					{
 						status: 'error',
-						data: { message: 'please send nessary details to rent' }
+						data: { message: 'please send bookId' }
 					},
 					{
 						status: 400
@@ -57,12 +57,12 @@ export async function PUT(req: NextRequest) {
 
 			const isAlreayRented = user.rentedBooks.some(({ id }) => id == Number(bookId));
 
-			if (isAlreayRented) {
+			if (!isAlreayRented) {
 				return NextResponse.json(
 					{
 						status: 'error',
 						data: {
-							message: 'You alredy rented this book before'
+							message: "You have't rented this book before"
 						}
 					},
 					{
@@ -70,24 +70,11 @@ export async function PUT(req: NextRequest) {
 					}
 				);
 			}
-			const { status } = await checkBookAvailablityAndUpdate(Number(bookId));
 
-			if (status == 'not available')
-				return NextResponse.json(
-					{
-						status: 'error',
-						data: {
-							message: 'The Book You are looking for is not available for rent right know'
-						}
-					},
-					{
-						status: 400
-					}
-				);
-
-			const result = await increaseAuthorIncome(Number(authorId), Number(price));
-
-			const updatedRentedBooks = [...user.rentedBooks.map((book) => book.id), Number(bookId)];
+			const filterbooks = user.rentedBooks
+				.map((book) => book.id)
+				.filter((id) => id !== Number(bookId))
+				.map((id) => ({ id }));
 
 			const updatedUser = await prisma.user.update({
 				where: {
@@ -95,7 +82,18 @@ export async function PUT(req: NextRequest) {
 				},
 				data: {
 					rentedBooks: {
-						connect: updatedRentedBooks.map((id) => ({ id }))
+						set: filterbooks
+					}
+				}
+			});
+
+			const updateBookQuantity = await prisma.book.update({
+				where: {
+					id: Number(bookId)
+				},
+				data: {
+					quantity: {
+						increment: 1
 					}
 				}
 			});
@@ -104,7 +102,8 @@ export async function PUT(req: NextRequest) {
 				status: 'success',
 				data: {
 					message: 'Book rented successfully',
-					user: updatedUser
+					user: updatedUser,
+					increamentBook: updateBookQuantity
 				}
 			});
 		} else {

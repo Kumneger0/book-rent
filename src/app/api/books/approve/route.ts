@@ -38,6 +38,31 @@ export async function PUT(req: NextRequest) {
 				id: number;
 				isApproved: boolean;
 			};
+
+			if (isApproved) {
+				const isBookOwnerApproved = await prisma.book.findFirst({
+					where: {
+						id
+					},
+					include: {
+						owner: {
+							select: {
+								approved: true,
+								isActive: true
+							}
+						}
+					}
+				});
+				if (!isBookOwnerApproved?.owner.isActive || !isBookOwnerApproved.owner.approved) {
+					return NextResponse.json({
+						status: 'error',
+						data: {
+							message: 'The owner this book is disabled so you need to enable the owner fisrt '
+						}
+					});
+				}
+			}
+
 			const updatedBook = await prisma.book.update({
 				where: {
 					id: id

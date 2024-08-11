@@ -23,6 +23,21 @@ import toast from 'react-hot-toast';
 import { Book } from '@prisma/client';
 import { useUserContext } from './UserContextWrapper';
 
+import { styled } from '@mui/material/styles';
+import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
+
+const VisuallyHiddenInput = styled('input')({
+	clip: 'rect(0 0 0 0)',
+	clipPath: 'inset(50%)',
+	height: 1,
+	overflow: 'hidden',
+	position: 'absolute',
+	bottom: 0,
+	left: 0,
+	whiteSpace: 'nowrap',
+	width: 1
+});
+
 function UploadBook({ books }: { books: Partial<Book>[] }) {
 	const [newBook, setBook] = useState<{
 		name: string;
@@ -63,12 +78,14 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 			return;
 		}
 
+		const mimeType = `data:${file.type};base64`;
+		const base64image = `${mimeType},${Buffer.from(await file.arrayBuffer()).toString('base64')}`;
+
 		try {
 			setIsUploading(true);
 			const response = await fetch(`/api/books?filename=${file.name}`, {
 				method: 'POST',
-
-				body: JSON.stringify({ ...bookToUpload, file })
+				body: JSON.stringify({ ...bookToUpload, file, base64image })
 			});
 			const data = (await response.json()) as APIResponse;
 			if (data.status === 'success') {
@@ -206,23 +223,26 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 				}}
 			>
 				<Box display="flex" alignItems="center">
-					<input
-						type="file"
-						accept="image/*"
-						style={{ display: 'none' }}
-						name="coverImage"
-						ref={inputFileRef}
-						id="upload-book-cover"
-					/>
-					<label htmlFor="upload-book-cover">
-						<Button variant="contained" component="span" startIcon={<UploadIcon />}>
-							Upload Book Cover
-						</Button>
-					</label>
+					<Button
+						component="label"
+						role={undefined}
+						variant="text"
+						tabIndex={-1}
+						startIcon={<FileUploadOutlinedIcon />}
+						sx={{
+							mb: '30px',
+							fontSize: '16px',
+							fontWeight: 500,
+							textTransform: 'none'
+						}}
+					>
+						Upload Book Cover
+						<VisuallyHiddenInput ref={inputFileRef} type="file" />
+					</Button>
 				</Box>
 				<Box sx={{ p: 2, my: 3 }} display="flex" alignItems="center">
 					<BasicModal
-						disabled={isUploading || user?.approved}
+						disabled={isUploading || !user?.approved}
 						onSubmit={handleBookUpload}
 						open={open}
 						setOpen={setOpen}

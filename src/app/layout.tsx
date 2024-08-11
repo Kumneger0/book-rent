@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 		card: 'summary_large_image',
 		title: 'Rent Books Online | book-rent-challenge.vercel.app',
 		description:
-			'Discover a vast digital library of books to rent. Instant access to your favorite reads. No delivery hassle, just pure reading enjoyment.',
+			'Discover a vast digital library of books to rent. Instant access to your favorite reads.',
 		images: [{ url: '/Logo.png' }]
 	}
 };

@@ -48,6 +48,8 @@ const BookList = ({ books }: { books: Book[] }) => {
 								<Image
 									src={book.coverImage}
 									alt={book.bookName}
+									width={300}
+									height={300}
 									style={{ width: '100%', height: '200px', objectFit: 'cover' }}
 								/>
 								<Typography
@@ -61,6 +63,9 @@ const BookList = ({ books }: { books: Book[] }) => {
 								<Typography variant="body2" color="text.secondary">
 									Author: {book.author}
 								</Typography>
+								<Typography variant="body2" color="text.secondary">
+									Quantity: {book.quantity}
+								</Typography>
 								<Typography variant="h6" color="text.secondary">
 									Price:
 									{book.price.toLocaleString('en-ET', {
@@ -68,7 +73,14 @@ const BookList = ({ books }: { books: Book[] }) => {
 										currency: 'ETB'
 									})}
 								</Typography>
-								<RentBookButton author={book.ownerId} price={book.price} bookID={book.id} />
+								<RentBookButton
+									url={'/api/books/rent'}
+									author={book.ownerId}
+									price={book.price}
+									bookID={book.id}
+								>
+									Rent Book
+								</RentBookButton>
 							</Box>
 						</Grid>
 					))}

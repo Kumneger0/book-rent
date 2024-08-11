@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import { useUserContext } from './UserContextWrapper';
 import BasicModal from './viewAutorModal';
 import { onColumnFiltersChange, useCreateQueryString } from '@/lib/utils';
+import { useDebouncedCallback } from 'use-debounce';
 
 export function getFuncToUpdate() {
 	return async (
@@ -75,6 +76,7 @@ function AdminOwnerTable({
 	const ablity = defineAbilty(user!);
 	const router = useRouter();
 
+	const debouncedOnColumnFiltersChange = useDebouncedCallback(onColumnFiltersChange, 400);
 	const columnFilterState = Array.from(searchParams.keys()).map((key) => ({
 		id: key,
 		value: searchParams.get(key)
@@ -214,7 +216,7 @@ function AdminOwnerTable({
 		enableFullScreenToggle: false,
 		manualFiltering: true,
 		onColumnFiltersChange: (data) => {
-			onColumnFiltersChange({
+			debouncedOnColumnFiltersChange({
 				createQueryString,
 				data,
 				pathname,

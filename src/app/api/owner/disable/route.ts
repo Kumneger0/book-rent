@@ -41,6 +41,8 @@ export async function POST(req: NextRequest) {
 				}
 			});
 
+			if (!json.isActive) await disableOwnerBooks(json.id);
+
 			return NextResponse.json({
 				status: 'success',
 				data: {
@@ -64,4 +66,15 @@ export async function POST(req: NextRequest) {
 			}
 		});
 	}
+}
+
+async function disableOwnerBooks(ownerId: number) {
+	const updteResult = await prisma.book.updateMany({
+		where: {
+			ownerId
+		},
+		data: {
+			isApproved: false
+		}
+	});
 }

@@ -1,5 +1,4 @@
 'use client';
-
 import LoginIcon from '@mui/icons-material/Login';
 import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -26,9 +25,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useUserContext } from './UserContextWrapper';
-
 const drawerWidth = 300;
-
 const Sidebar = ({
 	lists,
 	role
@@ -46,7 +43,7 @@ const Sidebar = ({
 	const [matches, setMatches] = useState(useMediaQuery(theme.breakpoints.up('lg')));
 
 	const { user } = useUserContext();
-   const [open, setOpen] = useState(true);
+	const [open, setOpen] = useState(true);
 
 	async function logout() {
 		try {
@@ -242,7 +239,9 @@ const Sidebar = ({
 					height={50}
 				/>
 				<Typography color={'blue'} variant="h6" noWrap>
-					Book Rent
+					<Link href="/" style={{ textDecoration: 'none' }}>
+						Book Rent
+					</Link>
 				</Typography>
 			</Toolbar>
 			<Divider sx={{ width: '80%', margin: '10px auto', borderColor: 'gray' }} />

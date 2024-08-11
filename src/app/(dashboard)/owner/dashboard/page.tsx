@@ -73,7 +73,10 @@ async function Dashboard({ searchParams }: { searchParams: Record<string, string
 
 	return (
 		<>
-			<SharedHeader>Owner/Dashboard</SharedHeader>
+			<SharedHeader>
+				<span style={{ fontWeight: 'bold', fontSize: '24px' }}>Owner</span>
+				/Dashboard
+			</SharedHeader>
 			<DashboardContent
 				numberOfBooksByCategory={numberOfBooksByCategory}
 				pieChartData={data}

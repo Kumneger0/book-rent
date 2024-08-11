@@ -14,6 +14,7 @@ import { useMemo } from 'react';
 import toast from 'react-hot-toast';
 import BasicModal from './editBook';
 import { $Enums } from '@prisma/client';
+import { useDebouncedCallback } from 'use-debounce';
 
 export type TableProps = {
 	data: {
@@ -32,6 +33,7 @@ export const TableOwner = ({ data }: TableProps) => {
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 
+	const debouncedOnColumnFiltersChange = useDebouncedCallback(onColumnFiltersChange, 400);
 	const columnFilterState = Array.from(searchParams.keys()).map((key) => ({
 		id: key,
 		value: searchParams.get(key)
@@ -142,7 +144,7 @@ export const TableOwner = ({ data }: TableProps) => {
 		enablePagination: false,
 		enableFullScreenToggle: false,
 		onColumnFiltersChange: (data) => {
-			onColumnFiltersChange({ createQueryString, data, pathname, router });
+			debouncedOnColumnFiltersChange({ createQueryString, data, pathname, router });
 		},
 		state: {
 			columnFilters: columnFilterState

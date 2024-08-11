@@ -10,12 +10,15 @@ import { useMemo } from 'react';
 import { useUserContext } from './UserContextWrapper';
 import { defineAbilty } from '@/abilities';
 import { getFuncToUpdate } from './AdminOwnerTable';
+import { useDebouncedCallback } from 'use-debounce';
 
 const Example = ({ data }: { data: BookTable[] }) => {
 	const searchParams = useSearchParams();
 	const createQueryString = useCreateQueryString(searchParams);
 	const { user } = useUserContext();
 	const ablity = defineAbilty(user!);
+
+	const debouncedOnColumnFiltersChange = useDebouncedCallback(onColumnFiltersChange, 400);
 
 	const pathname = usePathname();
 	const router = useRouter();
@@ -105,7 +108,7 @@ const Example = ({ data }: { data: BookTable[] }) => {
 		enableFullScreenToggle: false,
 		manualFiltering: true,
 		onColumnFiltersChange: (data) => {
-			onColumnFiltersChange({
+			debouncedOnColumnFiltersChange({
 				createQueryString,
 				data,
 				pathname,

@@ -13,12 +13,14 @@ async function BookUpload() {
 
 	return (
 		<>
-			<SharedHeader>Owner/UploadBook</SharedHeader>
+			<SharedHeader>
+				<span style={{ fontWeight: 'bold', fontSize: '24px' }}>Owner</span>
+				/UploadBook
+			</SharedHeader>
 
 			<Box
 				sx={{
 					width: '100%',
-					height: '100dvh',
 					backgroundColor: 'white',
 					borderRadius: '20px',
 					padding: '10px'
