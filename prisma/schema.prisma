@@ -25,25 +25,26 @@ enum Role {
 }
 
 model User {
-  id          Int     @id @default(autoincrement())
-  fullName    String
-  email       String  @unique
-  password    String
-  location    String
-  phoneNumber String
-  Book        Book[]
-  role        Role    @default(user)
-  approved    Boolean @default(false)
-  isActive    Boolean @default(true)
-  wallet      Int      @default(0)
+  id            Int             @id @default(autoincrement())
+  fullName      String
+  email         String          @unique
+  password      String
+  location      String
+  phoneNumber   String
+  rentedBooks   Book[]          @relation(name: "RentedBooks") // Rented books
+  role          Role            @default(user)
+  approved      Boolean         @default(false)
+  isActive      Boolean         @default(true)
+  wallet        Int             @default(0)
   MonthlyIncome MonthlyIncome[]
+  Book          Book[]
 
-    @@map("users")
+  @@map("users")
 }
 
 model Book {
   id         Int        @id @default(autoincrement())
-  bookNo     String    
+  bookNo     String
   author     String
   owner      User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId    Int
@@ -52,20 +53,20 @@ model Book {
   status     BookStatus @default(free)
   category   Category
   price      Int
-  quantity   Int         @default(0)
-  coverImage String      @default("")
+  quantity   Int        @default(0)
+  coverImage String     @default("")
+  rentedBy   User?      @relation("RentedBooks", fields: [rentedByid], references: [id])
+  rentedByid Int?
 
   @@map("books")
 }
 
-
-
 model MonthlyIncome {
   id        Int      @id @default(autoincrement())
-  month     Int      @db.SmallInt  
+  month     Int      @db.SmallInt
   year      Int      @db.SmallInt
   income    Int
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
