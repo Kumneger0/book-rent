@@ -53,7 +53,7 @@ function LoginForm() {
 	const passwordErorr = errors?.issues.find((err) => err.path.includes('password'))?.message;
 
 	return (
-		<Box sx={{ width: '80%', marginTop: '10px' }}>
+		<Box sx={{ width: '80%', margin: '10px auto' }}>
 			<TextField
 				error={!!emailError}
 				id="outlined-email"

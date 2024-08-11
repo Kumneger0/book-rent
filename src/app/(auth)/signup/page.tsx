@@ -25,22 +25,40 @@ function Signup() {
 						display: 'flex',
 						alignItems: 'center',
 						gap: '5px',
-						margin: '10px, 0px',
+						margin: '10px auto',
+						width: '80%',
 						p: 2
 					}}
 				>
 					<Image src="/Logo.png" alt="logo" width={100} height={50} />
 					<Typography sx={{ fontWeight: 400, fontSize: '28px', px: 2 }}>Book Rent</Typography>
 				</Box>
-				<Typography sx={{ color: 'black', marginTop: '30px', fontSize: '20px' }}>
+				<Typography
+					sx={{
+						color: 'black',
+						margin: '0 auto',
+						fontSize: '20px',
+						width: '80%'
+					}}
+				>
 					Sign Up Into Book Rent
 				</Typography>
 			</Box>
-			<Divider sx={{ width: '80%', marginBottom: '10px' }} />
+			<Divider sx={{ width: '80%', margin: '0 auto' }} />
+			<form>
+				<SignUPForm />
+			</form>
 
-			<SignUPForm />
-
-			<div style={{ marginTop: '10px', color: 'black', paddingBottom: '20px' }}>
+			<div
+				style={{
+					marginTop: '10px',
+					color: 'black',
+					paddingBottom: '20px',
+					width: '80%',
+					margin: '10px auto',
+					textAlign: 'center'
+				}}
+			>
 				Already have an account{' '}
 				<Link href={'/login'} style={{ color: 'blue', textDecoration: 'none' }}>
 					login

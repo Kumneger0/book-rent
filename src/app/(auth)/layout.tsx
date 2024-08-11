@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { cookies } from 'next/headers';
 
 import { VerifyUserJwt } from '@/lib/utils';
@@ -19,25 +19,17 @@ async function AuthLayout({ children }: { children: React.ReactNode }) {
 	}
 
 	return (
-		<Box
-			sx={{
-				display: 'flex',
-				height: '100dvh',
-				flexWrap: 'wrap',
-				[`@media (max-width: 768px)`]: {
-					flexDirection: 'column'
-				}
-			}}
-		>
-			<Box
+		<Grid container>
+			<Grid
+				item
+				md={12}
+				lg={6}
 				sx={{
-					width: '50%',
 					backgroundColor: '#191D38',
 					display: 'flex',
 					justifyContent: 'center',
 					alignItems: 'center',
 					padding: '2rem 0',
-					minWidth: '500px',
 					color: 'white',
 					[`@media (max-width: 768px)`]: {
 						width: '100%'
@@ -45,28 +37,25 @@ async function AuthLayout({ children }: { children: React.ReactNode }) {
 				}}
 			>
 				<Image src="/Logo.png" alt="logo" width={300} height={200} />
-			</Box>
-
-			<Box
-				component="form"
+			</Grid>
+			{/* @ts-ignore */}
+			<Grid
+				item
+				md={12}
+				lg={6}
 				sx={{
-					flex: 1,
-					padding: '2rem 0',
-					display: 'flex',
 					justifyContent: 'center',
 					alignItems: 'center',
-					flexDirection: 'column',
-					'& > *': { marginBottom: '9px' },
-					[`@media (max-width: 768px)`]: {
-						backgroundColor: 'green'
-					}
+					minHeight: '100dvh',
+					display: 'grid',
+					placeItems: 'center'
 				}}
 				noValidate
 				autoComplete="off"
 			>
-				{children}
-			</Box>
-		</Box>
+				<main>{children}</main>
+			</Grid>
+		</Grid>
 	);
 }
 
