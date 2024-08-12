@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+	font-family: 'Graphik Webfont,-apple-system,Helvetica Neue,Droid Sans,Arial,sans-serif';
+}

@@ -301,6 +301,3 @@ export function getBOOKpieChart(book: Book[]) {
 	}));
 	return { data, numberOfBooksByCategory };
 }
-
-
-
