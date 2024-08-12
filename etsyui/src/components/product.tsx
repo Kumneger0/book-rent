@@ -1,5 +1,5 @@
 import { Gift, Plus, Star } from 'lucide-react';
-
+import { Link } from 'react-router-dom';
 const mockProducts = [
 	{
 		name: 'Gaming Laptop',
@@ -135,48 +135,50 @@ function Product() {
 						sx={{ width: '100%' }}
 						className="pr_product-card"
 					>
-						<Box sx={{ width: '100%' }} className="pr_image-wrapper">
-							<img
-								src={data.image}
-								alt={data.name}
-								style={{
-									width: '100%',
-									height: 'auto',
-									objectFit: 'cover',
-									objectPosition: 'center',
-									aspectRatio: '1 / 1'
-								}}
-								className="pr_image"
-							/>
-						</Box>
-						<Box>
-							<Typography
-								sx={{
-									display: 'flex',
-									gap: 0.25,
-									overflow: 'hidden',
-									textOverflow: 'ellipsis',
-									whiteSpace: 'nowrap'
-								}}
-								className="pr_description"
-							>
-								{data.description}
-							</Typography>
-							<Box sx={{ display: 'flex', gap: 0.5 }} className="pr_rating">
-								<Star />
-								<Star />
-								<Star />
-								<Star />
-								<Star />
-								<Typography sx={{ fontSize: '0.8em' }} className="pr_rating-count">
-									(193)
-								</Typography>
+						<Link style={{ textDecoration: 'none', color: 'inherit' }} to={'/page2'}>
+							<Box sx={{ width: '100%' }} className="pr_image-wrapper">
+								<img
+									src={data.image}
+									alt={data.name}
+									style={{
+										width: '100%',
+										height: 'auto',
+										objectFit: 'cover',
+										objectPosition: 'center',
+										aspectRatio: '1 / 1'
+									}}
+									className="pr_image"
+								/>
 							</Box>
-							<Typography sx={{ fontWeight: 'bold', fontSize: '1.125rem' }} className="pr_price">
-								USD: {data.price}
-							</Typography>
-							<Typography>{data.name}</Typography>
-						</Box>
+							<Box>
+								<Typography
+									sx={{
+										display: 'flex',
+										gap: 0.25,
+										overflow: 'hidden',
+										textOverflow: 'ellipsis',
+										whiteSpace: 'nowrap'
+									}}
+									className="pr_description"
+								>
+									{data.description}
+								</Typography>
+								<Box sx={{ display: 'flex', gap: 0.5 }} className="pr_rating">
+									<Star />
+									<Star />
+									<Star />
+									<Star />
+									<Star />
+									<Typography sx={{ fontSize: '0.8em' }} className="pr_rating-count">
+										(193)
+									</Typography>
+								</Box>
+								<Typography sx={{ fontWeight: 'bold', fontSize: '1.125rem' }} className="pr_price">
+									USD: {data.price}
+								</Typography>
+								<Typography>{data.name}</Typography>
+							</Box>
+						</Link>
 					</Grid>
 				))}
 			</Grid>
@@ -199,56 +201,58 @@ function Product() {
 						sx={{ width: '100%' }}
 						className="pr_product-card"
 					>
-						<Box sx={{ width: '100%' }} className="pr_image-wrapper">
-							<img
-								src={data.image}
-								alt={data.name}
-								style={{
-									width: '100%',
-									height: 'auto',
-									objectFit: 'cover',
-									objectPosition: 'center',
-									aspectRatio: '1 / 1'
-								}}
-								className="pr_image"
-							/>
-						</Box>
-						<Box>
-							<Typography
-								sx={{
-									display: 'flex',
-									gap: 0.25,
-									overflow: 'hidden',
-									textOverflow: 'ellipsis',
-									whiteSpace: 'nowrap'
-								}}
-								className="pr_description"
-							>
-								{data.name}
-							</Typography>
-							<Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }} className="pr_rating">
-								<Gift style={{ width: 15, height: 15 }} />
-								<Typography sx={{ fontSize: '0.8em' }}>Ad by Etsy Seller</Typography>
+						<Link style={{ textDecoration: 'none', color: 'inherit' }} to={'/page2'}>
+							<Box sx={{ width: '100%' }} className="pr_image-wrapper">
+								<img
+									src={data.image}
+									alt={data.name}
+									style={{
+										width: '100%',
+										height: 'auto',
+										objectFit: 'cover',
+										objectPosition: 'center',
+										aspectRatio: '1 / 1'
+									}}
+									className="pr_image"
+								/>
 							</Box>
-							<Typography sx={{ fontWeight: 'bold', fontSize: '1.125rem' }} className="pr_price">
-								USD: {data.price}
-							</Typography>
-							<Box
-								sx={{
-									display: 'flex',
-									border: '2px solid black',
-									borderRadius: '30px',
-									width: 'fit-content',
-									padding: '5px 25px',
-									mt: 0.5,
-									alignItems: 'center'
-								}}
-								className="pr_button-wrapper"
-							>
-								<Plus style={{ width: 20, height: 20 }} />
-								<Typography sx={{ ml: 1 }}>Add To Cart</Typography>
+							<Box>
+								<Typography
+									sx={{
+										display: 'flex',
+										gap: 0.25,
+										overflow: 'hidden',
+										textOverflow: 'ellipsis',
+										whiteSpace: 'nowrap'
+									}}
+									className="pr_description"
+								>
+									{data.name}
+								</Typography>
+								<Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }} className="pr_rating">
+									<Gift style={{ width: 15, height: 15 }} />
+									<Typography sx={{ fontSize: '0.8em' }}>Ad by Etsy Seller</Typography>
+								</Box>
+								<Typography sx={{ fontWeight: 'bold', fontSize: '1.125rem' }} className="pr_price">
+									USD: {data.price}
+								</Typography>
+								<Box
+									sx={{
+										display: 'flex',
+										border: '2px solid black',
+										borderRadius: '30px',
+										width: 'fit-content',
+										padding: '5px 25px',
+										mt: 0.5,
+										alignItems: 'center'
+									}}
+									className="pr_button-wrapper"
+								>
+									<Plus style={{ width: 20, height: 20 }} />
+									<Typography sx={{ ml: 1 }}>Add To Cart</Typography>
+								</Box>
 							</Box>
-						</Box>
+						</Link>
 					</Grid>
 				))}
 			</Grid>
