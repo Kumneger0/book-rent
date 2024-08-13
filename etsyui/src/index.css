@@ -1,10 +1,7 @@
 * {
 	font-family: 'Graphik Webfont,-apple-system,Helvetica Neue,Droid Sans,Arial,sans-serif';
-	border: '2px solid black';
 	margin: 0;
 	padding: 0;
 }
 
-body: {
-	overflow: hidden;
-}
+

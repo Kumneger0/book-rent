@@ -51,7 +51,7 @@ const mockProducts = [
 	}
 ];
 
-const products = Array.from({ length: 100 }, (_, index) => ({
+export const products = Array.from({ length: 100 }, (_, index) => ({
 	...mockProducts.sort((a, b) =>
 		index % 2 == 0 ? a.price - b.price : a.name.localeCompare(b.name)
 	)[index % mockProducts.length]

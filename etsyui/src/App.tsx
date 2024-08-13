@@ -1,19 +1,17 @@
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './App.css';
 import SubHeader from './components/belowHeader';
+import ProductPage from './components/eachProduct';
 import FilterArea from './components/filterArea';
-import Subscription from './components/subscription';
+import Footer from './components/footer';
 import Header from './components/header';
 import Product from './components/product';
-import Footer from './components/footer';
-import { Router, createBrowserRouter, RouterProvider } from 'react-router-dom';
-import ProductPage from './components/eachProduct';
 export const Home = () => {
 	return (
 		<>
 			<SubHeader />
 			<FilterArea />
 			<Product />
-			<Subscription />
 		</>
 	);
 };

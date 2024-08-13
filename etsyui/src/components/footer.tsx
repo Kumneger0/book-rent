@@ -1,15 +1,38 @@
 import { Box, Typography, Button, Grid, Link, IconButton } from '@mui/material';
 
 import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
+import SubscriptionSection from './subscription';
 
 function Footer() {
 	return (
 		<>
+			<SubscriptionSection />
 			<Box sx={{ bgcolor: '#0d47a1', color: 'white', p: 4 }}>
 				<Grid container spacing={4}>
 					<Grid item xs={12} md={4}>
-						<Box sx={{ textAlign: 'center', mb: 3 }}>
-							<Box sx={{ bgcolor: 'orange', p: 2, display: 'inline-block', borderRadius: '8px' }}>
+						<Box
+							sx={{
+								textAlign: 'center',
+								mt: -4,
+								background: '#122868',
+								height: '130%',
+								display: 'flex',
+								justifyContent: 'center',
+								alignItems: 'center',
+								flexDirection: 'column',
+								width: '100%'
+							}}
+						>
+							<Box
+								sx={{
+									bgcolor: 'orange',
+									p: 2,
+									display: 'inline-block',
+									borderRadius: '8px',
+									flexDirection: 'column',
+									height: 'fit-content'
+								}}
+							>
 								<Typography variant="h6">Etsy</Typography>
 							</Box>
 							<Button
@@ -19,6 +42,7 @@ function Footer() {
 									borderRadius: '20px',
 									textTransform: 'none',
 									bgcolor: '#1e88e5',
+									height: 'fit-content',
 									'&:hover': {
 										bgcolor: '#1565c0'
 									}
