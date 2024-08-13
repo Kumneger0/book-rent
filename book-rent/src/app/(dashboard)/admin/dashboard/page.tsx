@@ -19,6 +19,7 @@ async function Dashboard({ searchParams }: { searchParams: Record<string, string
 
 	const books = await prisma.book.findMany({
 		where: {
+			isApproved: true,
 			owner: {
 				fullName: {
 					contains: owner ?? ' ',

@@ -49,7 +49,8 @@ export async function POST(req: NextRequest) {
 				bookNo: Math.floor(Math.random() * 1000).toString(),
 				ownerId: userFromDB.id,
 				price: book.price,
-				coverImage: book.base64image
+				coverImage: book.base64image,
+				quantity: book.quantity
 			}
 		});
 

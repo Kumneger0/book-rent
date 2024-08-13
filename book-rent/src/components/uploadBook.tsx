@@ -26,7 +26,7 @@ import { useUserContext } from './UserContextWrapper';
 import { styled } from '@mui/material/styles';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 
-const VisuallyHiddenInput = styled('input')({
+const FileInput = styled('input')({
 	clip: 'rect(0 0 0 0)',
 	clipPath: 'inset(50%)',
 	height: 1,
@@ -158,7 +158,7 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 											price: 0,
 											status: 'free'
 										}
-									])
+								  ])
 								: books
 							).map((book) => (
 								<Typography
@@ -237,7 +237,7 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 						}}
 					>
 						Upload Book Cover
-						<VisuallyHiddenInput ref={inputFileRef} type="file" />
+						<FileInput ref={inputFileRef} type="file" />
 					</Button>
 				</Box>
 				<Box sx={{ p: 2, my: 3 }} display="flex" alignItems="center">

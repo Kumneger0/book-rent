@@ -134,7 +134,8 @@ export async function getBooks({
 					bookName: {
 						contains: filterBy?.bookName,
 						mode: 'insensitive'
-					}
+					},
+					isApproved: true
 				}
 			}
 		},
