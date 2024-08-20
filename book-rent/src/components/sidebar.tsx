@@ -194,8 +194,8 @@ const Sidebar = ({
 	);
 
 	if (deviceWidth < 992) return (
-		<drawerContext.Provider value={{open, setOpen}}>
-			<MobileSideBar>{sideBarContents()}</MobileSideBar>;
+		<drawerContext.Provider value={{ open, setOpen }}>
+			<MobileSideBar>{sideBarContents()}</MobileSideBar>
 		</drawerContext.Provider>
 	);  
 

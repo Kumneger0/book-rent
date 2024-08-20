@@ -31,16 +31,25 @@ export async function PUT(req: NextRequest) {
 				}
 			});
 		}
-		const ablity = defineAbilty(userFromDB);
+		const { id, ...data } = (await req.json()) as {
+			bookName: string;
+			quantity: string;
+			category: $Enums.Category;
+			price: string;
+			id: number;
+		};
+
+		const bookOwnerId = (
+			await prisma.book.findFirst({
+				where: {
+					id
+				}
+			})
+		)?.ownerId;
+
+		const ablity = defineAbilty(userFromDB, bookOwnerId);
 
 		if (ablity.can('update', 'Book')) {
-			const { id, ...data } = (await req.json()) as {
-				bookName: string;
-				quantity: string;
-				category: $Enums.Category;
-				price: string;
-				id: number;
-			};
 			const updatedBook = await prisma.book.update({
 				where: {
 					id: id

@@ -226,7 +226,9 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 					width: '100%',
 					maxWidth: '800px',
 					justifyContent: 'space-arround',
-					margin: '150px auto'
+					margin: '150px auto',
+					flexWrap: 'wrap',
+					alignItems: 'center'
 				}}
 			>
 				<Box sx={{ minWidth: 300, mt: '150px', mx: 'auto' }}>

@@ -31,11 +31,18 @@ export const DELETE = async (req: NextRequest) => {
 				}
 			});
 		}
+		const { id } = (await req.json()) as { id: string };
 
-		const ablity = defineAbilty(user);
+		const bookOwnerId = (
+			await prisma.book.findFirst({
+				where: {
+					id: Number(id)
+				}
+			})
+		)?.ownerId;
 
+		const ablity = defineAbilty(user, bookOwnerId);
 		if (ablity.can('delete', 'Book')) {
-			const { id } = (await req.json()) as { id: string };
 			if (!id)
 				return NextResponse.json({
 					status: 'error',

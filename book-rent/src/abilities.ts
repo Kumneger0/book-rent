@@ -13,7 +13,7 @@ type AppAbility = PureAbility<
 	PrismaQuery
 >;
 
-export function defineAbilty(user: User): AppAbility {
+export function defineAbilty(user: User, bookOwnerId?: number): AppAbility {
 	const { can, cannot, build } = new AbilityBuilder<AppAbility>(createPrismaAbility);
 
 	if (user.role == 'admin') {
@@ -25,9 +25,9 @@ export function defineAbilty(user: User): AppAbility {
 		can('approve', 'Book').because('Admin can approve book');
 	}
 
-	if (user.role == 'owner') {
-		can('update', 'Book', { ownerId: user.id }).because('owner can update his books');
-		can('delete', 'Book', { ownerId: user.id }).because('owner can delele his books');
+	if (user.role == 'owner' && bookOwnerId === user.id) {
+		can('update', 'Book').because('owner can update his books');
+		can('delete', 'Book').because('owner can delele his books');
 	}
 
 	if (user.role == 'user') {
