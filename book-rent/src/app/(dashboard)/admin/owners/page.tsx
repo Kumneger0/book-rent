@@ -25,6 +25,9 @@ async function Owners({ searchParams }: { searchParams: Record<string, string> }
 			},
 			include: {
 				Book: true
+			},
+			orderBy: {
+				fullName: 'asc'
 			}
 		})
 	).map((owner) => {

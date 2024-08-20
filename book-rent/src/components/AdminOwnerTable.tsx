@@ -225,7 +225,8 @@ function AdminOwnerTable({
 		},
 		state: {
 			columnFilters: columnFilterState
-		}
+		},
+		enableSorting: false
 	});
 
 	return <MaterialReactTable table={table} />;

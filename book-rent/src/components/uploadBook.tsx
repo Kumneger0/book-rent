@@ -1,18 +1,7 @@
 'use client';
 
-import {
-	Alert,
-	Autocomplete,
-	Divider,
-	FormControl,
-	InputLabel,
-	MenuItem,
-	OutlinedInput,
-	Select,
-	TextField
-} from '@mui/material';
-import React, { useRef, useState } from 'react';
-// import UpgradeIcon from "@mui/icons-material/Upgrade";
+import { Alert, Autocomplete, Divider, FormControl, OutlinedInput, TextField } from '@mui/material';
+import React, { ElementRef, useRef, useState } from 'react';
 import { APIResponse } from '@/types';
 import { Box, Button, Typography } from '@mui/material';
 import { Book } from '@prisma/client';
@@ -43,10 +32,15 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 		category: string;
 	}>();
 	const [open, setOpen] = React.useState(false);
+	const [autoCompleteOpen, setAutoCompleteOpen] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
-	const [bookQuantity, setBookQuantity] = useState<number>(0);
-	const [bookPrice, setBookPrice] = useState<number>(0);
+	const [bookQuantity, setBookQuantity] = useState<number | null>(null);
+	const [bookPrice, setBookPrice] = useState<number | null>();
+	const searchRef = useRef<ElementRef<typeof TextField>>(null);
 	const inputFileRef = useRef<HTMLInputElement>(null);
+
+	const [autoCompleteSearchValue, setAutoCompleteSearchValue] = useState('');
+
 	async function handleBookUpload() {
 		const bookToUpload = {
 			name: newBook?.name,
@@ -88,8 +82,9 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 			const data = (await response.json()) as APIResponse;
 			if (data.status === 'success') {
 				setOpen(true);
-			} else {
-				toast.error('We Failed to upload your book try again');
+			}
+			if (data.data.message) {
+				toast.error(data.data.message);
 			}
 		} catch (e) {
 			console.error(e);
@@ -99,6 +94,28 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 	}
 
 	const { user } = useUserContext();
+
+	const booksToDisply = (
+		newBook
+			? books.concat([
+					{
+						bookName: newBook.name,
+						author: newBook.author,
+						category: newBook.category as 'fiction' | 'selfHelp' | 'business',
+						bookNo: '',
+						id: 0,
+						isApproved: false,
+						ownerId: 0,
+						price: 0,
+						status: 'free'
+					}
+			  ])
+			: books
+	).filter(
+		({ bookName, author }) =>
+			bookName?.toLowerCase()?.includes(autoCompleteSearchValue.toLowerCase()) ||
+			author?.toLowerCase()?.includes(autoCompleteSearchValue.toLowerCase())
+	);
 
 	return (
 		<Box sx={{ width: '80%', margin: '0 auto' }}>
@@ -119,6 +136,7 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 			<Box sx={{ width: 300, margin: '0 auto', textAlign: 'center' }}>
 				<h2>Upload New Book</h2>
 				<Autocomplete
+					open={autoCompleteOpen}
 					disableCloseOnSelect
 					disablePortal
 					onSelect={(e) => e.stopPropagation()}
@@ -127,47 +145,76 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 						value: book.bookName
 					}))}
 					renderInput={(params) => (
-						<TextField {...params} label="Search book by name or Author" variant="outlined" />
+						<FormControl
+							sx={{
+								width: '100%',
+								position: 'relative'
+							}}
+						>
+							<TextField
+								{...params}
+								ref={searchRef}
+								value={autoCompleteSearchValue}
+								onChange={(e) => setAutoCompleteSearchValue(e.currentTarget.value)}
+								label="Search book by name or Author"
+								variant="outlined"
+							/>
+							<Button
+								onClick={() => {
+									setAutoCompleteOpen((prv) => !prv);
+								}}
+								sx={{
+									position: 'absolute',
+									right: '5px',
+									top: '10px',
+									zIndex: 999999,
+									width: '20px',
+									height: '30px'
+								}}
+							></Button>
+						</FormControl>
 					)}
 					sx={{ marginBottom: 2 }}
 					PaperComponent={(props) => (
 						<Box
 							sx={{
-								backgroundColor: 'slate',
+								backgroundColor: 'white',
+								width: '100%',
+								hight: '100%',
 								padding: '10px',
 								borderRadius: '10px',
-								boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-								maxheight: '400px',
-								overflowY: 'auto'
+								boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
 							}}
-							{...props}
 						>
-							{(newBook
-								? books.concat([
-										{
-											bookName: newBook.name,
-											author: newBook.author,
-											category: newBook.category as 'fiction' | 'selfHelp' | 'business',
-											bookNo: '',
-											id: 0,
-											isApproved: false,
-											ownerId: 0,
-											price: 0,
-											status: 'free'
-										}
-								  ])
-								: books
-							).map((book) => (
-								<Typography
-									onClick={(e) => e.stopPropagation()}
-									key={book.id}
-									sx={{ marginBottom: '10px' }}
-								>
-									{book.bookName}
-								</Typography>
-							))}
+							<Box
+								sx={{
+									maxHeight: '150px',
+									overflowY: 'auto'
+								}}
+								{...props}
+							>
+								{booksToDisply.map((book) => (
+									<Typography
+										onClick={() => {
+											setBook({
+												author: book.author!,
+												category: book.category!,
+												name: book.bookName!
+											});
+										}}
+										key={book.id}
+										sx={{
+											marginBottom: '10px',
+											'&:hover': {
+												cursor: 'pointer'
+											}
+										}}
+									>
+										{book.bookName}
+									</Typography>
+								))}
+							</Box>
 							<Divider sx={{ width: '100%', margin: '10px 0', color: 'gray' }} />
-
 							<UploadBookModal setBook={setBook} />
 						</Box>
 					)}
@@ -179,23 +226,29 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 					width: '100%',
 					maxWidth: '800px',
 					justifyContent: 'space-arround',
-					margin: '100px auto'
+					margin: '150px auto'
 				}}
 			>
 				<Box sx={{ minWidth: 300, mt: '150px', mx: 'auto' }}>
-					<FormControl fullWidth>
-						<InputLabel id="demo-simple-select-label">Book Quantity</InputLabel>
-						<Select
-							labelId="demo-simple-select-label"
-							id="demo-simple-select"
-							label="Book Quantity"
-							onChange={(e) => setBookQuantity(Number(e.target.value))}
-						>
-							<MenuItem value={10}>Ten</MenuItem>
-							<MenuItem value={20}>Twenty</MenuItem>
-							<MenuItem value={30}>Thirty</MenuItem>
-						</Select>
-					</FormControl>
+					<TextField
+						id="Quantity"
+						label="Quantity"
+						type="number"
+						name="Quantity"
+						required
+						value={bookQuantity}
+						onChange={(e) => {
+							const value = e.currentTarget.value;
+							if (!value) {
+								setBookQuantity(null);
+								return;
+							}
+
+							setBookQuantity(Number(value));
+						}}
+						autoComplete="current-confirm-password"
+						style={{ width: '100%', margin: '10px 0' }}
+					/>
 				</Box>
 				<Box sx={{ minWidth: 300, mt: '150px', mx: 'auto' }}>
 					<OutlinedInput
@@ -204,7 +257,14 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 						placeholder="Rent Price for 2 weeks"
 						value={bookPrice}
 						type="number"
-						onChange={(e) => setBookPrice(Number(e.target.value))}
+						onChange={(e) => {
+							const price = e.currentTarget.value;
+							if (!price) {
+								setBookPrice(null);
+								return;
+							}
+							setBookPrice(Number(price));
+						}}
 					/>
 				</Box>
 			</Box>

@@ -49,7 +49,7 @@ model Book {
   owner      User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId    Int
   isApproved Boolean    @default(false)
-  bookName   String
+  bookName   String     @unique
   status     BookStatus @default(free)
   category   Category
   price      Int
@@ -58,6 +58,7 @@ model Book {
   rentedBy   User?      @relation("RentedBooks", fields: [rentedByid], references: [id])
   rentedByid Int?
 
+  @@unique([bookName, author])
   @@map("books")
 }
 

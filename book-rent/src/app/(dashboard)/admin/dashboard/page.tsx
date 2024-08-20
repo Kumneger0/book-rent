@@ -40,6 +40,9 @@ async function Dashboard({ searchParams }: { searchParams: Record<string, string
 					fullName: true
 				}
 			}
+		},
+		orderBy: {
+			bookName: 'asc'
 		}
 	});
 

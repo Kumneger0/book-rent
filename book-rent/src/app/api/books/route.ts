@@ -41,6 +41,26 @@ export async function POST(req: NextRequest) {
 			base64image: string;
 		};
 
+		const isBookPrevioslyExist = await prisma.book.findFirst({
+			where: {
+				bookName: book.name
+			}
+		});
+
+		if (isBookPrevioslyExist) {
+			return NextResponse.json(
+				{
+					status: 'error',
+					data: {
+						message: 'book already exist'
+					}
+				},
+				{
+					status: 400
+				}
+			);
+		}
+
 		const newBook = await prisma.book.create({
 			data: {
 				bookName: book.name,

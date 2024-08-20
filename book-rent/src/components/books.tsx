@@ -114,7 +114,8 @@ const Example = ({ data }: { data: BookTable[] }) => {
 				pathname,
 				router
 			});
-		}
+		},
+		enableSorting: false
 	});
 
 	return <MaterialReactTable table={table} />;

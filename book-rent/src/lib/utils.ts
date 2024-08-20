@@ -9,6 +9,7 @@ import { ReadonlyURLSearchParams } from 'next/navigation';
 import { z } from 'zod';
 import { MRT_Updater, MRT_ColumnFiltersState } from 'material-react-table';
 import { Book, $Enums, User } from '@prisma/client';
+import React from 'react';
 
 export function hashPassword(password: string): Promise<string> {
 	return new Promise((resolve, reject) => {
@@ -97,8 +98,7 @@ export const addBookSchema = z.object({
 	category: z.string().min(1, 'Category is required')
 });
 
-type ParamType = { name: string; value: string }; 
-
+type ParamType = { name: string; value: string };
 
 export function useCreateQueryString(
 	searchParams: ReadonlyURLSearchParams
@@ -230,22 +230,19 @@ export const fillerSixMonthsChartData = (
 export async function combineEachUserMontheyIncome(
 	income: NonNullable<Awaited<ReturnType<typeof getTotalIncome>>>
 ) {
-	const combinedData = income.reduce(
-		(acc, curr) => {
-			const { month, year, income } = curr;
-			const key = `${month}-${year}`;
-			if (!acc[key]) {
-				acc[key] = {
-					month,
-					year,
-					income: 0
-				};
-			}
-			acc[key].income += income;
-			return acc;
-		},
-		{} as Record<string, { month: number; year: number; income: number }>
-	);
+	const combinedData = income.reduce((acc, curr) => {
+		const { month, year, income } = curr;
+		const key = `${month}-${year}`;
+		if (!acc[key]) {
+			acc[key] = {
+				month,
+				year,
+				income: 0
+			};
+		}
+		acc[key].income += income;
+		return acc;
+	}, {} as Record<string, { month: number; year: number; income: number }>);
 	return Object.values(combinedData);
 }
 
@@ -265,7 +262,7 @@ export function onColumnFiltersChange({
 			? (data([]) as {
 					id: string;
 					value: string;
-				}[])
+			  }[])
 			: [];
 
 	if (!filters.length) {
@@ -284,17 +281,14 @@ export function onColumnFiltersChange({
 }
 
 export function getBOOKpieChart(book: Book[]) {
-	const numberOfBooksByCategory = book.reduce(
-		(acc, book) => {
-			const category = book.category;
-			if (!acc[category]) {
-				acc[category] = 0;
-			}
-			acc[category]++;
-			return acc;
-		},
-		{} as Record<$Enums.Category, number>
-	);
+	const numberOfBooksByCategory = book.reduce((acc, book) => {
+		const category = book.category;
+		if (!acc[category]) {
+			acc[category] = 0;
+		}
+		acc[category]++;
+		return acc;
+	}, {} as Record<$Enums.Category, number>);
 
 	const data = Object.entries(numberOfBooksByCategory ?? {}).map(([label, value]) => ({
 		label,
@@ -303,3 +297,14 @@ export function getBOOKpieChart(book: Book[]) {
 	}));
 	return { data, numberOfBooksByCategory };
 }
+
+export const useDeviceWith = () => {
+	const subscribe = (cb: () => any) => {
+		window?.addEventListener('resize', cb);
+		return () => {
+			window.removeEventListener('resize', cb);
+		};
+	};
+
+	return React.useSyncExternalStore(subscribe, () => window.innerWidth);
+};

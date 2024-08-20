@@ -120,7 +120,8 @@ const Example = ({ data }: { data: TableAdmin[] }) => {
 		},
 		state: {
 			columnFilters: columnFilterState
-		}
+		},
+		enableSorting: false
 	});
 
 	return <MaterialReactTable table={table} />;
