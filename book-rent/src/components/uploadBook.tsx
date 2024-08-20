@@ -1,30 +1,28 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
 import {
-	TextField,
+	Alert,
 	Autocomplete,
 	Divider,
 	FormControl,
 	InputLabel,
-	Select,
 	MenuItem,
 	OutlinedInput,
-	Tooltip,
-	Alert
+	Select,
+	TextField
 } from '@mui/material';
+import React, { useRef, useState } from 'react';
 // import UpgradeIcon from "@mui/icons-material/Upgrade";
-import { Button, Input, Box, Typography } from '@mui/material';
-import UploadIcon from '@mui/icons-material/Upload';
-import UploadBookModal from './uploadBookModal';
 import { APIResponse } from '@/types';
-import BasicModal from './bookUploalSuccessModal';
-import toast from 'react-hot-toast';
+import { Box, Button, Typography } from '@mui/material';
 import { Book } from '@prisma/client';
+import toast from 'react-hot-toast';
+import BasicModal from './bookUploalSuccessModal';
+import UploadBookModal from './uploadBookModal';
 import { useUserContext } from './UserContextWrapper';
 
-import { styled } from '@mui/material/styles';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
+import { styled } from '@mui/material/styles';
 
 const FileInput = styled('input')({
 	clip: 'rect(0 0 0 0)',
@@ -121,7 +119,6 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 			<Box sx={{ width: 300, margin: '0 auto', textAlign: 'center' }}>
 				<h2>Upload New Book</h2>
 				<Autocomplete
-					open
 					disableCloseOnSelect
 					disablePortal
 					onSelect={(e) => e.stopPropagation()}

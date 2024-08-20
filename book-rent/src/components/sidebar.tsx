@@ -45,6 +45,9 @@ const Sidebar = ({
 	const { user } = useUserContext();
 	const [open, setOpen] = useState(true);
 
+
+	console.log('user', user);
+
 	async function logout() {
 		try {
 			const response = await fetch('/api/user/logout', {
@@ -55,7 +58,7 @@ const Sidebar = ({
 				data: { message: string };
 			};
 			if (data.status == 'success') {
-				router.push('/login');
+				location.assign('/login');
 			}
 		} catch (err) {
 			if (err instanceof Error) {
@@ -167,7 +170,7 @@ const Sidebar = ({
 						>
 							<ListItemIcon
 								onClick={() => {
-									user ? logout() : router.push('/login');
+									user ? logout() : location.assign('/login');
 								}}
 							>
 								<LoginIcon sx={{ color: 'white' }} />
@@ -310,7 +313,7 @@ const Sidebar = ({
 						margin: '10px auto'
 					}}
 					onClick={() => {
-						user ? logout() : router.push('/login');
+						user ? logout() : location.assign('/login');
 					}}
 				>
 					<ListItemIcon>

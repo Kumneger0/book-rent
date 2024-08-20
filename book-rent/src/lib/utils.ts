@@ -97,7 +97,8 @@ export const addBookSchema = z.object({
 	category: z.string().min(1, 'Category is required')
 });
 
-type ParamType = { name: string; value: string };
+type ParamType = { name: string; value: string }; 
+
 
 export function useCreateQueryString(
 	searchParams: ReadonlyURLSearchParams
