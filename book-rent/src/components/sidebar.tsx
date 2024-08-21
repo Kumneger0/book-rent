@@ -27,8 +27,10 @@ import toast from 'react-hot-toast';
 import { useUserContext } from './UserContextWrapper';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
-
-const drawerContext = React.createContext<{open:boolean, setOpen:React.Dispatch<React.SetStateAction<boolean>> | null}>({open:false, setOpen:null})
+const drawerContext = React.createContext<{
+	open: boolean;
+	setOpen: React.Dispatch<React.SetStateAction<boolean>> | null;
+}>({ open: false, setOpen: null });
 
 const drawerWidth = 300;
 const Sidebar = ({
@@ -69,7 +71,15 @@ const Sidebar = ({
 
 	const sideBarContents = () => (
 		<>
-			<Toolbar sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+			<Toolbar
+				sx={{
+					display: 'flex',
+					justifyContent: 'center',
+					gap: 2,
+					position: 'relative',
+					zIndex: 99999999
+				}}
+			>
 				<Button sx={{ color: 'white', ml: -3, py: 3 }} onClick={() => setOpen((prev) => !prev)}>
 					<MenuIcon />
 				</Button>
@@ -193,11 +203,12 @@ const Sidebar = ({
 		</>
 	);
 
-	if (deviceWidth < 992) return (
-		<drawerContext.Provider value={{ open, setOpen }}>
-			<MobileSideBar>{sideBarContents()}</MobileSideBar>
-		</drawerContext.Provider>
-	);  
+	if (deviceWidth < 992)
+		return (
+			<drawerContext.Provider value={{ open, setOpen }}>
+				<MobileSideBar>{sideBarContents()}</MobileSideBar>
+			</drawerContext.Provider>
+		);
 
 	if (!open) {
 		return (
@@ -374,9 +385,7 @@ import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import * as React from 'react';
 
 function MobileSideBar({ children }: { children: React.ReactNode }) {
-
-   const {open, setOpen} = React.use(drawerContext);
-
+	const { open, setOpen } = React.use(drawerContext);
 
 	const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
 		if (

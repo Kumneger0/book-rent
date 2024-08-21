@@ -1,4 +1,4 @@
-import { defineAbilty } from '@/abilities';
+import { defineAbilty, defineOwnerAblity } from '@/abilities';
 import { prisma } from '@/db';
 import { verify } from '@/lib/utils';
 import { User } from '@prisma/client';
@@ -33,16 +33,23 @@ export const DELETE = async (req: NextRequest) => {
 		}
 		const { id } = (await req.json()) as { id: string };
 
-		const bookOwnerId = (
-			await prisma.book.findFirst({
-				where: {
-					id: Number(id)
-				}
-			})
-		)?.ownerId;
+		const userBook = await prisma.book.findFirst({
+			where: {
+				id: Number(id)
+			}
+		});
 
-		const ablity = defineAbilty(user, bookOwnerId);
-		if (ablity.can('delete', 'Book')) {
+		if (!userBook) {
+			return NextResponse.json({
+				status: 'error',
+				data: {
+					message: 'Book not found'
+				}
+			});
+		}
+
+		const ability = defineOwnerAblity(user);
+		if (ability.can('delete', { ...userBook, __caslSubjectType__: 'Book' })) {
 			if (!id)
 				return NextResponse.json({
 					status: 'error',

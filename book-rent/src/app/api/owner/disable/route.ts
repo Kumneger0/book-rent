@@ -18,7 +18,26 @@ export async function POST(req: NextRequest) {
 
 		const ablity = defineAbilty(user);
 
-		if (ablity.can('disable', 'User')) {
+		const json = (await req.json()) as { id: number; isActive: boolean };
+
+		const userToDisable = await prisma.user.findFirst({
+			where: {
+				id: json.id
+			}
+		});
+
+		if (!userToDisable)
+			return NextResponse.json(
+				{
+					status: 'error',
+					data: {
+						message: 'user not found'
+					}
+				},
+				{ status: 400 }
+			);
+
+		if (ablity.can('disable', { ...userToDisable, __caslSubjectType__: 'User' })) {
 			const json = (await req.json()) as { id: number; isActive: boolean };
 
 			if (!json?.id)

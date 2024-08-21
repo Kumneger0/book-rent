@@ -18,9 +18,26 @@ export async function DELETE(req: NextRequest) {
 
 		const ablity = defineAbilty(user);
 
-		if (ablity.can('delete', 'User')) {
-			const json = (await req.json()) as { id: number };
+		const json = (await req.json()) as { id: number };
 
+		const userToDelete = await prisma.user.findFirst({
+			where: {
+				id: json.id
+			}
+		});
+
+		if (!userToDelete)
+			return NextResponse.json(
+				{
+					status: 'error',
+					data: {
+						message: 'user not found'
+					}
+				},
+				{ status: 400 }
+			);
+
+		if (ablity.can('delete', { ...userToDelete, __caslSubjectType__: 'User' })) {
 			if (!json?.id)
 				return NextResponse.json(
 					{

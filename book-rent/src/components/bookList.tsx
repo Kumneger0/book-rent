@@ -4,6 +4,10 @@ import Image from 'next/image';
 import { Book } from '@prisma/client';
 import RentBookButton from './rentBook';
 
+const getPlaceholderImage = (filename: string) => {
+	return `https://via.placeholder.com/${800}x${800}/${'black'}/${'white'}?text=${filename}`;
+};
+
 const BookList = ({ books }: { books: Book[] }) => {
 	return (
 		<Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -46,7 +50,11 @@ const BookList = ({ books }: { books: Book[] }) => {
 								}}
 							>
 								<Image
-									src={book.coverImage}
+									src={
+										book?.coverImage.startsWith('data')
+											? book.coverImage
+											: getPlaceholderImage(book.bookName)
+									}
 									alt={book.bookName}
 									width={300}
 									height={300}

@@ -17,10 +17,26 @@ export async function POST(req: NextRequest) {
 		const user = await verify<User>(token.value);
 
 		const ablity = defineAbilty(user);
+		const json = (await req.json()) as { id: number; isApprove: boolean };
 
-		if (ablity.can('approve', 'User')) {
-			const json = (await req.json()) as { id: number; isApprove: boolean };
+		const userToApprove = await prisma.user.findFirst({
+			where: {
+				id: json.id
+			}
+		});
 
+		if (!userToApprove)
+			return NextResponse.json(
+				{
+					status: 'error',
+					data: {
+						message: 'user not found'
+					}
+				},
+				{ status: 400 }
+			);
+
+		if (ablity.can('approve', { ...userToApprove, __caslSubjectType__: 'User' })) {
 			if (!json?.id)
 				return NextResponse.json(
 					{

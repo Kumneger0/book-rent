@@ -2,7 +2,7 @@ import { prisma } from '@/db';
 import { verify } from '@/lib/utils';
 import { $Enums, User } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
-import { defineAbilty } from '@/abilities';
+import { defineAbilty, defineOwnerAblity } from '@/abilities';
 
 export async function PUT(req: NextRequest) {
 	try {
@@ -39,17 +39,28 @@ export async function PUT(req: NextRequest) {
 			id: number;
 		};
 
-		const bookOwnerId = (
-			await prisma.book.findFirst({
-				where: {
-					id
+		/**
+		 * now lets try our own book
+		 */
+		const userBook = await prisma.book.findFirst({
+			where: {
+				id: id
+			}
+		});
+
+		if (!userBook) {
+			return NextResponse.json({
+				status: 'error',
+				data: {
+					message: 'Book not found'
 				}
-			})
-		)?.ownerId;
+			});
+		}
 
-		const ablity = defineAbilty(userFromDB, bookOwnerId);
 
-		if (ablity.can('update', 'Book')) {
+		const ability = defineOwnerAblity(userFromDB);
+
+		if (ability.can('update', { ...userBook, __caslSubjectType__: 'Book' })) {
 			const updatedBook = await prisma.book.update({
 				where: {
 					id: id
@@ -71,7 +82,7 @@ export async function PUT(req: NextRequest) {
 		return NextResponse.json({
 			status: 'error',
 			data: {
-				message: 'you are no authorized to perform this action'
+				message: 'you are not authorized to perform this action'
 			}
 		});
 	} catch (e) {

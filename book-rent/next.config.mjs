@@ -7,9 +7,19 @@ const nextConfig = {
 				protocol: 'https',
 				hostname: 'api.dicebear.com',
 				port: ''
+			},
+			{
+				protocol: 'https',
+				hostname: 'via.placeholder.com',
+				port: ''
 			}
 		],
 		dangerouslyAllowSVG: true
+	},
+	compiler: {
+		removeConsole: {
+			exclude: ['error']
+		}
 	}
 };
 

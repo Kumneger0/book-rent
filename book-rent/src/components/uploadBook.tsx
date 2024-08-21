@@ -1,10 +1,10 @@
 'use client';
 
 import { Alert, Autocomplete, Divider, FormControl, OutlinedInput, TextField } from '@mui/material';
-import React, { ElementRef, useRef, useState } from 'react';
+import React, { ElementRef, useEffect, useRef, useState } from 'react';
 import { APIResponse } from '@/types';
 import { Box, Button, Typography } from '@mui/material';
-import { Book } from '@prisma/client';
+import { $Enums, Book } from '@prisma/client';
 import toast from 'react-hot-toast';
 import BasicModal from './bookUploalSuccessModal';
 import UploadBookModal from './uploadBookModal';
@@ -12,6 +12,7 @@ import { useUserContext } from './UserContextWrapper';
 
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import { styled } from '@mui/material/styles';
+import { useRouter } from 'next/navigation';
 
 const FileInput = styled('input')({
 	clip: 'rect(0 0 0 0)',
@@ -38,8 +39,25 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 	const [bookPrice, setBookPrice] = useState<number | null>();
 	const searchRef = useRef<ElementRef<typeof TextField>>(null);
 	const inputFileRef = useRef<HTMLInputElement>(null);
+	const router = useRouter();
 
 	const [autoCompleteSearchValue, setAutoCompleteSearchValue] = useState('');
+
+	useEffect(() => {
+		const abortController = new AbortController();
+		if (typeof window !== 'undefined') {
+			window.addEventListener(
+				'resize',
+				() => {
+					setAutoCompleteOpen(false);
+				},
+				{ signal: abortController.signal }
+			);
+		}
+		return () => {
+			abortController.abort();
+		};
+	}, []);
 
 	async function handleBookUpload() {
 		const bookToUpload = {
@@ -82,6 +100,7 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 			const data = (await response.json()) as APIResponse;
 			if (data.status === 'success') {
 				setOpen(true);
+				return;
 			}
 			if (data.data.message) {
 				toast.error(data.data.message);
@@ -90,24 +109,21 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 			console.error(e);
 		} finally {
 			setIsUploading(false);
+			router.refresh();
 		}
 	}
 
 	const { user } = useUserContext();
 
 	const booksToDisply = (
-		newBook
+		newBook && books.every(({ bookName }) => newBook.name !== bookName)
 			? books.concat([
 					{
 						bookName: newBook.name,
 						author: newBook.author,
-						category: newBook.category as 'fiction' | 'selfHelp' | 'business',
-						bookNo: '',
-						id: 0,
-						isApproved: false,
-						ownerId: 0,
-						price: 0,
-						status: 'free'
+						category: newBook.category as $Enums.Category,
+						quantity: bookQuantity ?? 0,
+						price: bookPrice ?? 0
 					}
 			  ])
 			: books
@@ -155,6 +171,9 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 								{...params}
 								ref={searchRef}
 								value={autoCompleteSearchValue}
+								onFocus={() => {
+									setAutoCompleteOpen(true);
+								}}
 								onChange={(e) => setAutoCompleteSearchValue(e.currentTarget.value)}
 								label="Search book by name or Author"
 								variant="outlined"
@@ -183,7 +202,9 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 								hight: '100%',
 								padding: '10px',
 								borderRadius: '10px',
-								boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+								boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+								position: 'relative',
+								zIndex: 10
 							}}
 						>
 							<Box
@@ -206,7 +227,9 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 										sx={{
 											marginBottom: '10px',
 											'&:hover': {
-												cursor: 'pointer'
+												cursor: 'pointer',
+												background: 'gray',
+												color: 'white'
 											}
 										}}
 									>
