@@ -38,8 +38,6 @@ export async function POST(req: NextRequest) {
 			);
 
 		if (ablity.can('disable', { ...userToDisable, __caslSubjectType__: 'User' })) {
-			const json = (await req.json()) as { id: number; isActive: boolean };
-
 			if (!json?.id)
 				return NextResponse.json(
 					{

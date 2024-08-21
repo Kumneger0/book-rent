@@ -27,10 +27,16 @@ export function getFuncToUpdate() {
 				},
 				body
 			});
+
+			console.log(response);
+
 			const data = (await response.json()) as {
 				status: 'success' | 'error';
 				data: { message: string };
 			};
+
+			console.log(data);
+
 			if (data.status == 'success') {
 				toast.success('success');
 				return { status: 'success' };
