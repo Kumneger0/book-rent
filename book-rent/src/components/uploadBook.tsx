@@ -134,7 +134,7 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 	);
 
 	return (
-		<Box sx={{ width: '80%', margin: '0 auto' }}>
+		<Box sx={{ width: '80%', margin: '0 auto', position: 'relative', zIndex: 10 }}>
 			{!user?.approved && (
 				<Alert
 					sx={{
@@ -202,9 +202,7 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 								hight: '100%',
 								padding: '10px',
 								borderRadius: '10px',
-								boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-								position: 'relative',
-								zIndex: 10
+								boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
 							}}
 						>
 							<Box

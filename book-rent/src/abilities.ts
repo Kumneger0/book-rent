@@ -36,7 +36,7 @@ export const defineOwnerAblity = (user: User) => {
 	if (user.role == 'owner') {
 		/**
 		 * Grants the current user, who has the 'owner' role, the ability to update and delete books that they own.
-		 * to see how it works checkout condtions section on https://casl.js.org/v6/en/guide/intro#basics
+		 * to see how it works checkout condtions section on https://casl.js.org/v6/en/guide/intro#conditions
 		 * The `ownerId` field on the `Book` model is used to determine ownership.
 		 */
 		can('update', 'Book', { ownerId: { equals: user.id } }).because('owner can update his books');

@@ -17,6 +17,9 @@ import {
 	Tooltip,
 	Typography
 } from '@mui/material';
+import { useDeviceWith } from '@/lib/utils';
+import SwipeableDrawer from '@mui/material/SwipeableDrawer';
+import * as React from 'react';
 
 import Divider from '@mui/material/Divider';
 import Image from 'next/image';
@@ -380,10 +383,6 @@ const Sidebar = ({
 
 export default Sidebar;
 
-import { useDeviceWith } from '@/lib/utils';
-import SwipeableDrawer from '@mui/material/SwipeableDrawer';
-import * as React from 'react';
-
 function MobileSideBar({ children }: { children: React.ReactNode }) {
 	const { open, setOpen } = React.use(drawerContext);
 
@@ -405,7 +404,7 @@ function MobileSideBar({ children }: { children: React.ReactNode }) {
 			sx={{
 				position: 'absolute',
 				left: '-10px',
-				top: '25px'
+				top: '50px'
 			}}
 		>
 			<React.Fragment>
@@ -425,7 +424,7 @@ function MobileSideBar({ children }: { children: React.ReactNode }) {
 					onClose={toggleDrawer(false)}
 					onOpen={toggleDrawer(true)}
 					sx={{
-						width: 250,
+						width: 300,
 						flexShrink: 0,
 						'& .MuiDrawer-paper': {
 							boxSizing: 'border-box',
