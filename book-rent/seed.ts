@@ -298,27 +298,27 @@ async function main() {
 // 	});
 
 // (async () => {
-//   const deleteData = await prisma.monthlyIncome.deleteMany();
-//   console.log(deleteData);
-//   const ownersUsers = await prisma.user.findMany({
-//     where: {
-//       role: "owner",
-//     },
-//   });
+// 	const deleteData = await prisma.monthlyIncome.deleteMany();
+// 	console.log(deleteData);
+// 	const ownersUsers = await prisma.user.findMany({
+// 		where: {
+// 			role: 'owner'
+// 		}
+// 	});
 
-//   for (const owner of ownersUsers) {
-//     for (const income of mockMonthlyIncomeData) {
-//       const data = await prisma.monthlyIncome.create({
-//         data: {
-//           userId: owner.id,
-//           month: income.month,
-//           year: income.year,
-//           income: Math.floor(Math.random() * 10000),
-//         },
-//       });
-//       console.log(data);
-//     }
-//   }
+// 	for (const owner of ownersUsers) {
+// 		for (const income of mockMonthlyIncomeData) {
+// 			const data = await prisma.monthlyIncome.create({
+// 				data: {
+// 					userId: owner.id,
+// 					month: income.month,
+// 					year: income.year,
+// 					income: Math.floor(Math.random() * 10000)
+// 				}
+// 			});
+// 			console.log(data);
+// 		}
+// 	}
 // })();
 
 // (async () => {
@@ -330,3 +330,82 @@ async function main() {
 // 		}
 // 	});
 // })();
+
+
+
+
+const permissions = [
+	{
+		actions: 'update',
+		subject: 'Book',
+		reason: 'owner can update his book',
+		condition: {
+			ownerId: `$user.id`
+		},
+		name: 'update-book',
+		role: 'owner' as const
+	},
+	{
+		actions: 'delete',
+		subject: 'Book',
+		reason: 'owner can delete his book',
+		condition: {
+			ownerId: `$user.id`
+		},
+		name: 'delete-book',
+		role: 'owner' as const
+	},
+	{
+		actions: 'disable',
+		subject: 'User',
+		condition: { role: `$user.role` },
+		reason: 'Admin can disable owners',
+		name: 'disable-owner',
+		role: 'admin' as const
+	},
+	{
+		actions: 'delete',
+		subject: 'User',
+		condition: {
+			AND: [{ role: '$user.role' }, { role: '$user.role' }]
+		},
+		reason: 'Admin can delete owner',
+		name: 'delete-owner',
+		role: 'admin' as const
+	},
+	{
+		actions: 'approve',
+		subject: 'User',
+		condition: { role: '$user.role' },
+		reason: 'admin can approve book owner',
+		name: 'approve-owner',
+		role: 'admin' as const
+	},
+
+	{
+		actions: 'approve',
+		subject: 'Book',
+		reason: 'Admin can approve book',
+		name: 'approve-book',
+		role: 'admin' as const
+	}
+];
+
+async function seedPerimissions() {
+	await prisma.permission.deleteMany();
+	const permission = await Promise.all(
+		permissions.map((permission) => {
+			return prisma.permission.create({
+				data: {
+					actions: permission.actions,
+					subject: permission.subject,
+					condition: permission.condition,
+					name: permission.name,
+					role: permission.role
+				}
+			});
+		})
+	);
+	console.log(permission);
+}
+seedPerimissions();

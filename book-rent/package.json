@@ -15,7 +15,8 @@
 		"generate": "dotenv -e .env.development -- prisma generate",
 		"db:seed": "dotenv -e .env.development -- tsx  seed.ts",
 		"db:migrate:deploy": "dotenv -e .env.production -- prisma migrate deploy",
-		"db:seed:prod": "dotenv -e .env.production -- tsx seed.ts"
+		"db:seed:prod": "dotenv -e .env.production -- tsx seed.ts",
+		"db:studio": "dotenv -e .env.development -- prisma studio"
 	},
 	"dependencies": {
 		"@casl/ability": "^6.7.1",

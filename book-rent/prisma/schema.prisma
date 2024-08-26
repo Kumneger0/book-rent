@@ -74,3 +74,16 @@ model MonthlyIncome {
 
   @@map("monthly_incomes")
 }
+
+model Permission {
+  id        Int      @id @default(autoincrement())
+  actions   String
+  subject   String
+  condition Json?
+  name      String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  
+}

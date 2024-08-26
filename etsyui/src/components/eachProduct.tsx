@@ -67,7 +67,6 @@ function ProductPage() {
 							justifyContent: 'center',
 							alignItems: 'center',
 							gap: '4px',
-
 							maxHeight: '600px'
 						}}
 					>

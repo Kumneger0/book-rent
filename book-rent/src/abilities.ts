@@ -2,7 +2,10 @@ import { AbilityBuilder, PureAbility } from '@casl/ability';
 import { createPrismaAbility, PrismaQuery, Subjects } from '@casl/prisma';
 import { Book, User } from '@prisma/client';
 
-type AppAbilityAdmin = PureAbility<[string, Subjects<{ User: User; Book: Book }>], PrismaQuery>;
+export type AppAbilityAdmin = PureAbility<
+	[string, Subjects<{ User: User; Book: Book }>],
+	PrismaQuery
+>;
 
 export function defineAbilty(user: User): AppAbilityAdmin {
 	const { can, cannot, build } = new AbilityBuilder<AppAbilityAdmin>(createPrismaAbility);
@@ -29,7 +32,7 @@ export function defineAbilty(user: User): AppAbilityAdmin {
 	return ability;
 }
 
-type Sub = { Book: Book };
+type Sub = { Book: Book; User: User };
 export type AppAbility = PureAbility<[string, Subjects<Sub>], PrismaQuery>;
 export const defineOwnerAblity = (user: User) => {
 	const { can, cannot, build } = new AbilityBuilder<AppAbility>(createPrismaAbility);
@@ -47,3 +50,81 @@ export const defineOwnerAblity = (user: User) => {
 
 	return ability;
 };
+
+const permissions = [
+	{
+		actions: 'update',
+		subject: 'Book',
+		condition: {
+			ownerId: {
+				equals: `$user.id`
+			}
+		},
+		name: 'update-book'
+	},
+	{
+		actions: 'update',
+		subject: 'Book',
+		condition: {
+			ownerId: {
+				equals: `$user.id`
+			}
+		},
+		name: 'delete-book'
+	},
+	{
+		actions: 'update',
+		subject: 'Book',
+		condition: {
+			ownerId: {
+				equals: `$user.id`
+			}
+		},
+		name: 'update-book'
+	},
+	{}
+];
+
+const adminPermissions = [
+	{
+		actions: 'disable',
+		subject: 'User',
+		condition: { role: { equals: 'owner' } },
+		reason: 'Admin can disable owners',
+		name: 'disable-owner'
+	},
+	{
+		actions: 'approve',
+		subject: 'User',
+		condition: { role: { equals: 'owner' } },
+		reason: 'admin can approve book owner',
+		name: 'approve-owner'
+	},
+	{
+		actions: 'delete',
+		subject: 'User',
+		condition: {
+			AND: [{ role: { equals: 'owner' } }, { role: { equals: 'user' } }]
+		},
+		reason: 'Admin can delete owner',
+		name: 'delete-owner'
+	},
+	{
+		actions: 'approve',
+		subject: 'Book',
+		reason: 'Admin can approve book',
+		name: 'approve-book'
+	}
+];
+
+const userPermissions = [
+	{
+		actions: 'rent',
+		subject: 'Book',
+		reason: 'User Can Rent Books'
+	}
+];
+
+
+
+
