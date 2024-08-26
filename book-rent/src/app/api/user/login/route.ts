@@ -12,6 +12,9 @@ export const POST = async (req: Request) => {
 		const user = await prisma.user.findFirst({
 			where: {
 				email: body.email
+			},
+			include: {
+				Role: true
 			}
 		});
 
@@ -53,7 +56,7 @@ export const POST = async (req: Request) => {
 			})
 		);
 	} catch (err) {
-		console.log(err);
+		console.error(err);
 		return new Response(
 			JSON.stringify({
 				status: 'error',

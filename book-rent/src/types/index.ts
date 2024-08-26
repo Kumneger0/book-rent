@@ -1,7 +1,11 @@
 import { prisma } from '@/db';
 import { LoginSchema, UserSchema } from '@/lib/utils';
+import { PureAbility } from '@casl/ability';
 import { Box } from '@mui/material';
-import { $Enums } from '@prisma/client';
+
+import { PrismaQuery, Subjects } from '@casl/prisma';
+import { Book, Role, User } from '@prisma/client';
+
 import { ComponentProps } from 'react';
 import { z } from 'zod';
 
@@ -35,3 +39,32 @@ export type EarningsSummaryChartProps = {
 export type Prettify<T> = {
 	[K in keyof T]: T[K];
 } & {};
+
+export type AppAbilityAdmin = PureAbility<
+	[string, Subjects<{ User: User; Book: Book }>],
+	PrismaQuery
+>;
+
+type Sub = { Book: Book; User: User };
+
+export type AppAbility = PureAbility<[string, Subjects<Sub>], PrismaQuery>;
+
+export type PermissionType = {
+	actions: 'update' | 'delete' | 'disable' | 'approve';
+	subject: 'Book' | 'User';
+	reason: string;
+	condition: {
+		ownerId?: number;
+		role?: string;
+	} & Record<string, any>;
+	name: string;
+	role: Role['name'];
+};
+
+export type Permission = {
+	actions: PermissionType['actions'];
+	subject: PermissionType['subject'];
+	condition: PermissionType['condition'];
+	name: PermissionType['name'];
+	role: PermissionType['role'];
+};

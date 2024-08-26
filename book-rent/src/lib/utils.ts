@@ -1,6 +1,6 @@
 import { prisma } from '@/db';
 import { env } from '@/env';
-import { EarningsSummaryChartProps } from '@/types';
+import { AppAbility, EarningsSummaryChartProps, Permission, PermissionType } from '@/types';
 import crypto from 'crypto';
 import { jwtVerify } from 'jose';
 import jwt from 'jsonwebtoken';
@@ -8,8 +8,10 @@ import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.share
 import { ReadonlyURLSearchParams } from 'next/navigation';
 import { z } from 'zod';
 import { MRT_Updater, MRT_ColumnFiltersState } from 'material-react-table';
-import { Book, $Enums, User } from '@prisma/client';
+import { Book, $Enums, User, Permission as PermissionModel, Role } from '@prisma/client';
 import React from 'react';
+import { AbilityBuilder } from '@casl/ability';
+import { createPrismaAbility } from '@casl/prisma';
 
 export function hashPassword(password: string): Promise<string> {
 	return new Promise((resolve, reject) => {
@@ -308,3 +310,35 @@ export const useDeviceWith = () => {
 
 	return React.useSyncExternalStore(subscribe, () => window.innerWidth);
 };
+
+export function mapPermissions(
+	permissions: (PermissionModel & { Role: Role[] })[],
+	user: User
+): Permission[] {
+	return permissions.map(
+		({ updatedAt, createdAt, ...p }) =>
+			({
+				...p,
+				subject: p.subject as PermissionType['subject'],
+				actions: p.actions as PermissionType['actions'],
+				role: p.Role[0].name as PermissionType['role'],
+				condition: JSON.parse(JSON.stringify(p.condition), (key, value) => {
+					if (typeof value === 'string' && value.startsWith('')) {
+						return value.replace(/\${user\.(\w+)}/g, (_, prop) =>
+							String(user[prop as keyof typeof user] || '')
+						);
+					}
+					return value;
+				})
+			} satisfies Permission)
+	);
+}
+
+export function createAblity(permissions: Permission[]) {
+	const { can, cannot, build } = new AbilityBuilder<AppAbility>(createPrismaAbility);
+
+	permissions?.forEach(({ actions, condition, subject }) => {
+		can(actions, subject, condition ?? {});
+	});
+	return build();
+}

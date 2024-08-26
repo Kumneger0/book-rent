@@ -7,7 +7,6 @@ import { User } from '@prisma/client';
 
 export async function getCurrentUser() {
 	const token = cookies().get('token');
-
 	const user = token?.value ? (VerifyUserJwt(token?.value) as User) : null;
 
 	if (!user) return null;
@@ -19,7 +18,8 @@ export async function getCurrentUser() {
 		include: {
 			rentedBooks: true,
 			MonthlyIncome: true,
-			Book: true
+			Book: true,
+			Role: true
 		}
 	});
 

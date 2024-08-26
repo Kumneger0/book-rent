@@ -1,7 +1,7 @@
 import { defineAbilty } from '@/abilities';
 import { prisma } from '@/db';
 import { verify } from '@/lib/utils';
-import { User } from '@prisma/client';
+import { User, $Enums } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
@@ -14,7 +14,19 @@ export async function POST(req: NextRequest) {
 					message: 'you need to be logged to approve owner'
 				}
 			});
-		const user = await verify<User>(token.value);
+		const user = await verify<User & { Role: { name: string }[] }>(token.value);
+
+		const role = user.Role[0].name;
+
+		const userPermisssion = await prisma.permission.findMany({
+			where: {
+				Role: {
+					some: {
+						name: role
+					}
+				}
+			}
+		});
 
 		const ablity = defineAbilty(user);
 		const json = (await req.json()) as { id: number; isApprove: boolean };

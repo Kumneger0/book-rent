@@ -255,7 +255,6 @@ async function main() {
 				location: user.location,
 				phoneNumber: user.phoneNumber,
 
-				role: user.role,
 				MonthlyIncome: {
 					create: mockMonthlyIncomeData.map(({ userId, ...rest }) => ({
 						...rest
@@ -331,81 +330,171 @@ async function main() {
 // 	});
 // })();
 
+// const permissions = [
+// 	{
+// 		actions: 'update',
+// 		subject: 'Book',
+// 		reason: 'owner can update his book',
+// 		condition: {
+// 			ownerId: `$user.id`
+// 		},
+// 		name: 'update-book',
+// 	},
+// 	{
+// 		actions: 'delete',
+// 		subject: 'Book',
+// 		reason: 'owner can delete his book',
+// 		condition: {
+// 			ownerId: `$user.id`
+// 		},
+// 		name: 'delete-book',
+// 	},
+// 	{
+// 		actions: 'disable',
+// 		subject: 'User',
+// 		condition: { role: `$user.role` },
+// 		reason: 'Admin can disable owners',
+// 		name: 'disable-owner',
+// 		role: 'admin' as const
+// 	},
+// 	{
+// 		actions: 'delete',
+// 		subject: 'User',
+// 		condition: {
+// 			AND: [{ role: '$user.role' }, { role: '$user.role' }]
+// 		},
+// 		reason: 'Admin can delete owner',
+// 		name: 'delete-owner',
+// 		role: 'admin' as const
+// 	},
+// 	{
+// 		actions: 'approve',
+// 		subject: 'User',
+// 		condition: { role: '${user.role}' },
+// 		reason: 'admin can approve book owner',
+// 		name: 'approve-owner',
+// 	},
 
+// 	{
+// 		actions: 'approve',
+// 		subject: 'Book',
+// 		reason: 'Admin can approve book',
+// 		name: 'approve-book',
+// 		role: 'admin' as const
+// 	}
+// ];
 
+// async function seedPerimissions() {
+// 	await prisma.permission.deleteMany();
+// 	const permission = await Promise.all(
+// 		permissions.map((permission) => {
+// 			return prisma.permission.create({
+// 				data: {
+// 					actions: permission.actions,
+// 					subject: permission.subject,
+// 					condition: permission.condition,
+// 					name: permission.name,
+// 					role: permission.role
+// 				}
+// 			});
+// 		})
+// 	);
+// 	console.log(permission);
+// }
+// seedPerimissions();
 
-const permissions = [
-	{
-		actions: 'update',
-		subject: 'Book',
-		reason: 'owner can update his book',
-		condition: {
-			ownerId: `$user.id`
-		},
-		name: 'update-book',
-		role: 'owner' as const
-	},
-	{
-		actions: 'delete',
-		subject: 'Book',
-		reason: 'owner can delete his book',
-		condition: {
-			ownerId: `$user.id`
-		},
-		name: 'delete-book',
-		role: 'owner' as const
-	},
-	{
-		actions: 'disable',
-		subject: 'User',
-		condition: { role: `$user.role` },
-		reason: 'Admin can disable owners',
-		name: 'disable-owner',
-		role: 'admin' as const
-	},
-	{
-		actions: 'delete',
-		subject: 'User',
-		condition: {
-			AND: [{ role: '$user.role' }, { role: '$user.role' }]
-		},
-		reason: 'Admin can delete owner',
-		name: 'delete-owner',
-		role: 'admin' as const
-	},
-	{
-		actions: 'approve',
-		subject: 'User',
-		condition: { role: '$user.role' },
-		reason: 'admin can approve book owner',
-		name: 'approve-owner',
-		role: 'admin' as const
-	},
+const mockRoles = [{ name: 'admin' }, { name: 'owner' }, { name: 'user' }];
 
-	{
-		actions: 'approve',
-		subject: 'Book',
-		reason: 'Admin can approve book',
-		name: 'approve-book',
-		role: 'admin' as const
-	}
+const mockPermissions = [
+	{ actions: 'read', subject: 'Book', condition: null, name: 'read-book' },
+	{ actions: 'create', subject: 'Book', condition: null, name: 'create-book' },
+	{ actions: 'update', subject: 'Book', condition: { ownerId: '$user.id' }, name: 'update-book' },
+	{ actions: 'delete', subject: 'Book', condition: { ownerId: '$user.id' }, name: 'delete-book' },
+	{ actions: 'approve', subject: 'User', condition: null, name: 'approve-user' },
+	{ actions: 'approve', subject: 'Book', condition: null, name: 'approve-book' }
 ];
 
-async function seedPerimissions() {
+async function main2() {
+	// Clear existing data
+	await prisma.monthlyIncome.deleteMany();
+	await prisma.book.deleteMany();
+	await prisma.user.deleteMany();
+	await prisma.role.deleteMany();
 	await prisma.permission.deleteMany();
-	const permission = await Promise.all(
-		permissions.map((permission) => {
-			return prisma.permission.create({
+
+	// Seed Roles
+	const roles = await Promise.all(mockRoles.map((role) => prisma.role.create({ data: role })));
+
+	// Seed Permissions
+	const permissions = await Promise.all(
+		mockPermissions.map((permission) =>
+			prisma.permission.create({
 				data: {
-					actions: permission.actions,
-					subject: permission.subject,
-					condition: permission.condition,
-					name: permission.name,
-					role: permission.role
+					...permission,
+					condition: permission.condition === null ? undefined : permission.condition
+				}
+			})
+		)
+	);
+
+	// Seed Users with Roles
+	for (const user of mockUsers) {
+		const role = roles.find((r) => r.name === user.role);
+		await prisma.user.create({
+			data: {
+				fullName: user.fullName,
+				email: user.email,
+				password: await hashPassword(user.password),
+				location: user.location,
+				phoneNumber: user.phoneNumber,
+				approved: true,
+				isActive: true,
+				wallet: Math.floor(Math.random() * 1000),
+				Role: { connect: { id: role?.id } }
+			}
+		});
+	}
+
+	for (const book of mockBooks) {
+		const owner = await prisma.user.findFirst({ where: { Role: { some: { name: 'owner' } } } });
+		if (owner) {
+			await prisma.book.create({
+				data: {
+					...book,
+					ownerId: owner.id,
+					isApproved: Math.random() > 0.5,
+					quantity: Math.floor(Math.random() * 10) + 1
 				}
 			});
-		})
-	);
-	console.log(permission);
+		}
+	}
+
+	const users = await prisma.user.findMany();
+	for (const user of users) {
+		for (let month = 1; month <= 12; month++) {
+			await prisma.monthlyIncome.create({
+				data: {
+					userId: user.id,
+					month,
+					year: 2024,
+					income: Math.floor(Math.random() * 5000) + 1000
+				}
+			});
+		}
+	}
+
+	console.log('Seeding completed successfully!');
+	console.log(await prisma.user.findMany())
+	console.log(await prisma.book.findMany());
+	console.log(await prisma.monthlyIncome.findMany());
+	console.log(await prisma.role.findMany());
+	console.log(await prisma.permission.findMany());
+	
 }
-seedPerimissions();
+
+main2()
+	.catch((e) => console.error(e))
+	.finally(async () => {
+		await prisma.$disconnect();
+	});
+

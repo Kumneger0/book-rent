@@ -74,14 +74,17 @@ const lists = {
 
 async function App({ children }: { children: React.ReactNode }) {
 	const token = cookies().get('token');
-	const decoded = VerifyUserJwt<User>(token?.value ?? '');
+	const decoded = VerifyUserJwt<User & { Role: { name: keyof typeof lists }[] }>(
+		token?.value ?? ''
+	);
 
-	const sidebarList = lists[decoded?.role ?? 'user'];
+	const role = decoded?.Role?.[0]?.name ?? 'user';
+	const sidebarList = lists[role];
 
 	return (
 		<Box sx={{ display: 'flex' }}>
 			<CssBaseline />
-			<Sidebar role={decoded?.role ?? 'user'} lists={sidebarList} />
+			<Sidebar role={role} lists={sidebarList} />
 			<Box component="main" sx={{ flexGrow: 1, p: 3, maxWidth: '1600px', mx: 'auto' }}>
 				{children}
 			</Box>
