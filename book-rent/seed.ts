@@ -431,13 +431,13 @@ const mockPermissions = [
 	{
 		actions: 'disable',
 		subject: 'User',
-		condition: { role: '${user.role.name}' },
+		condition: null,
 		name: 'disable-owner'
 	},
 	{
 		actions: 'delete',
 		subject: 'User',
-		condition: { role: '${user.role.name}' },
+		condition: null,
 		name: 'delete-owner'
 	}
 ];
@@ -525,9 +525,8 @@ async function main2() {
 	}
 }
 
-
 async function displayData() {
-		console.log('Seeding completed successfully!');
+	console.log('Seeding completed successfully!');
 	console.log(await prisma.user.findMany());
 	console.log(await prisma.book.findMany());
 	console.log(await prisma.monthlyIncome.findMany());
@@ -548,5 +547,3 @@ async function displayData() {
 // 	});
 
 displayData();
-
-

@@ -1,4 +1,3 @@
-import { defineAbilty } from '@/abilities';
 import { prisma } from '@/db';
 import { createAblity, mapPermissions, verify } from '@/lib/utils';
 import { User } from '@prisma/client';
@@ -14,9 +13,9 @@ export async function POST(req: NextRequest) {
 					message: 'you need to be logged to disable owner'
 				}
 			});
-		const user = await verify<User & { Role: { name: string }[] }>(token.value);
+		const user = await verify<User & { role: { name: string; id: number } }>(token.value);
 
-		const role = user.Role[0].name;
+		const role = user.role.name;
 
 		const userPermissions = await prisma?.permission?.findMany({
 			where: {
@@ -34,6 +33,8 @@ export async function POST(req: NextRequest) {
 		const mappedPermissions = mapPermissions(userPermissions, user);
 
 		const ablity = createAblity(mappedPermissions);
+
+		console.error('mapped permission', mappedPermissions);
 
 		const json = (await req.json()) as { id: number; isActive: boolean };
 
@@ -85,12 +86,15 @@ export async function POST(req: NextRequest) {
 				}
 			});
 		}
-		return NextResponse.json({
-			status: 'error',
-			data: {
-				message: 'you are not authorized to perform this action'
-			}
-		});
+		return NextResponse.json(
+			{
+				status: 'error',
+				data: {
+					message: 'you are not authorized to perform this action'
+				}
+			},
+			{ status: 403 }
+		);
 	} catch (err) {
 		console.error(err);
 		return NextResponse.json({
@@ -101,7 +105,6 @@ export async function POST(req: NextRequest) {
 		});
 	}
 }
-
 async function disableOwnerBooks(ownerId: number) {
 	const updteResult = await prisma.book.updateMany({
 		where: {

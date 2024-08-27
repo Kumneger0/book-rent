@@ -29,9 +29,9 @@ const lists = {
 			href: '/admin/owners'
 		},
 		{
-			itemName: 'Others',
+			itemName: 'permission',
 			icon: <ControlPointRoundedIcon />,
-			href: '/admin/others'
+			href: '/admin/permission'
 		},
 		{
 			itemName: 'Others',

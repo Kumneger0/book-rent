@@ -346,6 +346,8 @@ export function createAblity(permissions: Permission[]) {
 	return build();
 }
 
+
+
 function parseTemplate(template: string, context: Record<string, unknown>): string {
 	return template.replace(/\$\{([\w.]+)\}/g, (_, path) => {
 		const value = path

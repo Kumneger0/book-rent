@@ -75,7 +75,7 @@ model Permission {
   actions   String
   subject   String
   condition Json?
-  name      String
+  name      String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   Role Role[]
