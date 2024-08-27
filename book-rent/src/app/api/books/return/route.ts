@@ -39,7 +39,7 @@ export async function PUT(req: NextRequest) {
 		const mappedPermissions = mapPermissions(userPermissions, user);
 		const ablity = createAblity(mappedPermissions);
 
-		if (ablity.can('rent', 'Book')) {
+		if (ablity.can('read', 'Book')) {
 			const { bookId, authorId, price } = (await req.json()) as {
 				bookId: string;
 				authorId: string;
