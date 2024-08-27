@@ -1,5 +1,5 @@
 'use client';
-import { onColumnFiltersChange, useCreateQueryString } from '@/lib/utils';
+import { createAblity, onColumnFiltersChange, useCreateQueryString } from '@/lib/utils';
 import { BookTable } from '@/types';
 import { Can } from '@casl/react';
 import { Box, Switch, Typography } from '@mui/material';
@@ -8,7 +8,6 @@ import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useMemo } from 'react';
 import { useUserContext } from './UserContextWrapper';
-import { defineAbilty } from '@/abilities';
 import { getFuncToUpdate } from './AdminOwnerTable';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -16,7 +15,7 @@ const Example = ({ data }: { data: BookTable[] }) => {
 	const searchParams = useSearchParams();
 	const createQueryString = useCreateQueryString(searchParams);
 	const { user } = useUserContext();
-	const ablity = defineAbilty(user!);
+	const ablity = createAblity(user!.permissions);
 
 	const debouncedOnColumnFiltersChange = useDebouncedCallback(onColumnFiltersChange, 400);
 

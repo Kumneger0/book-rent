@@ -1,6 +1,5 @@
-import { defineAbilty } from '../../../../abilities';
 import { prisma } from '../../../../db';
-import { verify } from '../../../../lib/utils';
+import { createAblity, getRolePermissions, mapPermissions, verify } from '../../../../lib/utils';
 import { User } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -14,9 +13,29 @@ export async function DELETE(req: NextRequest) {
 					message: 'you need to be logged to delete user'
 				}
 			});
-		const user = await verify<User>(token.value);
+		const decoded = await verify<User>(token.value);
+		const user = await prisma.user.findFirst({
+			where: {
+				email: decoded.email
+			},
+			include: {
+				role: true
+			}
+		});
 
-		const ablity = defineAbilty(user);
+		if (!user)
+			return NextResponse.json({
+				status: 'error',
+				data: {
+					message: 'user not found'
+				}
+			});
+
+		const userPermissions = await getRolePermissions(user.role);
+
+		const mappedPermissions = mapPermissions(userPermissions, user);
+
+		const ablity = createAblity(mappedPermissions);
 
 		const json = (await req.json()) as { id: number };
 

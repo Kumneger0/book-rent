@@ -540,10 +540,10 @@ async function displayData() {
 	console.log(await prisma.permission.findMany());
 }
 
-// main2()
-// 	.catch((e) => console.error(e))
-// 	.finally(async () => {
-// 		await prisma.$disconnect();
-// 	});
+main2()
+	.catch((e) => console.error(e))
+	.finally(async () => {
+		await displayData();
+		await prisma.$disconnect();
+	});
 
-displayData();

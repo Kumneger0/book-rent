@@ -2,7 +2,6 @@
 import { Can } from '@casl/react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Switch, Typography } from '@mui/material';
-import { defineAbilty } from '../abilities';
 
 import { MaterialReactTable, MRT_ColumnDef, useMaterialReactTable } from 'material-react-table';
 import Image from 'next/image';
@@ -11,7 +10,7 @@ import { useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useUserContext } from './UserContextWrapper';
 import BasicModal from './viewAutorModal';
-import { onColumnFiltersChange, useCreateQueryString } from '@/lib/utils';
+import { createAblity, onColumnFiltersChange, useCreateQueryString } from '@/lib/utils';
 import { useDebouncedCallback } from 'use-debounce';
 
 export function getFuncToUpdate() {
@@ -79,7 +78,7 @@ function AdminOwnerTable({
 
 	const pathname = usePathname();
 	const { user } = useUserContext();
-	const ablity = defineAbilty(user!);
+	const ablity = createAblity(user?.permissions ?? []);
 	const router = useRouter();
 
 	const debouncedOnColumnFiltersChange = useDebouncedCallback(onColumnFiltersChange, 400);

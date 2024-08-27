@@ -1,5 +1,5 @@
 import { prisma } from '@/db';
-import { createAblity, mapPermissions, verify } from '@/lib/utils';
+import { createAblity, getRolePermissions, mapPermissions, verify } from '@/lib/utils';
 import { $Enums, User, Role } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -59,22 +59,9 @@ export async function PUT(req: NextRequest) {
 			});
 		}
 
-		const userPermissions = await prisma?.permission?.findMany({
-			where: {
-				Role: {
-					some: {
-						name: userFromDB.role.name
-					}
-				}
-			},
-			include: {
-				Role: true
-			}
-		});
+		const userPermissions = await getRolePermissions(userFromDB.role);
 
 		const mappedPermissions = mapPermissions(userPermissions, userFromDB);
-
-		console.error('mappedPermissions', mappedPermissions);
 
 		const ability = createAblity(mappedPermissions);
 		if (ability.can('update', { ...userBook, __caslSubjectType__: 'Book' })) {

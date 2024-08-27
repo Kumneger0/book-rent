@@ -1,6 +1,5 @@
-import { defineAbilty, defineOwnerAblity } from '@/abilities';
 import { prisma } from '@/db';
-import { verify } from '@/lib/utils';
+import { createAblity, getRolePermissions, mapPermissions, verify } from '@/lib/utils';
 import { User } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -20,6 +19,9 @@ export const DELETE = async (req: NextRequest) => {
 		const user = await prisma.user.findFirst({
 			where: {
 				email: decoded.email
+			},
+			include: {
+				role: true
 			}
 		});
 
@@ -48,7 +50,10 @@ export const DELETE = async (req: NextRequest) => {
 			});
 		}
 
-		const ability = defineOwnerAblity(user);
+		const userPermissions = await getRolePermissions(user.role);
+		const mappedPermissions = mapPermissions(userPermissions, user);
+		const ability = createAblity(mappedPermissions);
+
 		if (ability.can('delete', { ...userBook, __caslSubjectType__: 'Book' })) {
 			if (!id)
 				return NextResponse.json({

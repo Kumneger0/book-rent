@@ -360,3 +360,21 @@ function parseTemplate(template: string, context: Record<string, unknown>): stri
 		return value !== undefined ? String(value) : '';
 	});
 }
+
+
+export async function getRolePermissions(role: Role) {
+	const permissions = await prisma.permission.findMany({
+		where: {
+			Role: {
+				some: {
+					name: role.name
+				}
+			}
+		},
+		include: {
+			Role: true
+		}
+	});
+
+	return permissions;
+}

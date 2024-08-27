@@ -1,8 +1,7 @@
 import { prisma } from '@/db';
-import { verify } from '@/lib/utils';
+import { createAblity, getRolePermissions, mapPermissions, verify } from '@/lib/utils';
 import { $Enums, User } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
-import { defineAbilty } from '@/abilities';
 
 export async function PUT(req: NextRequest) {
 	try {
@@ -20,6 +19,9 @@ export async function PUT(req: NextRequest) {
 		const userFromDB = await prisma.user.findUnique({
 			where: {
 				email: user.email
+			},
+			include: {
+				role: true
 			}
 		});
 
@@ -31,9 +33,12 @@ export async function PUT(req: NextRequest) {
 				}
 			});
 		}
-		const ablity = defineAbilty(userFromDB);
 
-		if (ablity.can('approve', 'Book')) {
+		const userPermissions = await getRolePermissions(userFromDB.role);
+		const mappedPermissions = mapPermissions(userPermissions, userFromDB);
+		const ability = createAblity(mappedPermissions);
+
+		if (ability.can('approve', 'Book')) {
 			const { id, isApproved } = (await req.json()) as {
 				id: number;
 				isApproved: boolean;

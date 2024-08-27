@@ -1,6 +1,5 @@
-import { defineAbilty } from '@/abilities';
 import { prisma } from '@/db';
-import { verify } from '@/lib/utils';
+import { createAblity, getRolePermissions, mapPermissions, verify } from '@/lib/utils';
 import { User } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -22,7 +21,8 @@ export async function PUT(req: NextRequest) {
 				email: decoded.email
 			},
 			include: {
-				rentedBooks: true
+				rentedBooks: true,
+				role: true
 			}
 		});
 
@@ -35,9 +35,13 @@ export async function PUT(req: NextRequest) {
 			});
 		}
 
-		const ablity = defineAbilty(user);
+		const userPermissions = await getRolePermissions(user.role);
 
-		if (ablity.can('rent', 'Book')) {
+		const mappedPermissions = mapPermissions(userPermissions, user);
+
+		const ablity = createAblity(mappedPermissions);
+
+		if (ablity.can('read', 'Book')) {
 			const { bookId, authorId, price } = (await req.json()) as {
 				bookId: string;
 				authorId: string;
