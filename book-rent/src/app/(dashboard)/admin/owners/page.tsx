@@ -12,9 +12,9 @@ async function Owners({ searchParams }: { searchParams: Record<string, string> }
 	const owners = (
 		await prisma.user.findMany({
 			where: {
-				Role: {
-					some: {
-						name: 'owner'
+				role: {
+					name: {
+						contains: owner
 					}
 				},
 				fullName: {
@@ -28,7 +28,7 @@ async function Owners({ searchParams }: { searchParams: Record<string, string> }
 			},
 			include: {
 				Book: true,
-				Role: true
+				role: true
 			},
 			orderBy: {
 				fullName: 'asc'

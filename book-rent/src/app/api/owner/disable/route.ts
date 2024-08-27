@@ -1,6 +1,6 @@
 import { defineAbilty } from '@/abilities';
 import { prisma } from '@/db';
-import { verify } from '@/lib/utils';
+import { createAblity, mapPermissions, verify } from '@/lib/utils';
 import { User } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -14,9 +14,26 @@ export async function POST(req: NextRequest) {
 					message: 'you need to be logged to disable owner'
 				}
 			});
-		const user = await verify<User>(token.value);
+		const user = await verify<User & { Role: { name: string }[] }>(token.value);
 
-		const ablity = defineAbilty(user);
+		const role = user.Role[0].name;
+
+		const userPermissions = await prisma?.permission?.findMany({
+			where: {
+				Role: {
+					some: {
+						name: role
+					}
+				}
+			},
+			include: {
+				Role: true
+			}
+		});
+
+		const mappedPermissions = mapPermissions(userPermissions, user);
+
+		const ablity = createAblity(mappedPermissions);
 
 		const json = (await req.json()) as { id: number; isActive: boolean };
 

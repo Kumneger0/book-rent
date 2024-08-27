@@ -18,8 +18,7 @@ export async function getCurrentUser() {
 		include: {
 			rentedBooks: true,
 			MonthlyIncome: true,
-			Book: true,
-			Role: true
+			Book: true
 		}
 	});
 

@@ -1,6 +1,6 @@
 import { prisma } from '@/db';
 import { createAblity, mapPermissions, verify } from '@/lib/utils';
-import { $Enums, User } from '@prisma/client';
+import { $Enums, User, Role } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function PUT(req: NextRequest) {
@@ -21,7 +21,7 @@ export async function PUT(req: NextRequest) {
 				email: user.email
 			},
 			include: {
-				Role: true
+				role: true
 			}
 		});
 
@@ -63,7 +63,7 @@ export async function PUT(req: NextRequest) {
 			where: {
 				Role: {
 					some: {
-						name: userFromDB.Role[0].name
+						name: userFromDB.role.name
 					}
 				}
 			},
@@ -73,6 +73,8 @@ export async function PUT(req: NextRequest) {
 		});
 
 		const mappedPermissions = mapPermissions(userPermissions, userFromDB);
+
+		console.error('mappedPermissions', mappedPermissions);
 
 		const ability = createAblity(mappedPermissions);
 		if (ability.can('update', { ...userBook, __caslSubjectType__: 'Book' })) {
@@ -89,7 +91,7 @@ export async function PUT(req: NextRequest) {
 			return NextResponse.json({
 				status: 'success',
 				data: {
-					message: 'successfully uploaded',
+					message: 'successfully updated',
 					data: updatedBook
 				}
 			});

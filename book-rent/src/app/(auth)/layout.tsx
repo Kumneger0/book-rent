@@ -8,13 +8,14 @@ import { User } from '@prisma/client';
 
 async function AuthLayout({ children }: { children: React.ReactNode }) {
 	const token = cookies().get('token')?.value;
-	const user = VerifyUserJwt<User>(token);
+	const user = VerifyUserJwt<User & { role: { name: string } }>(token);
 
 	if (user) {
-		if (user.role == 'user') {
+		const role = user?.role?.name;
+		if (role == 'user') {
 			return redirect('/');
 		}
-		const pathToRedirect = `/${user?.role}/dashboard`;
+		const pathToRedirect = `/${role}/dashboard`;
 		return redirect(pathToRedirect);
 	}
 

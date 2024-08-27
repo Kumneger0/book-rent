@@ -308,12 +308,16 @@ export const useDeviceWith = () => {
 		};
 	};
 
-	return React.useSyncExternalStore(subscribe, () => window.innerWidth);
+	return React.useSyncExternalStore(
+		subscribe,
+		() => window.innerWidth,
+		() => 1000
+	);
 };
 
 export function mapPermissions(
 	permissions: (PermissionModel & { Role: Role[] })[],
-	user: User
+	user: User & { role: { name: string; id: number } }
 ): Permission[] {
 	return permissions.map(
 		({ updatedAt, createdAt, ...p }) =>
@@ -323,10 +327,9 @@ export function mapPermissions(
 				actions: p.actions as PermissionType['actions'],
 				role: p.Role[0].name as PermissionType['role'],
 				condition: JSON.parse(JSON.stringify(p.condition), (key, value) => {
-					if (typeof value === 'string' && value.startsWith('')) {
-						return value.replace(/\${user\.(\w+)}/g, (_, prop) =>
-							String(user[prop as keyof typeof user] || '')
-						);
+					if (typeof value === 'string' && value.includes('${')) {
+						const val = parseTemplate(value, { user });
+						return isNaN(Number(val)) ? val : Number(val);
 					}
 					return value;
 				})
@@ -341,4 +344,17 @@ export function createAblity(permissions: Permission[]) {
 		can(actions, subject, condition ?? {});
 	});
 	return build();
+}
+
+function parseTemplate(template: string, context: Record<string, unknown>): string {
+	return template.replace(/\$\{([\w.]+)\}/g, (_, path) => {
+		const value = path
+			.split('.')
+			.reduce(
+				<Obj extends Record<string, unknown>, Key extends keyof Obj>(obj: Obj, key: Key) =>
+					obj?.[key],
+				context
+			);
+		return value !== undefined ? String(value) : '';
+	});
 }

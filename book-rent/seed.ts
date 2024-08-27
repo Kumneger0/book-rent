@@ -1,5 +1,7 @@
 import { prisma } from '@/db';
 import { hashPassword } from '@/lib/utils';
+import { permission } from 'process';
+import { act } from 'react';
 
 const mockUsers = [
 	{
@@ -241,53 +243,53 @@ const mockMonthlyIncomeData = [
 	}
 ];
 
-async function main() {
-	await prisma.user.deleteMany();
-	await prisma.book.deleteMany();
-	await prisma.monthlyIncome.deleteMany();
+// async function main() {
+// 	await prisma.user.deleteMany();
+// 	await prisma.book.deleteMany();
+// 	await prisma.monthlyIncome.deleteMany();
 
-	for (const user of mockUsers) {
-		await prisma.user.create({
-			data: {
-				fullName: user.fullName,
-				email: user.email,
-				password: await hashPassword(user.password),
-				location: user.location,
-				phoneNumber: user.phoneNumber,
+// 	for (const user of mockUsers) {
+// 		await prisma.user.create({
+// 			data: {
+// 				fullName: user.fullName,
+// 				email: user.email,
+// 				password: await hashPassword(user.password),
+// 				location: user.location,
+// 				phoneNumber: user.phoneNumber,
 
-				MonthlyIncome: {
-					create: mockMonthlyIncomeData.map(({ userId, ...rest }) => ({
-						...rest
-					}))
-				}
-			}
-		});
-	}
+// 				MonthlyIncome: {
+// 					create: mockMonthlyIncomeData.map(({ userId, ...rest }) => ({
+// 						...rest
+// 					}))
+// 				}
+// 			}
+// 		});
+// 	}
 
-	for (const book of mockBooks) {
-		const owners = mockUsers.filter(({ role }) => role == 'owner');
-		const ownerEmil = owners[Math.floor(Math.random() * owners.length)].email;
-		const ownerID = await prisma.user.findFirst({
-			where: {
-				email: ownerEmil
-			}
-		});
+// 	for (const book of mockBooks) {
+// 		const owners = mockUsers.filter(({ role }) => role == 'owner');
+// 		const ownerEmil = owners[Math.floor(Math.random() * owners.length)].email;
+// 		const ownerID = await prisma.user.findFirst({
+// 			where: {
+// 				email: ownerEmil
+// 			}
+// 		});
 
-		if (ownerID) {
-			await prisma.book.create({
-				data: {
-					bookNo: book.bookNo,
-					author: book.author,
-					ownerId: ownerID.id,
-					bookName: book.bookName,
-					status: book.status,
-					category: book.category,
-					price: book.price
-				}
-			});
-		}
-	}
-}
+// 		if (ownerID) {
+// 			await prisma.book.create({
+// 				data: {
+// 					bookNo: book.bookNo,
+// 					author: book.author,
+// 					ownerId: ownerID.id,
+// 					bookName: book.bookName,
+// 					status: book.status,
+// 					category: book.category,
+// 					price: book.price
+// 				}
+// 			});
+// 		}
+// 	}
+// }
 
 // main()
 // 	.catch((e) => console.error(e))
@@ -403,29 +405,50 @@ async function main() {
 // }
 // seedPerimissions();
 
-const mockRoles = [{ name: 'admin' }, { name: 'owner' }, { name: 'user' }];
+const mockRoles = [
+	{ name: 'admin', permissions: ['approve-user', 'approve-book', 'disable-owner', 'delete-owner'] },
+	{ name: 'owner', permissions: ['create-book', 'update-book', 'delete-book'] },
+	{ name: 'user', permissions: ['read-book'] }
+];
 
 const mockPermissions = [
 	{ actions: 'read', subject: 'Book', condition: null, name: 'read-book' },
 	{ actions: 'create', subject: 'Book', condition: null, name: 'create-book' },
-	{ actions: 'update', subject: 'Book', condition: { ownerId: '$user.id' }, name: 'update-book' },
-	{ actions: 'delete', subject: 'Book', condition: { ownerId: '$user.id' }, name: 'delete-book' },
+	{
+		actions: 'update',
+		subject: 'Book',
+		condition: { ownerId: '${user.id}' },
+		name: 'update-book'
+	},
+	{
+		actions: 'delete',
+		subject: 'Book',
+		condition: { ownerId: '${user.id}' },
+		name: 'delete-book'
+	},
 	{ actions: 'approve', subject: 'User', condition: null, name: 'approve-user' },
-	{ actions: 'approve', subject: 'Book', condition: null, name: 'approve-book' }
+	{ actions: 'approve', subject: 'Book', condition: null, name: 'approve-book' },
+	{
+		actions: 'disable',
+		subject: 'User',
+		condition: { role: '${user.role.name}' },
+		name: 'disable-owner'
+	},
+	{
+		actions: 'delete',
+		subject: 'User',
+		condition: { role: '${user.role.name}' },
+		name: 'delete-owner'
+	}
 ];
 
 async function main2() {
-	// Clear existing data
 	await prisma.monthlyIncome.deleteMany();
 	await prisma.book.deleteMany();
 	await prisma.user.deleteMany();
 	await prisma.role.deleteMany();
 	await prisma.permission.deleteMany();
 
-	// Seed Roles
-	const roles = await Promise.all(mockRoles.map((role) => prisma.role.create({ data: role })));
-
-	// Seed Permissions
 	const permissions = await Promise.all(
 		mockPermissions.map((permission) =>
 			prisma.permission.create({
@@ -436,8 +459,22 @@ async function main2() {
 			})
 		)
 	);
+	const roles = await Promise.all(
+		mockRoles.map((role) => {
+			const rolePermsssion = role.permissions.map((permission) => {
+				return permissions.find((p) => p.name === permission);
+			});
+			return prisma.role.create({
+				data: {
+					name: role.name,
+					permissions: {
+						connect: rolePermsssion.map((permission) => ({ id: permission?.id }))
+					}
+				}
+			});
+		})
+	);
 
-	// Seed Users with Roles
 	for (const user of mockUsers) {
 		const role = roles.find((r) => r.name === user.role);
 		await prisma.user.create({
@@ -450,13 +487,17 @@ async function main2() {
 				approved: true,
 				isActive: true,
 				wallet: Math.floor(Math.random() * 1000),
-				Role: { connect: { id: role?.id } }
+				role: {
+					connect: {
+						id: role?.id
+					}
+				}
 			}
 		});
 	}
 
 	for (const book of mockBooks) {
-		const owner = await prisma.user.findFirst({ where: { Role: { some: { name: 'owner' } } } });
+		const owner = await prisma.user.findFirst({ where: { role: { name: 'owner' } } });
 		if (owner) {
 			await prisma.book.create({
 				data: {
@@ -482,19 +523,30 @@ async function main2() {
 			});
 		}
 	}
-
-	console.log('Seeding completed successfully!');
-	console.log(await prisma.user.findMany())
-	console.log(await prisma.book.findMany());
-	console.log(await prisma.monthlyIncome.findMany());
-	console.log(await prisma.role.findMany());
-	console.log(await prisma.permission.findMany());
-	
 }
 
-main2()
-	.catch((e) => console.error(e))
-	.finally(async () => {
-		await prisma.$disconnect();
-	});
+
+async function displayData() {
+		console.log('Seeding completed successfully!');
+	console.log(await prisma.user.findMany());
+	console.log(await prisma.book.findMany());
+	console.log(await prisma.monthlyIncome.findMany());
+	console.log(
+		await prisma.role.findMany({
+			include: {
+				permissions: true
+			}
+		})
+	);
+	console.log(await prisma.permission.findMany());
+}
+
+// main2()
+// 	.catch((e) => console.error(e))
+// 	.finally(async () => {
+// 		await prisma.$disconnect();
+// 	});
+
+displayData();
+
 

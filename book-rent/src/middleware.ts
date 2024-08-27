@@ -11,9 +11,9 @@ export async function middleware(req: NextRequest) {
 
 		if (!token) return NextResponse.redirect(new URL('/login', req.url));
 
-		const user = await verify<User & { Role: { name: string }[] }>(token?.value);
+		const user = await verify<User & { role: { name: string } }>(token?.value);
 
-		const role = user?.Role[0].name;
+		const role = user?.role.name;
 
 		if (!user) return NextResponse.redirect(new URL('/login', req.url));
 

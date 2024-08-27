@@ -1,7 +1,6 @@
-import { defineAbilty } from '@/abilities';
 import { prisma } from '@/db';
-import { verify } from '@/lib/utils';
-import { User, $Enums } from '@prisma/client';
+import { createAblity, mapPermissions, verify } from '@/lib/utils';
+import { User } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
@@ -14,26 +13,28 @@ export async function POST(req: NextRequest) {
 					message: 'you need to be logged to approve owner'
 				}
 			});
-		const user = await verify<User & { Role: { name: string }[] }>(token.value);
-
-		const role = user.Role[0].name;
-
-		const userPermisssion = await prisma.permission.findMany({
+		const user = await verify<User & { role: { name: string } }>(token.value);
+		const role = user.role.name;
+		const permissions = await prisma.role.findMany({
 			where: {
-				Role: {
-					some: {
-						name: role
+				name: role
+			},
+			include: {
+				permissions: {
+					include: {
+						Role: true
 					}
 				}
 			}
 		});
-
-		const ablity = defineAbilty(user);
 		const json = (await req.json()) as { id: number; isApprove: boolean };
 
 		const userToApprove = await prisma.user.findFirst({
 			where: {
 				id: json.id
+			},
+			include: {
+				role: true
 			}
 		});
 
@@ -48,7 +49,15 @@ export async function POST(req: NextRequest) {
 				{ status: 400 }
 			);
 
-		if (ablity.can('approve', { ...userToApprove, __caslSubjectType__: 'User' })) {
+		const flattenedPermissions = permissions.flatMap((role) => role.permissions);
+
+		const mappedPermissions = mapPermissions(flattenedPermissions, userToApprove);
+
+		console.error('mapped permissions', mappedPermissions);
+
+		const ability = createAblity(mappedPermissions);
+
+		if (ability.can('approve', { ...userToApprove, __caslSubjectType__: 'User' })) {
 			if (!json?.id)
 				return NextResponse.json(
 					{

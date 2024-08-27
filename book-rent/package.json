@@ -11,7 +11,6 @@
 		"db:pull": "dotenv -e .env.development -- prisma db pull",
 		"migrate:dev": "dotenv -e .env.development -- prisma migrate dev",
 		"db:push": "dotenv -e .env.development -- prisma db push",
-		"migrate:deploy": "dotenv -e .env.production -- prisma migrate reset --force",
 		"generate": "dotenv -e .env.development -- prisma generate",
 		"db:seed": "dotenv -e .env.development -- tsx  seed.ts",
 		"db:migrate:deploy": "dotenv -e .env.production -- prisma migrate deploy",

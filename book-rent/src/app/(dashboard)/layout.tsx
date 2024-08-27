@@ -74,11 +74,9 @@ const lists = {
 
 async function App({ children }: { children: React.ReactNode }) {
 	const token = cookies().get('token');
-	const decoded = VerifyUserJwt<User & { Role: { name: keyof typeof lists }[] }>(
-		token?.value ?? ''
-	);
+	const decoded = VerifyUserJwt<User & { role: { name: keyof typeof lists } }>(token?.value ?? '');
 
-	const role = decoded?.Role?.[0]?.name ?? 'user';
+	const role = decoded?.role.name ?? 'user';
 	const sidebarList = lists[role];
 
 	return (

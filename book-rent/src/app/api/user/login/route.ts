@@ -14,7 +14,7 @@ export const POST = async (req: Request) => {
 				email: body.email
 			},
 			include: {
-				Role: true
+				role: true
 			}
 		});
 
