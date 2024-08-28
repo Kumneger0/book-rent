@@ -29,14 +29,14 @@ const lists = {
 			href: '/admin/owners'
 		},
 		{
-			itemName: 'permission',
+			itemName: 'Permission',
 			icon: <ControlPointRoundedIcon />,
 			href: '/admin/permission'
 		},
 		{
-			itemName: 'Others',
+			itemName: 'Roles',
 			icon: <ControlPointRoundedIcon />,
-			href: '/admin/others'
+			href: '/admin/roles'
 		}
 	],
 	owner: [

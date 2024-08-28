@@ -1,6 +1,12 @@
 import { prisma } from '@/db';
 import { env } from '@/env';
-import { AppAbility, EarningsSummaryChartProps, Permission, PermissionType } from '@/types';
+import {
+	APIResponse,
+	AppAbility,
+	EarningsSummaryChartProps,
+	Permission,
+	PermissionType
+} from '@/types';
 import crypto from 'crypto';
 import { jwtVerify } from 'jose';
 import jwt from 'jsonwebtoken';
@@ -12,6 +18,7 @@ import { Book, $Enums, User, Permission as PermissionModel, Role } from '@prisma
 import React from 'react';
 import { AbilityBuilder } from '@casl/ability';
 import { createPrismaAbility } from '@casl/prisma';
+import { baseURL } from '@/app/(dashboard)/admin/permission/view/page';
 
 export function hashPassword(password: string): Promise<string> {
 	return new Promise((resolve, reject) => {
@@ -346,8 +353,6 @@ export function createAblity(permissions: Permission[]) {
 	return build();
 }
 
-
-
 function parseTemplate(template: string, context: Record<string, unknown>): string {
 	return template.replace(/\$\{([\w.]+)\}/g, (_, path) => {
 		const value = path
@@ -360,7 +365,6 @@ function parseTemplate(template: string, context: Record<string, unknown>): stri
 		return value !== undefined ? String(value) : '';
 	});
 }
-
 
 export async function getRolePermissions(role: Role) {
 	const permissions = await prisma.permission.findMany({
@@ -378,3 +382,15 @@ export async function getRolePermissions(role: Role) {
 
 	return permissions;
 }
+
+export const getRoles = async () => {
+	try {
+		const res = await fetch(`${baseURL}/api/roles`, { cache: 'no-store' });
+		if (!res.ok) throw new Error('Failed to get roles');
+		const { data } = (await res.json()) as APIResponse;
+		return (data as unknown as { data: (Role & { permissions: PermissionModel[] })[] }).data;
+	} catch (error) {
+		console.log(error);
+		return [] as (Role & { permissions: PermissionModel[] })[];
+	}
+};

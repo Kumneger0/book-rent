@@ -63,6 +63,9 @@ export async function PUT(req: NextRequest) {
 
 		const mappedPermissions = mapPermissions(userPermissions, userFromDB);
 
+
+		console.error('fkjaf', mappedPermissions);
+
 		const ability = createAblity(mappedPermissions);
 		if (ability.can('update', { ...userBook, __caslSubjectType__: 'Book' })) {
 			const updatedBook = await prisma.book.update({

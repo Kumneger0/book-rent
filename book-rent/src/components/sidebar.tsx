@@ -50,8 +50,8 @@ const Sidebar = ({
 	const router = useRouter();
 	const pathname = usePathname();
 	const { user } = useUserContext();
-	const [open, setOpen] = useState(true);
 	const deviceWidth = useDeviceWith();
+	const [open, setOpen] = useState(deviceWidth > 992 ? true : false);
 
 	async function logout() {
 		try {
@@ -193,7 +193,7 @@ const Sidebar = ({
 			>
 				<Button
 					onClick={() => {
-						user ? logout() : router.push('/login');
+						user ? logout() : location.assign('/login');
 					}}
 					sx={{ color: 'white' }}
 				>
