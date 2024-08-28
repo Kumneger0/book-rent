@@ -1,6 +1,9 @@
 import { prisma } from '@/db';
 import { APIResponse } from '@/types';
-import { Box, List, ListItem, ListItemText, Typography } from '@mui/material';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import Typography from '@mui/material/Typography';
 
 export const baseURL =
 	process.env.NODE_ENV == 'development'
@@ -24,10 +27,10 @@ const getAllPermmissions = async (): Promise<Permissions | null> => {
 };
 const ViewPermissions: React.FC = async () => {
 	const permissions = await getAllPermmissions();
-	if (!permissions) return <Box>No Permission found</Box>;
+	if (!permissions) return <div>No Permission found</div>;
 
 	return (
-		<Box>
+		<div>
 			<Typography variant="h5" gutterBottom>
 				Permissions List
 			</Typography>
@@ -54,7 +57,7 @@ const ViewPermissions: React.FC = async () => {
 					</ListItem>
 				))}
 			</List>
-		</Box>
+		</div>
 	);
 };
 

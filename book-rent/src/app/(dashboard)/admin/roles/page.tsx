@@ -1,5 +1,3 @@
-// create Nextjs Page to view list of all available roles
-
 import { getRoles } from '@/lib/utils';
 import {
 	Box,
@@ -41,7 +39,7 @@ export default async function Roles() {
 								<ListItemText
 									primary={<Typography variant="h6">{name}</Typography>}
 									secondary={
-										<Box mt={1}>
+										<Typography mt={1}>
 											{permissions.map((permission, index) => (
 												<Chip
 													key={index}
@@ -52,7 +50,7 @@ export default async function Roles() {
 													sx={{ mr: 0.5, mb: 0.5 }}
 												/>
 											))}
-										</Box>
+										</Typography>
 									}
 								/>
 							</ListItem>
