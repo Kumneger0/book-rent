@@ -10,7 +10,7 @@ export const baseURL =
 type Permissions = Awaited<ReturnType<typeof prisma.permission.findMany>>;
 const getAllPermmissions = async (): Promise<Permissions | null> => {
 	try {
-		const response = await fetch(`${baseURL}/api/permission`, { cache: 'no-store' });
+		const response = await fetch(`${baseURL}/api/permissions`, { cache: 'no-store' });
 		if (response.ok) {
 			const { data } = (await response.json()) as APIResponse;
 			const permissions = (data as unknown as { data: Permissions }).data;

@@ -2,7 +2,6 @@ import { verify } from '@/lib/utils';
 import { prisma } from '@/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { Permission, Prisma } from '@prisma/client';
-
 import { User } from '@prisma/client';
 import { APIResponse } from '@/types';
 export async function POST(req: NextRequest) {

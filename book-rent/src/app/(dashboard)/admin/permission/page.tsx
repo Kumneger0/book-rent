@@ -8,14 +8,68 @@ const PermissionManagement: React.FC = () => {
 				Permission Management
 			</Typography>
 			<Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-				<Button variant="contained">
-					<Link href={'/admin/permission/view'}>View Permissions</Link>
+				<Button
+					sx={{
+						textTransform: 'capitalize'
+					}}
+					variant="contained"
+				>
+					<Link
+						style={{
+							textDecoration: 'none'
+						}}
+						href={'/admin/permission/view'}
+					>
+						<Typography
+							sx={{
+								color: '#ffff'
+							}}
+						>
+							View Permissions
+						</Typography>
+					</Link>
 				</Button>
-				<Button variant="contained">
-					<Link href={'/admin/permission/assign'}>Assign Permission</Link>
+				<Button
+					sx={{
+						textTransform: 'capitalize'
+					}}
+					variant="contained"
+				>
+					<Link
+						style={{
+							textDecoration: 'none'
+						}}
+						href={'/admin/permission/assign'}
+					>
+						<Typography
+							sx={{
+								color: '#ffff'
+							}}
+						>
+							Assign Permission
+						</Typography>
+					</Link>
 				</Button>
-				<Button variant="contained">
-					<Link href={'/admin/permission/create'}>Create Permission</Link>
+				<Button
+					sx={{
+						textTransform: 'capitalize'
+					}}
+					variant="contained"
+				>
+					<Link
+						style={{
+							textDecoration: 'none'
+						}}
+						href={'/admin/permission/create'}
+					>
+						<Typography
+							sx={{
+								color: '#ffff'
+							}}
+						>
+							Create Permission
+						</Typography>
+					</Link>
 				</Button>
 			</Box>
 		</Box>

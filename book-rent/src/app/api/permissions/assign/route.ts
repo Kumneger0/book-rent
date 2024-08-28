@@ -9,7 +9,7 @@ export const POST = async (req: NextRequest) => {
 		};
 		const role = await prisma.role.findFirst({
 			where: {
-				id: roleId
+				id: Number(roleId)
 			},
 			include: {
 				permissions: true
@@ -29,7 +29,7 @@ export const POST = async (req: NextRequest) => {
 			where: { id: roleId },
 			data: {
 				permissions: {
-					connect: permissions.map((permission) => ({ id: permission.id }))
+					connect: permissions.map((permission) => ({ id: Number(permission.id) }))
 				}
 			},
 			include: {
@@ -44,5 +44,11 @@ export const POST = async (req: NextRequest) => {
 		});
 	} catch (err) {
 		console.error(err);
+		return NextResponse.json({
+			status: 'error',
+			data: {
+				message: err instanceof Error ? err.message : 'Filed to assign permissions'
+			}
+		});
 	}
 };

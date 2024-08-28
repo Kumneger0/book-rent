@@ -19,7 +19,7 @@ const NewPermissionForm: React.FC = () => {
 					condition: string;
 				} satisfies Pick<Permission, 'actions' | 'condition' | 'subject' | 'name'>;
 				try {
-					const response = await fetch(`${baseURL}/api/permission/new`, {
+					const response = await fetch(`${baseURL}/api/permissions/new`, {
 						method: 'post',
 						headers: {
 							'Content-Type': 'application/json'

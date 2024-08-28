@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { getFuncToUpdate } from './AdminOwnerTable';
 import { getCurrentUser } from '@/actions';
 import { useFormStatus } from 'react-dom';
+import { createAblity } from '@/lib/utils';
+import { Can } from '@casl/react';
 
 type User = Awaited<ReturnType<typeof getCurrentUser>>;
 
@@ -26,6 +28,7 @@ function RentAndReturnBookButton({
 	isReturn = false
 }: RentAndReturnBookButtonProps) {
 	const { user } = useUserContext();
+	const ablity = createAblity(user?.permissions ?? []);
 	const router = useRouter();
 
 	const isAlreadyRented = isReturn
@@ -51,9 +54,19 @@ function RentAndReturnBookButton({
 
 	return (
 		<form>
-			<SubmitButton onSubmit={(fdata) => handleBookRent()} disabled={isAlreadyRented}>
-				{children}
-			</SubmitButton>
+			<Can this={'Book'} I={'read'} ability={ablity}>
+				{(k) => {
+					return k ? (
+						<SubmitButton onSubmit={(fdata) => handleBookRent()} disabled={isAlreadyRented}>
+							{children}
+						</SubmitButton>
+					) : (
+						<SubmitButton onSubmit={(fdata) => handleBookRent()} disabled={true}>
+							{children}
+						</SubmitButton>
+					);
+				}}
+			</Can>
 		</form>
 	);
 }
