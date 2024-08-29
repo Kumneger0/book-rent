@@ -1,23 +1,21 @@
 'use client';
-import { baseURL } from '@/app/(dashboard)/admin/permission/view/page';
-import { getRoles } from '@/lib/utils';
+import { baseURL, getRoles } from '@/lib/utils';
 import { APIResponse } from '@/types';
 import {
 	Box,
 	Button,
+	Checkbox,
 	FormControl,
+	FormControlLabel,
 	FormGroup,
 	InputLabel,
-	ListItem,
-	ListItemSecondaryAction,
-	ListItemText,
 	MenuItem,
 	Select,
 	SelectChangeEvent,
 	Typography
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { startTransition, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import toast from 'react-hot-toast';
 
@@ -27,16 +25,17 @@ export const RolePermissionManager = async ({
 	roles: Awaited<ReturnType<typeof getRoles>>;
 }) => {
 	const [selectedRole, setSelectedRole] = useState('');
+	const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
 	const router = useRouter();
 
 	const handleRoleChange = (event: SelectChangeEvent) => {
-		setSelectedRole(event.target.value);
+		startTransition(() => setSelectedRole(event.target.value));
 	};
 
 	const permissions =
 		roles.find((role) => String(role.id) === String(selectedRole))?.permissions ?? [];
 
-	const handleRevokePermission = async (permissionId: number, roleId: number) => {
+	const handleRevokePermission = async () => {
 		try {
 			const res = await fetch(`${baseURL}/api/permissions/revoke`, {
 				cache: 'no-store',
@@ -46,7 +45,7 @@ export const RolePermissionManager = async ({
 				},
 				body: JSON.stringify({
 					roleId: Number(selectedRole),
-					permissionId: permissionId
+					permissionIds: selectedPermissions
 				})
 			});
 			if (!res.ok) throw Error('failed to revoke permission');
@@ -61,16 +60,21 @@ export const RolePermissionManager = async ({
 		}
 	};
 
+	const handlePermissionChange = (permissionId: string) => {
+		startTransition(() => {
+			setSelectedPermissions((prev) =>
+				prev.includes(permissionId)
+					? prev.filter((id) => id !== permissionId)
+					: [...prev, permissionId]
+			);
+		});
+	};
+
 	return (
-		<Box sx={{ maxWidth: 400, mx: 'auto' }}>
+		<>
 			<FormControl fullWidth margin="normal">
 				<InputLabel>Select Role</InputLabel>
-				<Select
-					defaultValue=""
-					value={selectedRole}
-					onChange={handleRoleChange}
-					label="Select Role"
-				>
+				<Select value={selectedRole} onChange={handleRoleChange} label="Select Role">
 					{roles.map((role) => (
 						<MenuItem key={role.id} value={role.id}>
 							{role.name}
@@ -78,32 +82,44 @@ export const RolePermissionManager = async ({
 					))}
 				</Select>
 			</FormControl>
-			<Box component={'form'} mt={2}>
+			<Box
+				action={async (fdata) => {
+					await handleRevokePermission();
+				}}
+				component={'form'}
+				mt={2}
+			>
 				<Typography variant="subtitle1">Permissions:</Typography>
-				<FormGroup sx={{ listStyle: 'none' }}>
+				<FormGroup>
 					{permissions.map((permission) => (
-						<ListItem sx={{ my: 1, listStyle: 'none' }} key={permission.id}>
-							<ListItemText primary={permission.name} />
-							<ListItemSecondaryAction>
-								<RevokeButton
-									type="submit"
-									formAction={() => {
-										handleRevokePermission(Number(permission.id), Number(selectedRole));
-									}}
+						<FormControlLabel
+							key={permission.id}
+							control={
+								<Checkbox
+									checked={selectedPermissions.includes(permission.id.toString())}
+									onChange={() => handlePermissionChange(permission.id.toString())}
 								/>
-							</ListItemSecondaryAction>
-						</ListItem>
+							}
+							label={permission.name}
+						/>
 					))}
 				</FormGroup>
-			</Box>
-		</Box>
+				<RevokeButton disabled={!selectedRole || !selectedPermissions.length} />
+			</Box>{' '}
+		</>
 	);
 };
 
 function RevokeButton({ ...props }: React.ComponentProps<typeof Button>) {
 	const { pending } = useFormStatus();
 	return (
-		<Button {...props} disabled={props.disabled || pending} variant="outlined" color="secondary">
+		<Button
+			type="submit"
+			{...props}
+			disabled={props.disabled || pending}
+			variant="outlined"
+			color="secondary"
+		>
 			{pending ? 'wait' : 'Revoke'}
 		</Button>
 	);

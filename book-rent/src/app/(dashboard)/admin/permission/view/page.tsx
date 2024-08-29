@@ -1,14 +1,11 @@
 import { prisma } from '@/db';
+import { baseURL } from '@/lib/utils';
 import { APIResponse } from '@/types';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 
-export const baseURL =
-	process.env.NODE_ENV == 'development'
-		? 'http://localhost:4000'
-		: 'https://book-rent-challenge.vercel.app';
 
 type Permissions = Awaited<ReturnType<typeof prisma.permission.findMany>>;
 const getAllPermmissions = async (): Promise<Permissions | null> => {

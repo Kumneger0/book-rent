@@ -1,11 +1,11 @@
 'use client';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { Permission } from '@prisma/client';
-import { baseURL } from '../view/page';
 import { redirect } from 'next/navigation';
 import { APIResponse } from '@/types';
 import toast from 'react-hot-toast';
 import { useFormStatus } from 'react-dom';
+import { baseURL } from '@/lib/utils';
 
 const NewPermissionForm: React.FC = () => {
 	return (

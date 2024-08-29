@@ -1,9 +1,8 @@
 import { APIResponse } from '@/types';
 import { Paper, Typography } from '@mui/material';
 import { Permission, Role } from '@prisma/client';
-import { baseURL } from '../view/page';
 import PermissionAssign from '@/components/permissionAssign';
-import { getRoles } from '@/lib/utils';
+import { baseURL, getRoles } from '@/lib/utils';
 
 
 

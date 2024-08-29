@@ -18,7 +18,13 @@ import { Book, $Enums, User, Permission as PermissionModel, Role } from '@prisma
 import React from 'react';
 import { AbilityBuilder } from '@casl/ability';
 import { createPrismaAbility } from '@casl/prisma';
-import { baseURL } from '@/app/(dashboard)/admin/permission/view/page';
+
+
+
+export const baseURL =
+	process.env.NODE_ENV == 'development'
+		? 'http://localhost:4000'
+		: 'https://book-rent-challenge.vercel.app';
 
 export function hashPassword(password: string): Promise<string> {
 	return new Promise((resolve, reject) => {

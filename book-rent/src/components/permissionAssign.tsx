@@ -18,7 +18,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-function PermissionAssign({
+function PermissionManager({
 	roles,
 	permissions
 }: {
@@ -116,7 +116,7 @@ function PermissionAssign({
 	);
 }
 
-export default PermissionAssign;
+export default PermissionManager;
 
 function SubmitButton({
 	formAction,

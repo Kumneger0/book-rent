@@ -4,25 +4,21 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const DELETE = async (req: NextRequest) => {
 	try {
-		const { permissionId, roleId } = (await req.json()) as {
-			permissionId: number;
+		const { permissionIds, roleId } = (await req.json()) as {
+			permissionIds: string[];
 			roleId: number;
 		};
-		const permission = await prisma.permission.findFirst({
-			where: {
-				id: Number(permissionId)
-			}
-		});
-		if (!permission)
+		if (!permissionIds)
 			return NextResponse.json(
 				{
 					status: 'error',
 					data: {
-						message: 'no permission found with the given id'
+						message: 'please provide permission ids'
 					}
 				},
 				{ status: 400 }
 			);
+	
 		const role = await prisma.role.findFirst({
 			where: {
 				id: roleId
@@ -43,7 +39,7 @@ export const DELETE = async (req: NextRequest) => {
 			where: { id: roleId },
 			data: {
 				permissions: {
-					disconnect: { id: Number(permissionId) }
+					disconnect: permissionIds.map((id) => ({ id: Number(id) }))
 				}
 			}
 		});
