@@ -1,11 +1,10 @@
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import Modal from '@mui/material/Modal';
+import { MUITypes } from '@/types';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { TextField } from '@mui/material';
-import { MUITypes } from '@/types';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Modal from '@mui/material/Modal';
+import * as React from 'react';
 
 const style: MUITypes = {
 	position: 'absolute' as 'absolute',

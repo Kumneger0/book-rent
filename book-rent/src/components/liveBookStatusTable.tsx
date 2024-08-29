@@ -116,7 +116,7 @@ const Example = ({ data }: { data: TableAdmin[] }) => {
 		enableFullScreenToggle: false,
 		manualFiltering: true,
 		onColumnFiltersChange: (data) => {
-			debouncedOnColumnFiltersChange({ createQueryString, data, pathname, router });
+			debouncedOnColumnFiltersChange({ createQueryString, data, pathname, router, model: 'Book' });
 		},
 		state: {
 			columnFilters: columnFilterState

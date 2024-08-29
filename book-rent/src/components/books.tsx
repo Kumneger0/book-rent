@@ -27,7 +27,7 @@ const Example = ({ data }: { data: BookTable[] }) => {
 			{ accessorKey: 'bookNo', header: 'No.' },
 			{ accessorKey: 'author', header: 'Author' },
 			{
-				accessorKey: 'owner',
+				accessorKey: 'owner.fullName',
 				header: 'Owner',
 				Cell(props) {
 					const owner = props.cell.getValue() as string;
@@ -102,7 +102,7 @@ const Example = ({ data }: { data: BookTable[] }) => {
 	const table = useMaterialReactTable({
 		columns,
 		//@ts-ignore
-		data: data.map((data) => ({ ...data, owner: data.owner.fullName })),
+		data: data.map((data) => ({ ...data, owner:{fullName: data.owner.fullName} })),
 		enablePagination: false,
 		enableFullScreenToggle: false,
 		manualFiltering: true,
@@ -111,7 +111,8 @@ const Example = ({ data }: { data: BookTable[] }) => {
 				createQueryString,
 				data,
 				pathname,
-				router
+				router,
+				model: 'Book'
 			});
 		},
 		enableSorting: false

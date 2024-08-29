@@ -1,31 +1,18 @@
 import AdminOwnerTable from '@/components/AdminOwnerTable';
 import SharedHeader from '@/components/sharedHead';
 import { prisma } from '@/db';
+import { validateAndCreateFilter } from '@/lib/utils';
 import { Box } from '@mui/material';
+import { Prisma } from '@prisma/client';
 
 // location;
 
 async function Owners({ searchParams }: { searchParams: Record<string, string> }) {
-	const owner = searchParams.owner;
-	const location = searchParams.location;
+	const where = validateAndCreateFilter<Prisma.UserWhereInput>('User', searchParams);
 
 	const owners = (
 		await prisma.user.findMany({
-			where: {
-				role: {
-					name: {
-						contains: owner
-					}
-				},
-				fullName: {
-					contains: owner,
-					mode: 'insensitive'
-				},
-				location: {
-					contains: location,
-					mode: 'insensitive'
-				}
-			},
+			where,
 			include: {
 				Book: true,
 				role: true

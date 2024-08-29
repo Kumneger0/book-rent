@@ -2,15 +2,13 @@ import DashboardContent from '@/components/dashboardContent';
 import { TableOwner as OwnerLiveBookStatus } from '@/components/ownerLiveBookStatus';
 import SharedHeader from '@/components/sharedHead';
 import {
-	combineEachUserMontheyIncome,
 	fillerSixMonthsChartData,
-	getBOOKpieChart,
+	getBooKPieChart,
 	getBooks,
 	getIncome,
-	getTotalIncome,
+	validateAndCreateFilter,
 	verify
 } from '@/lib/utils';
-import { EarningsSummaryChartProps } from '@/types';
 import { Box } from '@mui/material';
 import { User } from '@prisma/client';
 import { cookies } from 'next/headers';
@@ -19,15 +17,10 @@ async function Dashboard({ searchParams }: { searchParams: Record<string, string
 	const token = cookies().get('token')!;
 	const user = await verify<User>(token.value)!;
 
-	const bookName = searchParams?.bookName;
-	const status = searchParams?.status;
+	const where = validateAndCreateFilter('User', searchParams);
 
 	const { books, tableBooks: bookTable } = await getBooks({
-		email: user?.email ?? '',
-		filterBy: {
-			bookName,
-			status
-		}
+		where
 	});
 
 	const tableBooks = bookTable?.map((book) => ({
@@ -69,7 +62,7 @@ async function Dashboard({ searchParams }: { searchParams: Record<string, string
 
 	const chartData = fillerSixMonthsChartData(income);
 
-	const { data, numberOfBooksByCategory } = getBOOKpieChart(books ?? []);
+	const { data, numberOfBooksByCategory } = getBooKPieChart(books ?? []);
 
 	return (
 		<>

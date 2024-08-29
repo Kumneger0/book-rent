@@ -1,38 +1,16 @@
 import Example from '@/components/books';
 import SharedHeader from '@/components/sharedHead';
 import { prisma } from '@/db';
+import { validateAndCreateFilter } from '@/lib/utils';
 import { Box } from '@mui/material';
+import { Prisma } from '@prisma/client';
 import React from 'react';
 
-// owner=fklalkf&category=fljaflkj&bookName=falfjl&author=fjafklaj&bookNo=fljalkfjl
-
 async function Books({ searchParams }: { searchParams: Record<string, string> }) {
-	const owner = searchParams.owner;
-	const bookName = searchParams.bookName;
-	const author = searchParams.author;
-	const bookNo = searchParams.bookNo;
+	const where = validateAndCreateFilter<Prisma.BookWhereInput>('Book', searchParams);
 
 	const books = await prisma.book.findMany({
-		where: {
-			owner: {
-				fullName: {
-					contains: owner,
-					mode: 'insensitive'
-				}
-			},
-			author: {
-				contains: author,
-				mode: 'insensitive'
-			},
-			bookName: {
-				contains: bookName,
-				mode: 'insensitive'
-			},
-			bookNo: {
-				contains: bookNo,
-				mode: 'insensitive'
-			}
-		},
+		where,
 		include: {
 			owner: {
 				select: {

@@ -9,7 +9,7 @@ import React from 'react';
 async function BookUpload() {
 	const token = cookies().get('token')!;
 	const user = await verify<User>(token.value)!;
-	const { books, tableBooks } = await getBooks({ email: user.email });
+	const { books, tableBooks } = await getBooks({ where: {} });
 
 	return (
 		<>

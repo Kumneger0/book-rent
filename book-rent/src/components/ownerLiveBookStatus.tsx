@@ -144,7 +144,7 @@ export const TableOwner = ({ data }: TableProps) => {
 		enablePagination: false,
 		enableFullScreenToggle: false,
 		onColumnFiltersChange: (data) => {
-			debouncedOnColumnFiltersChange({ createQueryString, data, pathname, router });
+			debouncedOnColumnFiltersChange({ createQueryString, data, pathname, router, model: 'User' });
 		},
 		state: {
 			columnFilters: columnFilterState

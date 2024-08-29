@@ -7,7 +7,7 @@ import { prisma } from '@/db';
 import {
 	combineEachUserMontheyIncome,
 	fillerSixMonthsChartData,
-	getBOOKpieChart,
+	getBooKPieChart,
 	getTotalIncome
 } from '@/lib/utils';
 import { $Enums, Book } from '@prisma/client';
@@ -95,7 +95,7 @@ async function Dashboard({ searchParams }: { searchParams: Record<string, string
 	const combinedIncome = await combineEachUserMontheyIncome(totalIncome);
 	const chartData = fillerSixMonthsChartData(combinedIncome);
 
-	const { data, numberOfBooksByCategory } = getBOOKpieChart(books);
+	const { data, numberOfBooksByCategory } = getBooKPieChart(books);
 
 	return (
 		<>

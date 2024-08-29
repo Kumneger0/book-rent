@@ -225,7 +225,8 @@ function AdminOwnerTable({
 				createQueryString,
 				data,
 				pathname,
-				router
+				router,
+				model: 'User'
 			});
 		},
 		state: {
