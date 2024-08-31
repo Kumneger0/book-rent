@@ -6,6 +6,7 @@ import { User } from '@prisma/client';
 import { cookies } from 'next/headers';
 import React from 'react';
 
+
 async function BookUpload() {
 	const token = cookies().get('token')!;
 	const user = await verify<User>(token.value)!;
@@ -31,7 +32,7 @@ async function BookUpload() {
 						tableBooks?.map((book) => ({
 							...book,
 							price: Number(book.price),
-							bookNo: book.BookNo.toString()
+							bookNo: book.bookNo.toString()
 						})) ?? []
 					}
 				/>
