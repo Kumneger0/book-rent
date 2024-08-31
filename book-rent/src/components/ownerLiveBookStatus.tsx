@@ -1,26 +1,34 @@
 'use client';
-import { useCreateQueryString, onColumnFiltersChange } from '@/lib/utils';
+import {
+	FilterModes,
+	numberFilterModes,
+	onColumnFiltersChange,
+	onFilterModeChange,
+	stringFilterModes,
+	useCreateQueryString
+} from '@/lib/utils';
 import { APIResponse } from '@/types';
 import CircleIcon from '@mui/icons-material/Circle';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, MenuItem, Typography } from '@mui/material';
+import { $Enums } from '@prisma/client';
 import {
 	MaterialReactTable,
 	useMaterialReactTable,
 	type MRT_ColumnDef
 } from 'material-react-table';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { flushSync } from 'react-dom';
 import toast from 'react-hot-toast';
-import BasicModal from './editBook';
-import { $Enums } from '@prisma/client';
 import { useDebouncedCallback } from 'use-debounce';
+import BasicModal from './editBook';
 
 export type TableProps = {
 	data: {
 		id: number;
 		No: string;
-		BookNo: number;
+		bookNo: number;
 		bookName: string;
 		status: 'rented' | 'free' | 'waiting approval';
 		price: string;
@@ -28,10 +36,30 @@ export type TableProps = {
 	}[];
 };
 
+type TableDataItem = TableProps['data'][number];
+type TableDataKeys = keyof TableDataItem;
+
+
+
+const nums = ['id', 'No', 'price', 'BookNo'].map((item) => item.toLowerCase());
+
 export const TableOwner = ({ data }: TableProps) => {
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
+
+	const [selectedColmunFilterMode, setSelectedColmunFilterMode] = useState<
+		{ column: string; mode: FilterModes }[]
+	>(() => {
+		if(!data?.[0]) return []
+		return Object.keys(data?.[0])?.map((key) => {
+			if (nums.includes(key.toLowerCase()))
+				return { column: key, mode: 'equals' as unknown as FilterModes };
+			return { column: key, mode: 'contains' as unknown as FilterModes };
+		});
+	});
+
+	const [filterData, setFilerData] = useState<{ id: string; value: string }[]>([]);
 
 	const debouncedOnColumnFiltersChange = useDebouncedCallback(onColumnFiltersChange, 400);
 	const columnFilterState = Array.from(searchParams.keys()).map((key) => ({
@@ -39,6 +67,7 @@ export const TableOwner = ({ data }: TableProps) => {
 		value: searchParams.get(key)
 	}));
 
+	const getFilterData = () => filterData;
 	const createQueryString = useCreateQueryString(searchParams);
 
 	const deleteBook = async (bookID: number) => {
@@ -71,14 +100,46 @@ export const TableOwner = ({ data }: TableProps) => {
 				size: 50
 			},
 			{
-				accessorKey: 'BookNo',
+				accessorKey: 'bookNo',
 				header: 'Book No',
-				size: 100
+				size: 100,
+				renderColumnFilterModeMenuItems: ({ column, onSelectFilterMode }) =>
+					numberFilterModes.map(({name, pr}) => (
+						<MenuItem
+							onClick={() => {
+								onFilterModeChange<TableDataKeys>({
+									column: 'bookNo',
+									mode:pr,
+									onSelectFilterMode,
+									setSelectedColmunFilterMode
+								});
+							}}
+							key={name}
+						>
+							{name}
+						</MenuItem>
+					))
 			},
 			{
 				accessorKey: 'bookName',
 				header: 'Book Name',
-				size: 200
+				size: 200,
+				renderColumnFilterModeMenuItems: ({ column, onSelectFilterMode }) =>
+					stringFilterModes.map(({name, pr}) => (
+						<MenuItem
+							onClick={() =>
+								onFilterModeChange<TableDataKeys>({
+									column: 'bookName',
+									mode: pr,
+									onSelectFilterMode,
+									setSelectedColmunFilterMode
+								})
+							}
+							key={name}
+						>
+							{name}
+						</MenuItem>
+					))
 			},
 			{
 				accessorKey: 'status',
@@ -109,7 +170,23 @@ export const TableOwner = ({ data }: TableProps) => {
 			{
 				accessorKey: 'price',
 				header: 'Price',
-				size: 100
+				size: 100,
+				renderColumnFilterModeMenuItems: ({ column, onSelectFilterMode }) =>
+					numberFilterModes.map((mode) => (
+						<MenuItem
+							onClick={() =>
+								onFilterModeChange<TableDataKeys>({
+									column: 'price',
+									mode: mode.pr,
+									onSelectFilterMode,
+									setSelectedColmunFilterMode
+								})
+							}
+							key={mode.name}
+						>
+							{mode.name}
+						</MenuItem>
+					))
 			},
 			{
 				accessorKey: 'action',
@@ -142,14 +219,41 @@ export const TableOwner = ({ data }: TableProps) => {
 		columns,
 		data,
 		enablePagination: false,
-		enableFullScreenToggle: false,
+		enableColumnFilterModes: true,
+		manualFiltering: true,
 		onColumnFiltersChange: (data) => {
-			debouncedOnColumnFiltersChange({ createQueryString, data, pathname, router, model: 'User' });
+				setFilerData((prv) => {
+					const filter = (typeof data === 'function' ? data([]) : []) as {
+						id: string;
+						value: string;
+					}[];
+					const merged = prv.length ? [...prv, ...filter] : filter;
+					return merged
+						.reverse()
+						.filter((item, i) => i == merged.findIndex((it) => item.id == it.id));
+				});
+			debouncedOnColumnFiltersChange({
+				createQueryString,
+				getFilterData,
+				pathname,
+				router,
+				model: 'User',
+				selectedColmunFilterModes: selectedColmunFilterMode
+			});
 		},
+
 		state: {
 			columnFilters: columnFilterState
 		}
 	});
 
-	return <MaterialReactTable table={table} />;
+	return (
+		<>
+			<div>
+				fiter:
+				{JSON.stringify(getFilterData())}
+			</div>
+			<MaterialReactTable table={table} />
+		</>
+	);
 };

@@ -5,6 +5,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Modal from '@mui/material/Modal';
 import * as React from 'react';
+import { OwnerTableData } from './AdminOwnerTable';
 
 const style: MUITypes = {
 	position: 'absolute' as 'absolute',
@@ -21,7 +22,7 @@ const style: MUITypes = {
 	gap: '1rem'
 };
 
-export default function BasicModal({ author }: { author: any }) {
+export default function BasicModal({ author }: { author: OwnerTableData }) {
 	const [open, setOpen] = React.useState(false);
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => setOpen(false);
@@ -38,12 +39,14 @@ export default function BasicModal({ author }: { author: any }) {
 				aria-describedby="modal-modal-description"
 			>
 				<Box sx={style}>
-					<TextField id="outlined-name" label="Name" type="text" value={author.owner} />
+					<TextField id="outlined-name" label="Name" type="text" value={author.fullName} />
 					<TextField
 						id="outlined-email"
 						label="Email"
 						type="email"
-						value={`${author.owner.replaceAll(' ', '')}@gmail.com`}
+						value={`${(
+							author.fullName as unknown as { replaceAll: (text: string, value: string) => string }
+						).replaceAll(' ', '')}@gmail.com`}
 					/>
 					<TextField
 						id="outlined-location-input"

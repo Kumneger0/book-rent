@@ -68,3 +68,10 @@ export type Permission = {
 	name: PermissionType['name'];
 	role: PermissionType['role'];
 };
+
+
+export type FilterSearchParam = {
+	op: string;
+	column: string;
+	value: string;
+}[];

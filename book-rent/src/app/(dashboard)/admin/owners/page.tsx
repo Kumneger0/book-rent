@@ -1,18 +1,25 @@
-import AdminOwnerTable from '@/components/AdminOwnerTable';
+import AdminOwnerTable, { OwnerTableData } from '@/components/AdminOwnerTable';
 import SharedHeader from '@/components/sharedHead';
 import { prisma } from '@/db';
 import { validateAndCreateFilter } from '@/lib/utils';
 import { Box } from '@mui/material';
 import { Prisma } from '@prisma/client';
 
-// location;
-
 async function Owners({ searchParams }: { searchParams: Record<string, string> }) {
-	const where = validateAndCreateFilter<Prisma.UserWhereInput>('User', searchParams);
+	//TODO: fix this monday
+	//@ts-expect-error
+	const where = validateAndCreateFilter<Prisma.UserWhereInput>('User', {
+		...searchParams
+	});
 
 	const owners = (
 		await prisma.user.findMany({
-			where,
+			where: {
+				...where,
+				role: {
+					name: { contains: 'owner' }
+				}
+			},
 			include: {
 				Book: true,
 				role: true
@@ -26,21 +33,12 @@ async function Owners({ searchParams }: { searchParams: Record<string, string> }
 			id: owner.id,
 			no: owner.id,
 			action: owner.approved ? 'approve' : 'review',
-			owner: owner.fullName,
+			fullName: owner.fullName,
 			status: owner.isActive ? 'active' : 'not active',
 			upload: owner.Book.length,
 			location: owner.location,
 			approved: owner.approved
-		} satisfies {
-			id: string | number;
-			no: number;
-			owner: string;
-			upload: number;
-			location: string;
-			status: string;
-			action: string;
-			approved: boolean;
-		};
+		} satisfies OwnerTableData;
 	});
 
 	return (

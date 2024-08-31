@@ -9,6 +9,7 @@ import {
 	validateAndCreateFilter,
 	verify
 } from '@/lib/utils';
+import { FilterSearchParam } from '@/types';
 import { Box } from '@mui/material';
 import { User } from '@prisma/client';
 import { cookies } from 'next/headers';
@@ -16,11 +17,16 @@ import { cookies } from 'next/headers';
 async function Dashboard({ searchParams }: { searchParams: Record<string, string> }) {
 	const token = cookies().get('token')!;
 	const user = await verify<User>(token.value)!;
+	const filters: FilterSearchParam = searchParams?.filters
+		? JSON.parse(decodeURIComponent(searchParams?.filters))
+		: [];
 
-	const where = validateAndCreateFilter('User', searchParams);
-
+	const where = validateAndCreateFilter('Book', filters);
 	const { books, tableBooks: bookTable } = await getBooks({
-		where
+		where: {
+			...where,
+			ownerId: user.id
+		}
 	});
 
 	const tableBooks = bookTable?.map((book) => ({
@@ -78,7 +84,14 @@ async function Dashboard({ searchParams }: { searchParams: Record<string, string
 			>
 				<Box>
 					<h3>Live Book Status</h3>
-					<OwnerLiveBookStatus data={tableBooks ?? []} />
+					<OwnerLiveBookStatus
+						data={
+							tableBooks?.map((book) => ({
+								...book,
+								bookNo: book.bookNo as unknown as number
+							})) ?? []
+						}
+					/>
 				</Box>
 			</DashboardContent>
 		</>

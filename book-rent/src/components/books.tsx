@@ -6,7 +6,7 @@ import { Box, Switch, Typography } from '@mui/material';
 import { MaterialReactTable, MRT_ColumnDef, useMaterialReactTable } from 'material-react-table';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useUserContext } from './UserContextWrapper';
 import { getFuncToUpdate } from './AdminOwnerTable';
 import { useDebouncedCallback } from 'use-debounce';
@@ -16,6 +16,8 @@ const Example = ({ data }: { data: BookTable[] }) => {
 	const createQueryString = useCreateQueryString(searchParams);
 	const { user } = useUserContext();
 	const ablity = createAblity(user!.permissions);
+
+	const [filterData, setFilerData] = useState<{ id: string; value: string }[]>([]);
 
 	const debouncedOnColumnFiltersChange = useDebouncedCallback(onColumnFiltersChange, 400);
 
@@ -101,18 +103,28 @@ const Example = ({ data }: { data: BookTable[] }) => {
 
 	const table = useMaterialReactTable({
 		columns,
-		//@ts-ignore
-		data: data.map((data) => ({ ...data, owner:{fullName: data.owner.fullName} })),
+		data: data.map((data) => ({ ...data, owner: { fullName: data.owner.fullName } })),
 		enablePagination: false,
 		enableFullScreenToggle: false,
 		manualFiltering: true,
 		onColumnFiltersChange: (data) => {
+			setFilerData((prv) => {
+				const filter = (typeof data === 'function' ? data([]) : []) as {
+					id: string;
+					value: string;
+				}[];
+				const merged = prv.length ? [...prv, ...filter] : filter;
+				return merged
+					.reverse()
+					.filter((item, i) => i === merged.findIndex((it) => item.id === it.id));
+			});
 			debouncedOnColumnFiltersChange({
 				createQueryString,
-				data,
+				getFilterData: () => filterData,
 				pathname,
 				router,
-				model: 'Book'
+				model: 'Book',
+				selectedColmunFilterModes: []
 			});
 		},
 		enableSorting: false
