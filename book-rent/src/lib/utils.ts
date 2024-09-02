@@ -20,7 +20,7 @@ import { ReadonlyURLSearchParams } from 'next/navigation';
 import React from 'react';
 import { number, z } from 'zod';
 
-import jsonSchema from '../../prisma/json-schema/json-schema.json';
+import jsonSchema from '../../prisma/json-schema/json-schema.json' assert { type: 'json' };
 
 export const numberFilterModes = [
 	{ pr: 'equals', name: 'Equals' },
@@ -455,7 +455,20 @@ export const getRoles = async () => {
 	}
 };
 
-function setNestedValue(obj: any, keys: string[], value: any, op: string): void {
+type Model = keyof typeof jsonSchema.definitions;
+const getColumnType = (modelName: Model, columnName: string) => {
+	const columnDefinition =
+		jsonSchema.definitions[modelName]?.properties?.[
+			columnName as keyof (typeof jsonSchema.definitions)[typeof modelName]['properties']
+		];
+	const isEnum = 'enum' in columnDefinition;
+	return {
+		type: isEnum ? ('enum' as const) : columnDefinition.type,
+		values: isEnum ? (columnDefinition.enum as Array<string>) : null
+	};
+};
+
+function setNestedValue(obj: Record<string, any>, keys: string[], value: any, op: string): void {
 	for (let i = 0; i < keys.length - 1; i++) {
 		if (!(keys[i] in obj)) {
 			obj[keys[i]] = {};
@@ -481,29 +494,44 @@ export function validateAndCreateFilter<PrismaWhereInput extends Record<string, 
 
 	for (const { column, op, value } of input) {
 		const relationFiled = column.split('.');
-		if (relationFiled.length) {
+
+		if (relationFiled.length > 1) {
 			setNestedValue(where, relationFiled, value, op);
 		}
 		const col = modelSchema.properties[column as keyof typeof modelSchema.properties];
 
-		if (col) {
-			const type = col.type;
-			const isColumnNumber = type == 'integer' || type == 'number';
-			if (isColumnNumber && isNaN(Number(value))) {
-			}
-			if (isColumnNumber && !isNaN(Number(value))) {
-				(where as Record<string, any>)[column] = { [op]: Number(value) };
-			} else {
-				(where as Record<string, any>)[column] = {
-					[op]: value,
-					mode: 'insensitive'
-				};
-			}
+		if (!col) {
+			console.error('Invalid column:', column);
+			continue;
+		}
+
+		const { type, values } = getColumnType(modelName, column);
+
+		const filterValue =
+			type == 'enum'
+				? (values?.find((v) => v.toLowerCase().includes(value.toLowerCase())) as string)
+				: value;
+
+		const isNumber = type === 'integer' || type === 'number';
+		const parsedValue = isNumber ? Number(value) : value;
+
+		if (isNumber && isNaN(parsedValue as number)) {
+			console.error('Invalid number value for column:', column);
+			continue;
+		}
+
+		if (type == 'enum') {
+			(where as Record<string, any>)[column] = {
+				equals: filterValue
+			};
+		} else {
+			(where as Record<string, any>)[column] = isNumber
+				? { [op]: parsedValue }
+				: { [op]: filterValue, mode: 'insensitive' };
 		}
 	}
- return where as PrismaWhereInput;
 
-
+	return where as PrismaWhereInput;
 
 	// previos implemetation without oprator
 

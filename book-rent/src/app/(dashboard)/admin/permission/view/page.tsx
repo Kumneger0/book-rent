@@ -22,6 +22,7 @@ const getAllPermmissions = async (): Promise<Permissions | null> => {
 		return null;
 	}
 };
+ 
 const ViewPermissions: React.FC = async () => {
 	const permissions = await getAllPermmissions();
 	if (!permissions) return <div>No Permission found</div>;
