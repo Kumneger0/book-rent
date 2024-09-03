@@ -1,6 +1,6 @@
 import { prisma } from './../../../db/index';
 import { FilterSearchParam } from '@/types';
-
+import objectPath from 'object-path';
 import jsonSchema from '../../../../prisma/json-schema/json-schema.json' assert { type: 'json' };
 import { NextRequest, NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
@@ -9,7 +9,7 @@ import { numberFilterModes, stringFilterModes } from '@/lib/utils';
 const getColumnType = (modelName: keyof typeof jsonSchema.definitions, columnName: string) => {
 	const columnDefinition =
 		jsonSchema.definitions[modelName]?.properties?.[
-		columnName as keyof (typeof jsonSchema.definitions)[typeof modelName]['properties']
+			columnName as keyof (typeof jsonSchema.definitions)[typeof modelName]['properties']
 		];
 	const isEnum = columnDefinition && 'enum' in columnDefinition;
 	return {
@@ -18,20 +18,29 @@ const getColumnType = (modelName: keyof typeof jsonSchema.definitions, columnNam
 	};
 };
 
-function setNestedValue(obj: Record<string, any>, keys: string[], value: any, op: string): void {
-	for (let i = 0; i < keys.length - 1; i++) {
-		if (!(keys[i] in obj)) {
-			obj[keys[i]] = {};
-		}
-		obj = obj[keys[i]];
+function setNestedValue(
+	obj: Record<string, any>,
+	keys: string[],
+	value: any,
+	op: string,
+	type: string
+): void {
+	if (type == 'string') {
+		objectPath.set(obj, keys.join('.'), {
+			[op]: value,
+			mode: 'insensitive'
+		});
 	}
-	obj[keys[keys.length - 1]] = {
-		[op]: value,
-		mode: 'insensitive'
-	};
+	if (type == 'enum')
+		objectPath.set(obj, keys.join('.'), {
+			equals: value
+		});
+	if (type == 'number' || type == 'integer') {
+		objectPath.set(obj, keys.join('.'), {
+			[op]: value
+		});
+	}
 }
-
-
 export const GET = async (req: NextRequest) => {
 	try {
 		const queryParams = req.nextUrl.searchParams;
@@ -47,33 +56,78 @@ export const GET = async (req: NextRequest) => {
 				{ status: 400 }
 			);
 
-		const filters = JSON.parse(queryParams.get('filters') ?? '{}');
+		const filters = JSON.parse(queryParams.get('filters') ?? `{}`);
 
 		const model = Object.keys(jsonSchema.definitions).find(
 			(key) => key.toLowerCase() == queryParams.get('model')?.toLowerCase()
 		) as keyof typeof jsonSchema.definitions;
 		const where = validateAndCreateFilter(model, filters);
 
-		console.error('where', where);
-
-		const data = queryParams.get('model') == 'book' ? await getBOOK(where) : await getUser(where);
-		return NextResponse.json(JSON.stringify({ data }));
+		return NextResponse.json({ where });
 	} catch (err) {
-		return NextResponse.json({
-			status: 'error',
-			data: {
-				message: err instanceof Error ? err.message : 'there was an error occured'
+		return NextResponse.json(
+			{
+				status: 'error',
+				data: {
+					message: err instanceof Error ? err.message : 'there was an error occured'
+				}
+			},
+			{
+				status: 500
 			}
-		});
+		);
 	}
+};
+const isColumnExists = (
+	modelName: keyof typeof jsonSchema.definitions,
+	columnName: string
+): boolean => {
+	return columnName in jsonSchema.definitions[modelName]?.properties;
+};
+
+const getModelSchema = (BaseModel: Model) => {
+	return jsonSchema.definitions[BaseModel];
+};
+
+const checkRelationFiledType = (relationFiled: string[], BaseModel: Model) => {
+	const modelSchema = getModelSchema(BaseModel);
+	if (!modelSchema) {
+		throw new Error(`Schema for model ${BaseModel} not found`);
+	}
+
+	if (relationFiled.length == 1) return getColumnType(BaseModel, relationFiled[0]);
+
+	const [key, ...rest] = relationFiled;
+	const pkey = modelSchema.properties[key as keyof typeof modelSchema.properties];
+	let nextModelToCheck: string | null = null;
+
+	if (pkey?.type === 'array' && 'originalType' in pkey) {
+		nextModelToCheck = pkey.originalType;
+	} else if (pkey && '$ref' in pkey && typeof pkey.$ref === 'string') {
+		nextModelToCheck = pkey.$ref.split('/').at(-1) || null;
+	}
+	if (!nextModelToCheck)
+		throw new Error(`There was an error in ur nested query at fields ${relationFiled}`);
+	return checkRelationFiledType(rest, nextModelToCheck as Model);
+};
+
+type Model = keyof typeof jsonSchema.definitions;
+
+const validateQueryType = (colType: string, op: string) => {
+	const stringOprators = stringFilterModes.map(({ pr }) => pr);
+	const numberOprators = numberFilterModes.map(({ pr }) => pr);
+
+	const isNumber = colType === 'integer' || colType === 'number';
+	if (colType == 'string' && !stringOprators.includes(op as (typeof stringOprators)[number]))
+		throw Error('Not valid oprator for string');
+	if (isNumber && !numberOprators.includes(op as (typeof numberOprators)[number]))
+		throw Error('Not valid oprator for number');
 };
 
 export function validateAndCreateFilter<PrismaWhereInput extends Record<string, unknown>>(
-	modelName: keyof typeof jsonSchema.definitions,
+	modelName: Model,
 	input: FilterSearchParam
 ): PrismaWhereInput {
-	console.error('modelName', modelName);
-
 	const modelSchema = jsonSchema.definitions[modelName];
 	if (!modelSchema) {
 		throw new Error(`Schema for model ${modelName} not found`);
@@ -83,46 +137,18 @@ export function validateAndCreateFilter<PrismaWhereInput extends Record<string, 
 
 	for (const filter of input) {
 		const { column, op, value } = filter;
-
 		const relationFiled = column?.split('.');
 
-		const checkRelationFiledType = (relationFiled: string[]) => {
-			let filedType: ReturnType<typeof getColumnType> | null = null;
-			for (const key of relationFiled) {
-				const pkey = modelSchema.properties[key as keyof typeof modelSchema.properties];
-				if (pkey && '$ref' in pkey) {
-					const targetModelName = (pkey.$ref as string).split('/').at(-1);
-					const targetModel =
-						jsonSchema.definitions[targetModelName as keyof typeof jsonSchema.definitions];
-					if (!targetModel) {
-						throw new Error(`Target model ${targetModelName} not found`);
-					}
-					const prop =
-						targetModel.properties[relationFiled.at(-1) as keyof typeof targetModel.properties];
-					if (prop) {
-						filedType = getColumnType(
-							targetModelName as keyof typeof jsonSchema.definitions,
-							relationFiled.at(-1) as string
-						);
-					}
-				}
-			}
-			return filedType;
-		};
-
 		if (relationFiled?.length > 1) {
-			const columnType = checkRelationFiledType(relationFiled);
-			const stringOprators = stringFilterModes.map(({ pr }) => pr);
-			const numberOprators = numberFilterModes.map(({ pr }) => pr)
+			const fieldName = relationFiled[0];
+			const isKeyExits = isColumnExists(modelName, fieldName);
 
+			if (!isKeyExits)
+				throw new Error(`There is no field named ${relationFiled[0]} in model ${modelName}`);
 
-			const isNumber = columnType?.type === 'integer' || columnType?.type === 'number';
-			if (
-				columnType?.type == 'string' &&
-				!stringOprators.includes(op as (typeof stringOprators)[number])) throw Error('Not valid oprator for string')
-			if (isNumber && !numberOprators.includes(op as (typeof numberOprators)[number])) throw Error('Not valid oprator for number')
-			setNestedValue(where, relationFiled, value, op);
-
+			const columnType = checkRelationFiledType(relationFiled, modelName);
+			validateQueryType(columnType.type, op);
+			setNestedValue(where, relationFiled, value, op, columnType.type);
 		}
 		const col = modelSchema.properties[column as keyof typeof modelSchema.properties];
 
@@ -132,6 +158,8 @@ export function validateAndCreateFilter<PrismaWhereInput extends Record<string, 
 		}
 
 		const { type, values } = getColumnType(modelName, column);
+
+		validateQueryType(type, op);
 
 		const filterValue =
 			type == 'enum'
