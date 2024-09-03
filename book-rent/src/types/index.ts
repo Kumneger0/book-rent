@@ -74,4 +74,5 @@ export type FilterSearchParam = {
 	op: string;
 	column: string;
 	value: string;
+	manyToManyOp?: string;
 }[];

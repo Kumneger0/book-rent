@@ -14,11 +14,14 @@ import { $Enums, Book, Permission as PermissionModel, Prisma, Role, User } from 
 import crypto from 'crypto';
 import { jwtVerify } from 'jose';
 import jwt from 'jsonwebtoken';
-import { MRT_ColumnFiltersState, MRT_FilterOption, MRT_Updater } from 'material-react-table';
+import { MRT_FilterOption } from 'material-react-table';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { ReadonlyURLSearchParams } from 'next/navigation';
 import React from 'react';
-import { number, z } from 'zod';
+import { z } from 'zod';
+
+
+import objectPath from 'object-path';
 
 import jsonSchema from '../../prisma/json-schema/json-schema.json' assert { type: 'json' };
 
@@ -456,33 +459,97 @@ export const getRoles = async () => {
 };
 
 type Model = keyof typeof jsonSchema.definitions;
-const getColumnType = (modelName: Model, columnName: string) => {
+const getColumnType = (modelName: keyof typeof jsonSchema.definitions, columnName: string) => {
 	const columnDefinition =
 		jsonSchema.definitions[modelName]?.properties?.[
 			columnName as keyof (typeof jsonSchema.definitions)[typeof modelName]['properties']
 		];
-	const isEnum = 'enum' in columnDefinition;
+	const isEnum = columnDefinition && 'enum' in columnDefinition;
 	return {
-		type: isEnum ? ('enum' as const) : columnDefinition.type,
+		type: isEnum ? ('enum' as const) : columnDefinition?.type,
 		values: isEnum ? (columnDefinition.enum as Array<string>) : null
 	};
 };
 
-function setNestedValue(obj: Record<string, any>, keys: string[], value: any, op: string): void {
-	for (let i = 0; i < keys.length - 1; i++) {
-		if (!(keys[i] in obj)) {
-			obj[keys[i]] = {};
-		}
-		obj = obj[keys[i]];
+function setNestedValue(
+	obj: Record<string, any>,
+	keys: string[],
+	value: any,
+	op: string,
+	type: string
+){
+	if (type == 'string') {
+		objectPath.set(obj, keys.join('.'), {
+			[op]: value,
+			mode: 'insensitive'
+		});
 	}
-	obj[keys[keys.length - 1]] = {
-		[op]: value,
-		mode: 'insensitive'
-	};
+	if (type == 'enum')
+		objectPath.set(obj, keys.join('.'), {
+			equals: value
+		});
+	if (type == 'number' || type == 'integer') {
+		objectPath.set(obj, keys.join('.'), {
+			[op]: Number(value)
+		});
+	}
 }
 
-export function validateAndCreateFilter<PrismaWhereInput extends Record<string, unknown>>(
+const isColumnExists = (
 	modelName: keyof typeof jsonSchema.definitions,
+	columnName: string
+): boolean => {
+	return columnName in jsonSchema.definitions[modelName]?.properties;
+};
+
+const getModelSchema = (BaseModel: Model) => {
+	return jsonSchema.definitions[BaseModel];
+};
+
+const checkRelationFiledType = (
+	relationFiled: string[],
+	BaseModel: Model,
+	manyToManyRel?: string
+) => {
+	const modelSchema = getModelSchema(BaseModel);
+	if (!modelSchema) {
+		throw new Error(`Schema for model ${BaseModel} not found`);
+	}
+
+	if (relationFiled.length == 1)
+		return {
+			...getColumnType(BaseModel, relationFiled[0]),
+			isManyToMany: manyToManyRel === 'array'
+		};
+
+	const [key, ...rest] = relationFiled;
+	const pkey = modelSchema.properties[key as keyof typeof modelSchema.properties];
+	let nextModelToCheck: string | null = null;
+
+	if (pkey?.type === 'array' && 'originalType' in pkey) {
+		nextModelToCheck = pkey.originalType;
+	} else if (pkey && '$ref' in pkey && typeof pkey.$ref === 'string') {
+		nextModelToCheck = pkey.$ref.split('/').at(-1) || null;
+	}
+	if (!nextModelToCheck)
+		throw new Error(`There was an error in ur nested query at fields ${relationFiled}`);
+	return checkRelationFiledType(rest, nextModelToCheck as Model, pkey.type);
+};
+
+
+const validateQueryType = (colType: string, op: string) => {
+	const stringOprators = stringFilterModes.map(({ pr }) => pr);
+	const numberOprators = numberFilterModes.map(({ pr }) => pr);
+
+	const isNumber = colType === 'integer' || colType === 'number';
+	if (colType == 'string' && !stringOprators.includes(op as (typeof stringOprators)[number]))
+		throw Error('Not valid oprator for string');
+	if (isNumber && !numberOprators.includes(op as (typeof numberOprators)[number]))
+		throw Error('Not valid oprator for number');
+};
+
+export function validateAndCreateFilter<PrismaWhereInput extends Record<string, unknown>>(
+	modelName: Model,
 	input: FilterSearchParam
 ): PrismaWhereInput {
 	const modelSchema = jsonSchema.definitions[modelName];
@@ -492,11 +559,28 @@ export function validateAndCreateFilter<PrismaWhereInput extends Record<string, 
 
 	const where = {};
 
-	for (const { column, op, value } of input) {
-		const relationFiled = column.split('.');
+	for (const filter of input) {
+		const { column, op, value, manyToManyOp } = filter;
+		const relationFiled = column?.split('.');
 
-		if (relationFiled.length > 1) {
-			setNestedValue(where, relationFiled, value, op);
+		if (relationFiled?.length > 1) {
+			const fieldName = relationFiled[0];
+			const isKeyExits = isColumnExists(modelName, fieldName);
+
+			if (!isKeyExits)
+				throw new Error(`There is no field named ${relationFiled[0]} in model ${modelName}`);
+
+			const columnType = checkRelationFiledType(relationFiled, modelName);
+			validateQueryType(columnType.type, op);
+
+			const nestedValues = columnType.isManyToMany
+				? (() => {
+						const [last, ...rest] = [...relationFiled].reverse();
+						return [...rest.reverse(), (manyToManyOp ?? 'some'), last];
+				  })()
+				: relationFiled;
+
+			setNestedValue(where, nestedValues, value, op, columnType.type);
 		}
 		const col = modelSchema.properties[column as keyof typeof modelSchema.properties];
 
@@ -506,6 +590,8 @@ export function validateAndCreateFilter<PrismaWhereInput extends Record<string, 
 		}
 
 		const { type, values } = getColumnType(modelName, column);
+
+		validateQueryType(type, op);
 
 		const filterValue =
 			type == 'enum'
@@ -532,70 +618,10 @@ export function validateAndCreateFilter<PrismaWhereInput extends Record<string, 
 	}
 
 	return where as PrismaWhereInput;
-
-	// previos implemetation without oprator
-
-	// Object.entries(input).forEach(([key, value]) => {
-	// 	type ModelSchemaKeyType = keyof typeof modelSchema.properties;
-	// 	const propertySchema = modelSchema.properties[key as ModelSchemaKeyType];
-	// 	const relationFiled = key.split('.');
-	// 	if (!propertySchema) {
-	// 		console.error(`Property ${key} not found in schema for ${modelName}`);
-	// 		if (!relationFiled.length) return;
-	// 	}
-
-	// 	if (relationFiled.length) {
-	// 		let filedType = '';
-	// 		for (const value of relationFiled) {
-	// 			const pkey = modelSchema.properties[value as ModelSchemaKeyType];
-	// 			if (pkey && '$ref' in pkey) {
-	// 				const refModelArr = (pkey.$ref as string).split('/');
-	// 				const targetModel =
-	// 					jsonSchema.definitions[refModelArr[refModelArr.length - 1] as typeof modelName];
-	// 				const prop =
-	// 					targetModel.properties[relationFiled[relationFiled.length - 1] as ModelSchemaKeyType];
-	// 				if (prop) {
-	// 					filedType = prop.type;
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-
-	// 	if (propertySchema?.type === 'string') {
-	// 		const isEnum = 'enum' in propertySchema && Array.isArray(propertySchema.enum);
-	// 		const val = isEnum
-	// 			? (propertySchema?.enum as string[]).find((val) =>
-	// 					(val as string).toLowerCase().includes((value as string).toLowerCase())
-	// 			  )
-	// 			: value;
-
-	// 		if (isEnum) {
-	// 			//@ts-expect-error
-	// 			where[key] = { equals: val };
-	// 		}
-
-	// 		if (!isEnum) {
-	// 			// TODO: fix ts error after finishing main feature
-	// 			//@ts-expect-error  ts error i have no time fix you i'll fix you later
-	// 			where[key] = { contains: val as string, mode: 'insensitive' };
-	// 		}
-	// 	}
-	// 	if (propertySchema?.type === 'integer' || propertySchema?.type === 'number') {
-	// 		const numValue = Number(value);
-	// 		if (!isNaN(numValue)) {
-	// 			//@ts-expect-error
-	// 			where[key] = numValue;
-	// 		}
-	// 	}
-	// 	if (propertySchema?.type === 'boolean') {
-	// 		where[key as keyof typeof where] = (value === 'true') as (typeof where)[keyof typeof where];
-	// 	} else {
-	// 		console.error(`Unsupported type ${propertySchema?.type} for property ${key}`);
-	// 	}
-	// });
-
-	// return where as PrismaWhereInput;
 }
+
+
+
 
 export const onFilterModeChange = <TableDataKeys>({
 	mode,
