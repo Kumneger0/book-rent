@@ -620,9 +620,6 @@ export function validateAndCreateFilter<PrismaWhereInput extends Record<string, 
 	return where as PrismaWhereInput;
 }
 
-
-
-
 export const onFilterModeChange = <TableDataKeys>({
 	mode,
 	column,

@@ -5,20 +5,28 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function PUT(req: NextRequest) {
 	try {
-		const token = req.cookies.get('token');
-		const user = await verify<User>(token?.value ?? '');
-		if (!user) {
-			return NextResponse.json({
-				status: 'error',
-				data: {
-					message: 'Unauthorized'
-				}
-			});
-		}
+		// const token = req.cookies.get('token');
+		// const user = await verify<User>(token?.value ?? '');
+		// if (!user) {
+		// 	return NextResponse.json({
+		// 		status: 'error',
+		// 		data: {
+		// 			message: 'Unauthorized'
+		// 		}
+		// 	});
+		// }
+		const { id, userId, ...data } = (await req.json()) as {
+			bookName: string;
+			quantity: string;
+			category: $Enums.Category;
+			price: string;
+			id: number;
+			userId: string | number;
+		};
 
 		const userFromDB = await prisma.user.findUnique({
 			where: {
-				email: user.email
+				id: Number(userId)
 			},
 			include: {
 				role: true
@@ -33,13 +41,6 @@ export async function PUT(req: NextRequest) {
 				}
 			});
 		}
-		const { id, ...data } = (await req.json()) as {
-			bookName: string;
-			quantity: string;
-			category: $Enums.Category;
-			price: string;
-			id: number;
-		};
 
 		/**
 		 * now lets try our own book
@@ -63,9 +64,6 @@ export async function PUT(req: NextRequest) {
 
 		const mappedPermissions = mapPermissions(userPermissions, userFromDB);
 
-
-		console.error('fkjaf', mappedPermissions);
-
 		const ability = createAblity(mappedPermissions);
 		if (ability.can('update', { ...userBook, __caslSubjectType__: 'Book' })) {
 			const updatedBook = await prisma.book.update({
@@ -86,13 +84,17 @@ export async function PUT(req: NextRequest) {
 				}
 			});
 		}
-		return NextResponse.json({
-			status: 'error',
-			data: {
-				message: 'you are not authorized to perform this action'
-			}
-		});
+		return NextResponse.json(
+			{
+				status: 'error',
+				data: {
+					message: 'you are not authorized to perform this action'
+				}
+			},
+			{ status: 400 }
+		);
 	} catch (e) {
+		console.error(e);
 		return NextResponse.json(
 			{
 				status: 'error',
