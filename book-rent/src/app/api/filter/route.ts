@@ -37,7 +37,7 @@ function setNestedValue(
 		});
 	if (type == 'number' || type == 'integer') {
 		objectPath.set(obj, keys.join('.'), {
-			[op]: value
+			[op]: Number(value)
 		});
 	}
 }
@@ -62,7 +62,7 @@ export const GET = async (req: NextRequest) => {
 			(key) => key.toLowerCase() == queryParams.get('model')?.toLowerCase()
 		) as keyof typeof jsonSchema.definitions;
 		const where = validateAndCreateFilter(model, filters);
-
+		// const data = await getBOOK(where);
 		return NextResponse.json({ where });
 	} catch (err) {
 		return NextResponse.json(
@@ -89,13 +89,21 @@ const getModelSchema = (BaseModel: Model) => {
 	return jsonSchema.definitions[BaseModel];
 };
 
-const checkRelationFiledType = (relationFiled: string[], BaseModel: Model) => {
+const checkRelationFiledType = (
+	relationFiled: string[],
+	BaseModel: Model,
+	manyToManyRel?: string
+) => {
 	const modelSchema = getModelSchema(BaseModel);
 	if (!modelSchema) {
 		throw new Error(`Schema for model ${BaseModel} not found`);
 	}
 
-	if (relationFiled.length == 1) return getColumnType(BaseModel, relationFiled[0]);
+	if (relationFiled.length == 1)
+		return {
+			...getColumnType(BaseModel, relationFiled[0]),
+			isManyToMany: manyToManyRel === 'array'
+		};
 
 	const [key, ...rest] = relationFiled;
 	const pkey = modelSchema.properties[key as keyof typeof modelSchema.properties];
@@ -108,7 +116,7 @@ const checkRelationFiledType = (relationFiled: string[], BaseModel: Model) => {
 	}
 	if (!nextModelToCheck)
 		throw new Error(`There was an error in ur nested query at fields ${relationFiled}`);
-	return checkRelationFiledType(rest, nextModelToCheck as Model);
+	return checkRelationFiledType(rest, nextModelToCheck as Model, pkey.type);
 };
 
 type Model = keyof typeof jsonSchema.definitions;
@@ -148,7 +156,15 @@ export function validateAndCreateFilter<PrismaWhereInput extends Record<string, 
 
 			const columnType = checkRelationFiledType(relationFiled, modelName);
 			validateQueryType(columnType.type, op);
-			setNestedValue(where, relationFiled, value, op, columnType.type);
+
+			const nestedValues = columnType.isManyToMany
+				? (() => {
+						const [last, ...rest] = [...relationFiled].reverse();
+						return [...rest.reverse(), 'some', last];
+				  })()
+				: relationFiled;
+
+			setNestedValue(where, nestedValues, value, op, columnType.type);
 		}
 		const col = modelSchema.properties[column as keyof typeof modelSchema.properties];
 
@@ -206,3 +222,6 @@ async function getUser(where: Prisma.UserWhereInput) {
 	});
 	return users;
 }
+
+
+
