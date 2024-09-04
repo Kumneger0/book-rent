@@ -1,32 +1,36 @@
 import { prisma } from '@/db';
 import { createAblity, getRolePermissions, mapPermissions, verify } from '@/lib/utils';
-import { $Enums, User, Role } from '@prisma/client';
+import { $Enums, User } from '@prisma/client';
+import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function PUT(req: NextRequest) {
 	try {
-		// const token = req.cookies.get('token');
-		// const user = await verify<User>(token?.value ?? '');
-		// if (!user) {
-		// 	return NextResponse.json({
-		// 		status: 'error',
-		// 		data: {
-		// 			message: 'Unauthorized'
-		// 		}
-		// 	});
-		// }
-		const { id, userId, ...data } = (await req.json()) as {
+		const token = req.cookies.get('token')?.value ?? headers().get('token')?.split(' ').at(-1);
+
+		const user = await verify<User>(token ?? '');
+
+		console.error('user id', user.id);
+
+		if (!user) {
+			return NextResponse.json({
+				status: 'error',
+				data: {
+					message: 'Unauthorized'
+				}
+			});
+		}
+		const { id, ...data } = (await req.json()) as {
 			bookName: string;
 			quantity: string;
 			category: $Enums.Category;
 			price: string;
 			id: number;
-			userId: string | number;
 		};
 
 		const userFromDB = await prisma.user.findUnique({
 			where: {
-				id: Number(userId)
+				id: Number(user.id)
 			},
 			include: {
 				role: true
@@ -42,9 +46,6 @@ export async function PUT(req: NextRequest) {
 			});
 		}
 
-		/**
-		 * now lets try our own book
-		 */
 		const userBook = await prisma.book.findFirst({
 			where: {
 				id: id
@@ -63,6 +64,8 @@ export async function PUT(req: NextRequest) {
 		const userPermissions = await getRolePermissions(userFromDB.role);
 
 		const mappedPermissions = mapPermissions(userPermissions, userFromDB);
+
+		console.error('mappedpersmiison', mappedPermissions);
 
 		const ability = createAblity(mappedPermissions);
 		if (ability.can('update', { ...userBook, __caslSubjectType__: 'Book' })) {

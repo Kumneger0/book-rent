@@ -1,11 +1,13 @@
 import { prisma } from '@/db';
 import { createAblity, mapPermissions, verify } from '@/lib/utils';
 import { User } from '@prisma/client';
+import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
 	try {
-		const token = req.cookies.get('token');
+		const token = req.cookies.get('token')?.value ?? headers().get('token')?.split(' ').at(-1);
+
 		if (!token)
 			return NextResponse.json({
 				status: 'error',
@@ -13,9 +15,13 @@ export async function POST(req: NextRequest) {
 					message: 'you need to be logged to disable owner'
 				}
 			});
-		const user = await verify<User & { role: { name: string; id: number } }>(token.value);
+		const user = await verify<User & { role: { name: string; id: number } }>(token);
 
-		const role = user.role.name;
+		const json = (await req.json()) as { id: number; isActive: boolean };
+
+		if (!user) throw new Error('user not found');
+
+		const role = user?.role.name;
 
 		const userPermissions = await prisma?.permission?.findMany({
 			where: {
@@ -33,10 +39,6 @@ export async function POST(req: NextRequest) {
 		const mappedPermissions = mapPermissions(userPermissions, user);
 
 		const ablity = createAblity(mappedPermissions);
-
-		console.error('mapped permission', mappedPermissions);
-
-		const json = (await req.json()) as { id: number; isActive: boolean };
 
 		const userToDisable = await prisma.user.findFirst({
 			where: {
@@ -73,6 +75,13 @@ export async function POST(req: NextRequest) {
 				},
 				data: {
 					isActive: json.isActive
+				},
+				include: {
+					Book: {
+						select: {
+							isApproved: true
+						}
+					}
 				}
 			});
 

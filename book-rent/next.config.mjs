@@ -15,11 +15,6 @@ const nextConfig = {
 			}
 		],
 		dangerouslyAllowSVG: true
-	},
-	compiler: {
-		removeConsole: {
-			exclude: ['error']
-		}
 	}
 };
 
