@@ -60,7 +60,6 @@ export default function BasicModal({
 				handleClose();
 			}
 		} catch (err) {
-			console.error(err);
 		}
 	};
 

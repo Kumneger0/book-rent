@@ -106,7 +106,6 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 				toast.error(data.data.message);
 			}
 		} catch (e) {
-			console.error(e);
 		} finally {
 			setIsUploading(false);
 			router.refresh();

@@ -11,8 +11,6 @@ export const GET = async (req: NextRequest) => {
 			}
 		});
 
-		console.error('all permission', allPermissions);
-
 		return NextResponse.json({
 			status: 'success',
 			data: {
@@ -20,7 +18,6 @@ export const GET = async (req: NextRequest) => {
 			}
 		});
 	} catch (err) {
-		console.error('err');
 		return NextResponse.json(
 			{
 				status: 'error',

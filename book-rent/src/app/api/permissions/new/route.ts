@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 				condition: permission.condition as Prisma.InputJsonValue
 			}
 		});
-		console.error(perm);
+
 		return NextResponse.json({
 			status: 'success',
 			data: {
@@ -47,7 +47,6 @@ export async function POST(req: NextRequest) {
 			}
 		});
 	} catch (err) {
-		console.error(err);
 		return NextResponse.json({
 			status: 'error',
 			data: {

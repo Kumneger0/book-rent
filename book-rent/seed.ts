@@ -292,7 +292,7 @@ const mockMonthlyIncomeData = [
 // }
 
 // main()
-// 	.catch((e) => console.error(e))
+// 	.catch((e) => 
 // 	.finally(async () => {
 // 		await prisma.$disconnect();
 // 		const books = await prisma.book.findMany();
@@ -300,7 +300,7 @@ const mockMonthlyIncomeData = [
 
 // (async () => {
 // 	const deleteData = await prisma.monthlyIncome.deleteMany();
-// 	console.log(deleteData);
+// 	
 // 	const ownersUsers = await prisma.user.findMany({
 // 		where: {
 // 			role: 'owner'
@@ -317,7 +317,7 @@ const mockMonthlyIncomeData = [
 // 					income: Math.floor(Math.random() * 10000)
 // 				}
 // 			});
-// 			console.log(data);
+// 			
 // 		}
 // 	}
 // })();
@@ -401,7 +401,7 @@ const mockMonthlyIncomeData = [
 // 			});
 // 		})
 // 	);
-// 	console.log(permission);
+// 	
 // }
 // seedPerimissions();
 
@@ -526,22 +526,22 @@ async function main2() {
 }
 
 async function displayData() {
-	console.log('Seeding completed successfully!');
-	console.log(await prisma.user.findMany());
-	console.log(await prisma.book.findMany());
-	console.log(await prisma.monthlyIncome.findMany());
-	console.log(
+	
+	
+	
+	
+	
 		await prisma.role.findMany({
 			include: {
 				permissions: true
 			}
 		})
 	);
-	console.log(await prisma.permission.findMany());
+	
 }
 
 main2()
-	.catch((e) => console.error(e))
+	.catch((e) => 
 	.finally(async () => {
 		await displayData();
 		await prisma.$disconnect();

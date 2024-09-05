@@ -53,8 +53,6 @@ export async function POST(req: NextRequest) {
 
 		const mappedPermissions = mapPermissions(flattenedPermissions, userToApprove);
 
-		console.error('mapped permissions', mappedPermissions);
-
 		const ability = createAblity(mappedPermissions);
 
 		if (ability.can('approve', { ...userToApprove, __caslSubjectType__: 'User' })) {
@@ -93,7 +91,6 @@ export async function POST(req: NextRequest) {
 			}
 		});
 	} catch (err) {
-		console.error(err);
 		return NextResponse.json({
 			status: 'error',
 			data: {

@@ -120,7 +120,6 @@ export async function PUT(req: NextRequest) {
 			);
 		}
 	} catch (err) {
-		console.error(err);
 		return NextResponse.json(
 			{
 				status: 'error',

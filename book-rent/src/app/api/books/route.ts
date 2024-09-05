@@ -1,20 +1,24 @@
 import { prisma } from '@/db';
 import { verify } from '@/lib/utils';
 import { User } from '@prisma/client';
+import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
-
 	try {
-		const token = req.cookies.get('token');
-		const user = await verify<User>(token?.value ?? '');
+		const token = req.cookies.get('token')?.value ?? headers().get('token')?.split(' ').at(-1);
+
+		const user = await verify<User>(token ?? '');
 		if (!user) {
-			return NextResponse.json({
-				status: 'error',
-				data: {
-					message: 'Unauthorized'
-				}
-			});
+			return NextResponse.json(
+				{
+					status: 'error',
+					data: {
+						message: 'Unauthorized'
+					}
+				},
+				{ status: 400 }
+			);
 		}
 
 		const userFromDB = await prisma.user.findUnique({
@@ -83,7 +87,6 @@ export async function POST(req: NextRequest) {
 			}
 		});
 	} catch (e) {
-		console.error(e);
 		return NextResponse.json(
 			{
 				status: 'error',

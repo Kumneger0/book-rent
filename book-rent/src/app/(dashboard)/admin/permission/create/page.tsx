@@ -39,7 +39,6 @@ const NewPermissionForm: React.FC = () => {
 						toast.error(data.data.message);
 					}
 				} catch (err) {
-					console.error(err);
 				}
 			}}
 			sx={{ maxWidth: 400, margin: 'auto' }}

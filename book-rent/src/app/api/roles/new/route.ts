@@ -21,7 +21,6 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json({ status: 'success', data: { data: newRole } }, { status: 201 });
 	} catch (error) {
-		console.error('Error creating role:', error);
 		return NextResponse.json(
 			{
 				status: 'error',

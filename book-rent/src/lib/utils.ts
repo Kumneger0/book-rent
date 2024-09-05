@@ -235,7 +235,6 @@ export async function getTotalIncome() {
 		const totalIncome = await prisma.monthlyIncome.findMany();
 		return totalIncome;
 	} catch (err) {
-		console.log(err);
 		return [];
 	}
 }
@@ -453,7 +452,6 @@ export const getRoles = async () => {
 		const { data } = (await res.json()) as APIResponse;
 		return (data as unknown as { data: (Role & { permissions: PermissionModel[] })[] }).data;
 	} catch (error) {
-		console.log(error);
 		return [] as (Role & { permissions: PermissionModel[] })[];
 	}
 };
@@ -497,7 +495,7 @@ function setNestedValue(
 
 const isColumnExists = (
 	modelName: keyof typeof jsonSchema.definitions,
-	columnName: string
+	columnName: PropertyKey
 ): boolean => {
 	return columnName in jsonSchema.definitions[modelName]?.properties;
 };
@@ -536,7 +534,6 @@ const checkRelationFiledType = (
 	return checkRelationFiledType(rest, nextModelToCheck as Model, pkey.type);
 };
 
-
 const validateQueryType = (colType: string, op: string) => {
 	const stringOprators = stringFilterModes.map(({ pr }) => pr);
 	const numberOprators = numberFilterModes.map(({ pr }) => pr);
@@ -557,6 +554,8 @@ export function validateAndCreateFilter<PrismaWhereInput extends Record<string, 
 		throw new Error(`Schema for model ${modelName} not found`);
 	}
 
+	if (!input?.length) return {} as PrismaWhereInput;
+
 	const where = {};
 
 	for (const filter of input) {
@@ -576,7 +575,7 @@ export function validateAndCreateFilter<PrismaWhereInput extends Record<string, 
 			const nestedValues = columnType.isManyToMany
 				? (() => {
 						const [last, ...rest] = [...relationFiled].reverse();
-						return [...rest.reverse(), (manyToManyOp ?? 'some'), last];
+						return [...rest.reverse(), manyToManyOp ?? 'some', last];
 				  })()
 				: relationFiled;
 
@@ -585,7 +584,7 @@ export function validateAndCreateFilter<PrismaWhereInput extends Record<string, 
 		const col = modelSchema.properties[column as keyof typeof modelSchema.properties];
 
 		if (!col) {
-			console.error('Invalid column:', column);
+			
 			continue;
 		}
 
@@ -602,7 +601,7 @@ export function validateAndCreateFilter<PrismaWhereInput extends Record<string, 
 		const parsedValue = isNumber ? Number(value) : value;
 
 		if (isNumber && isNaN(parsedValue as number)) {
-			console.error('Invalid number value for column:', column);
+			
 			continue;
 		}
 

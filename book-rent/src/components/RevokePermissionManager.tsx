@@ -55,7 +55,6 @@ export const RolePermissionManager = async ({
 				toast.success('succuess');
 			}
 		} catch (err) {
-			console.error(err);
 			toast.error(err instanceof Error ? err.message : 'failed to revoke permission');
 		}
 	};

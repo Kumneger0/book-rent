@@ -1,12 +1,13 @@
 import { prisma } from '@/db';
 import { createAblity, getRolePermissions, mapPermissions, verify } from '@/lib/utils';
 import { User } from '@prisma/client';
+import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const DELETE = async (req: NextRequest) => {
 	try {
-		const token = req.cookies.get('token');
-		const decoded = await verify<User>(token?.value ?? '');
+		const token = req.cookies.get('token')?.value ?? headers().get('token')?.split(' ').at(-1);
+		const decoded = await verify<User>(token ?? '');
 		if (!decoded) {
 			return NextResponse.json({
 				status: 'error',
@@ -87,7 +88,6 @@ export const DELETE = async (req: NextRequest) => {
 			{ status: 403 }
 		);
 	} catch (err) {
-		console.error(err);
 		return NextResponse.json(
 			{
 				status: 'error',

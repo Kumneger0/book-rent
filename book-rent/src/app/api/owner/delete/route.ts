@@ -89,7 +89,6 @@ export async function DELETE(req: NextRequest) {
 			}
 		});
 	} catch (err) {
-		console.error(err);
 		return NextResponse.json({
 			status: 'error',
 			data: {

@@ -40,7 +40,6 @@ const disableOwner = async (id, isActive, token) => {
 
 		return data;
 	} catch (error) {
-		console.error('Fetch error:', error);
 		throw error;
 	}
 };
@@ -86,7 +85,6 @@ const login = async ({ email, password }) => {
 
 		return token;
 	} catch (errr) {
-		console.error(errr);
 	}
 };
 
@@ -103,13 +101,13 @@ const login = async ({ email, password }) => {
 	});
 
 	Then('the owner account should be disabled', function () {
-		assert.strictEqual(this.actualResult.data.owner.isActive, this.isActive);
+		assert.strictEqual(this.actualResult.data.owner?.isActive, this.isActive);
 	});
 
 	Then('all associated books should be marked as unavailable', function () {
-		const isBooksDisabled = this.actualResult.data.owner.Book.every(
-			({ isApproved }) => isApproved === false
-		);
+		const isBooksDisabled =
+			this.actualResult.data.owner.Book.every(({ isApproved }) => isApproved === false) ??
+			this.actualResult.data?.owner?.Book.length == 0;
 		assert.strictEqual(isBooksDisabled, true);
 	});
 }
@@ -132,5 +130,6 @@ const login = async ({ email, password }) => {
 }
 
 module.exports = {
-	login
+	login,
+	admin
 };

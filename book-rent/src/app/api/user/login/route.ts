@@ -56,7 +56,6 @@ export const POST = async (req: Request) => {
 			})
 		);
 	} catch (err) {
-		console.error(err);
 		return new Response(
 			JSON.stringify({
 				status: 'error',

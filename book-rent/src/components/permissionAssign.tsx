@@ -67,7 +67,6 @@ function PermissionManager({
 			}
 		} catch (errr) {
 			toast.error('Failed to assign permission');
-			console.error(errr);
 		} finally {
 			setIsLoading(false);
 			router.refresh();

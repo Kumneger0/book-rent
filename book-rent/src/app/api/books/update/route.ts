@@ -10,8 +10,6 @@ export async function PUT(req: NextRequest) {
 
 		const user = await verify<User>(token ?? '');
 
-		console.error('user id', user.id);
-
 		if (!user) {
 			return NextResponse.json({
 				status: 'error',
@@ -65,8 +63,6 @@ export async function PUT(req: NextRequest) {
 
 		const mappedPermissions = mapPermissions(userPermissions, userFromDB);
 
-		console.error('mappedpersmiison', mappedPermissions);
-
 		const ability = createAblity(mappedPermissions);
 		if (ability.can('update', { ...userBook, __caslSubjectType__: 'Book' })) {
 			const updatedBook = await prisma.book.update({
@@ -97,7 +93,6 @@ export async function PUT(req: NextRequest) {
 			{ status: 400 }
 		);
 	} catch (e) {
-		console.error(e);
 		return NextResponse.json(
 			{
 				status: 'error',

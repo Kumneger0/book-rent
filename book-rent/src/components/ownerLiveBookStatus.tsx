@@ -84,7 +84,6 @@ export const TableOwner = ({ data }: TableProps) => {
 				toast.error('Failed to Delete your book');
 			}
 		} catch (err) {
-			console.error(err);
 		}
 	};
 
@@ -222,8 +221,6 @@ export const TableOwner = ({ data }: TableProps) => {
 				id: string;
 				value: string;
 			}[];
-
-         console.error('filter', filter)
 
 			const merged = filterData.length ? [...filterData, ...filter] : filter;
 			const userFilterData = merged

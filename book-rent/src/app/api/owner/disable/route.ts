@@ -69,6 +69,8 @@ export async function POST(req: NextRequest) {
 					{ status: 400 }
 				);
 
+			if (!json.isActive) await disableOwnerBooks(json.id);
+
 			const disabledOwner = await prisma.user.update({
 				where: {
 					id: json.id
@@ -84,8 +86,6 @@ export async function POST(req: NextRequest) {
 					}
 				}
 			});
-
-			if (!json.isActive) await disableOwnerBooks(json.id);
 
 			return NextResponse.json({
 				status: 'success',
@@ -105,7 +105,6 @@ export async function POST(req: NextRequest) {
 			{ status: 403 }
 		);
 	} catch (err) {
-		console.error(err);
 		return NextResponse.json({
 			status: 'error',
 			data: {
@@ -115,7 +114,7 @@ export async function POST(req: NextRequest) {
 	}
 }
 async function disableOwnerBooks(ownerId: number) {
-	const updteResult = await prisma.book.updateMany({
+	await prisma.book.updateMany({
 		where: {
 			ownerId
 		},

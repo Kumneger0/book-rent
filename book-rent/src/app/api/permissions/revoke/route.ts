@@ -50,7 +50,6 @@ export const DELETE = async (req: NextRequest) => {
 			}
 		} satisfies APIResponse);
 	} catch (error) {
-		console.error(error);
 		return NextResponse.json(
 			{ status: 'error', message: 'Internal server error' },
 			{ status: 500 }
