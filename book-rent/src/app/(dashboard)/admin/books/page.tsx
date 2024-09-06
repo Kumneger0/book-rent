@@ -1,33 +1,45 @@
 import Example from '@/components/books';
 import SharedHeader from '@/components/sharedHead';
-import { prisma } from '@/db';
-import { validateAndCreateFilter } from '@/lib/utils';
+import { baseURL } from '@/lib/utils';
 import { Box } from '@mui/material';
-import { Prisma } from '@prisma/client';
-import React from 'react';
+import { Book } from '@prisma/client';
+import { cookies } from 'next/headers';
 
 async function Books({ searchParams }: { searchParams: Record<string, string> }) {
-	const where = validateAndCreateFilter<Prisma.BookWhereInput>('Book', searchParams);
+	const filter = searchParams.filter;
 
-	const books = await prisma.book.findMany({
-		where,
-		include: {
-			owner: {
-				select: {
-					fullName: true
-				}
-			}
-		},
-		orderBy: {
-			bookName: 'asc'
+	const token = cookies().get('token');
+
+	const books = await fetch(`${baseURL}/api/books/getbooks?filter=${filter ?? '{}'}`, {
+		headers: {
+			token: `Bearer ${token?.value}`
 		}
-	});
+	})
+		.then((res) => res.json())
+		.then(
+			(data: {
+				status: 'success' | 'error';
+				data: { books: Book & { owner: { fullName: string } }[] };
+			}) => {
+				console.error('allbooks from all owner', data);
+				if (data.status === 'error') {
+					throw new Error('Failed to fetch books');
+				}
+				return data.data.books;
+			}
+		)
+		.catch((error) => {
+			console.error('Error fetching books:', error);
+			return [];
+		});
+
 	return (
 		<Box sx={{ flexGrow: 1 }}>
 			<SharedHeader>Admin/Books</SharedHeader>
 			<Box sx={{ p: 2, borderRadius: 3, boxShadow: 1, backgroundColor: 'white' }}>
-				<h3>List of Owners</h3>
-				<Example data={books} />
+				<h3>List of Books</h3>
+				{/* @ts-expect-error */}
+				<Example data={books || []} />
 			</Box>
 		</Box>
 	);

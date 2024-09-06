@@ -4,12 +4,10 @@ const { login, admin } = require('./disableEnableOwner');
 
 const BASE_URL = 'http://localhost:4000';
 
-const TEST_BOOK_ID = 17;
-
 const bookowners = [
 	{
 		email: 'tom@example02.com',
-		password: 'password345' // book owner - tom has a book with id of 5
+		password: 'password345'
 	},
 	{
 		email: 'jane@exampl02e.com',
@@ -117,14 +115,9 @@ const deleteBook = async (bookId, token) => {
  */
 
 /**
- * Uploads a new book to the system
- * @param {Object} bookData - The data for the new book
- * @param {string} bookData.bookName - The name of the book
- * @param {string} bookData.category - The category of the book
- * @param {number} bookData.price - The price of the book
- * @param {number} bookData.quantity - The quantity of the book
- * @param {string} token - The authentication token of the book owner
- * @returns {Promise<UploadBookResponse>} A promise that resolves to the upload response
+ * @param {number} quantity
+ * @param {string} token
+ * @returns {Promise<UploadBookResponse>}
  */
 const uploadBook = async (quantity, token) => {
 	try {
@@ -245,7 +238,7 @@ const approveBook = async (bookId, adminToken) => {
  */
 const getAvailableBooks = async () => {
 	try {
-		const response = await fetch(`${BASE_URL}/api/books/getbooks`, {
+		const response = await fetch(`${BASE_URL}/api/books/user/getbooks`, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json'
@@ -277,6 +270,9 @@ const rentBook = async (bookId, authorId, price, token) => {
 		});
 
 		const data = await response.json();
+
+		console.log('book rent result', data);
+
 		if (response.ok) {
 		} else {
 		}
@@ -298,6 +294,9 @@ const returnBook = async (bookId, token) => {
 		});
 
 		const data = await response.json();
+
+		console.log('book return result', data);
+
 		if (response.ok) {
 		} else {
 		}
@@ -307,16 +306,42 @@ const returnBook = async (bookId, token) => {
 	}
 };
 
+const getAllBooksFromAllOwner = async (token) => {
+	try {
+		const response = await fetch(`${BASE_URL}/api/books/user/getbooks`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				token: `Bearer ${token}`
+			}
+		});
+
+		/** @type {GetBooksResponse} */
+		const result = await response.json();
+
+		if (result.status === 'success') {
+			return { status: result.status, books: result.data.books };
+		} else {
+			throw new Error(result.data.message || 'Failed to fetch approved books');
+		}
+	} catch (error) {
+		throw error;
+	}
+};
+
+let bookId;
+
 {
 	// update my own book
 	Given('the owner has a book in their collection', async function () {
 		const { email, password } = bookowners[0];
 		this.token = await login({ email, password });
+		bookId = (await getOwnerBalanceAndBookToRent(this.token)).ownerBooks?.[0]?.id;
 		this.bookId = 7;
 	});
 
 	When('the owner requests to update the book details', async function () {
-		this.actualAnswer = await update(this.bookId, this.token);
+		this.actualAnswer = await update(bookId, this.token);
 		assert.ok(!!this.actualAnswer);
 	});
 
@@ -330,11 +355,10 @@ const returnBook = async (bookId, token) => {
 	Given('there is a book owned by a different user', async function () {
 		const { email, password } = bookowners[1];
 		this.token = await login({ email, password });
-		this.bookId = 7;
 	});
 
 	When('an unauthorized user attempts to update the book details', async function () {
-		this.actualAnswer = await update(this.bookId, this.token);
+		this.actualAnswer = await update(bookId, this.token);
 	});
 
 	Then('the system should return an {string} message', function (expectedAnswer) {
@@ -348,7 +372,10 @@ const returnBook = async (bookId, token) => {
 		const { email, password } = bookowners[0];
 		this.token = await login({ email, password });
 
-		this.bookId = TEST_BOOK_ID;
+		//get random book to delete
+		const randomBookToDelete = (await getOwnerBalanceAndBookToRent(this.token)).ownerBooks?.[0];
+
+		this.bookId = randomBookToDelete.id;
 	});
 
 	When('the owner initiates the book deletion process', async function () {
@@ -487,9 +514,11 @@ Given('an owner has uploaded two pieces of the same book', async function () {
 	const { email, password } = bookowners[0];
 	this.ownerToken = await login({ email, password });
 	const result = await uploadBook(2, this.ownerToken);
+	console.log('book upload result', result);
 	this.bookId = result.bookId;
 	const adminToken = await login({ email: admin.email, password: admin.password });
-	await approveBook(this.bookId, adminToken);
+	const approveResult = await approveBook(this.bookId, adminToken);
+	console.log('approve result', approveResult);
 	const { authorId } = await getOwnerBalanceAndBookToRent(this.ownerToken);
 	this.authorId = authorId;
 });
@@ -506,7 +535,7 @@ When('both pieces are rented', async function () {
 	const secondUserPass = '6GuPUpLJlA*Dn&u#';
 	this.secondUserToken = await login({ email: secondUserEmail, password: secondUserPass });
 
-	await rentBook(this.bookId, this.authorId, 150, this.userToken);
+	await rentBook(this.bookId, this.authorId, 150, this.secondUserToken);
 
 	assert.ok(this.secondUserToken, 'user token needed to rent books');
 });
@@ -518,7 +547,7 @@ Then('the book should be unavailable for rent until one of them is returned', as
 		isBookNotAvailBeforeReturn,
 		'book should not available for rent since both pieces are rented'
 	);
-	await returnBook(this.bookId, this.userToken);
+	await returnBook(this.bookId, this.secondUserToken);
 
 	const allbooksAfterReturn = await getAvailableBooks();
 	const isBookNotAvailAfterRetrun = allbooksAfterReturn.some(
@@ -527,3 +556,22 @@ Then('the book should be unavailable for rent until one of them is returned', as
 
 	assert.ok(isBookNotAvailAfterRetrun, 'book should be avail since on of user returns abook');
 });
+
+Given('the user is a system admin', async function () {
+	this.adminToken = await login({ email: admin.email, password: admin.password });
+	assert.ok(this.adminToken, 'token is needed to perform opration');
+});
+
+When('the admin requests to view all books', async function () {
+	const { books, status } = await getAllBooksFromAllOwner(this.adminToken);
+	this.getBooksFromAllOwnerResult = status;
+	this.booksFromAllOwners = await getAllBooksFromAllOwner(this.adminToken);
+});
+
+Then('the system should display all books from all owners', function () {
+	assert.ok(this.getBooksFromAllOwnerResult == 'success');
+});
+
+module.exports = {
+	getOwnerBalanceAndBookToRent
+};

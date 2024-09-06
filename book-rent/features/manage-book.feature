@@ -44,4 +44,7 @@ Feature: Update and delete owner book
     When both pieces are rented
     Then the book should be unavailable for rent until one of them is returned
 
-
+  Scenario: Only system admins can see and filter through all books from all owners
+    Given the user is a system admin
+    When the admin requests to view all books
+    Then the system should display all books from all owners
