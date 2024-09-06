@@ -69,7 +69,6 @@ export type Permission = {
 	role: PermissionType['role'];
 };
 
-
 export type FilterSearchParam = {
 	op: string;
 	column: string;

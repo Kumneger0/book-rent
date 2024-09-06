@@ -6,7 +6,6 @@ import { User } from '@prisma/client';
 import { cookies } from 'next/headers';
 import React from 'react';
 
-
 async function BookUpload() {
 	const token = cookies().get('token')!;
 	const user = await verify<User>(token.value)!;

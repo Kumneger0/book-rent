@@ -20,7 +20,6 @@ import { ReadonlyURLSearchParams } from 'next/navigation';
 import React from 'react';
 import { z } from 'zod';
 
-
 import objectPath from 'object-path';
 
 import jsonSchema from '../../prisma/json-schema/json-schema.json' assert { type: 'json' };
@@ -285,19 +284,22 @@ export const fillerSixMonthsChartData = (
 export async function combineEachUserMontheyIncome(
 	income: NonNullable<Awaited<ReturnType<typeof getTotalIncome>>>
 ) {
-	const combinedData = income.reduce((acc, curr) => {
-		const { month, year, income } = curr;
-		const key = `${month}-${year}`;
-		if (!acc[key]) {
-			acc[key] = {
-				month,
-				year,
-				income: 0
-			};
-		}
-		acc[key].income += income;
-		return acc;
-	}, {} as Record<string, { month: number; year: number; income: number }>);
+	const combinedData = income.reduce(
+		(acc, curr) => {
+			const { month, year, income } = curr;
+			const key = `${month}-${year}`;
+			if (!acc[key]) {
+				acc[key] = {
+					month,
+					year,
+					income: 0
+				};
+			}
+			acc[key].income += income;
+			return acc;
+		},
+		{} as Record<string, { month: number; year: number; income: number }>
+	);
 	return Object.values(combinedData);
 }
 
@@ -352,14 +354,17 @@ export function onColumnFiltersChange({
 }
 
 export function getBooKPieChart(book: Book[]) {
-	const numberOfBooksByCategory = book.reduce((acc, book) => {
-		const category = book.category;
-		if (!acc[category]) {
-			acc[category] = 0;
-		}
-		acc[category]++;
-		return acc;
-	}, {} as Record<$Enums.Category, number>);
+	const numberOfBooksByCategory = book.reduce(
+		(acc, book) => {
+			const category = book.category;
+			if (!acc[category]) {
+				acc[category] = 0;
+			}
+			acc[category]++;
+			return acc;
+		},
+		{} as Record<$Enums.Category, number>
+	);
 
 	const data = Object.entries(numberOfBooksByCategory ?? {}).map(([label, value]) => ({
 		label,
@@ -402,7 +407,7 @@ export function mapPermissions(
 					}
 					return value;
 				})
-			} satisfies Permission)
+			}) satisfies Permission
 	);
 }
 
@@ -475,7 +480,7 @@ function setNestedValue(
 	value: any,
 	op: string,
 	type: string
-){
+) {
 	if (type == 'string') {
 		objectPath.set(obj, keys.join('.'), {
 			[op]: value,
@@ -576,7 +581,7 @@ export function validateAndCreateFilter<PrismaWhereInput extends Record<string, 
 				? (() => {
 						const [last, ...rest] = [...relationFiled].reverse();
 						return [...rest.reverse(), manyToManyOp ?? 'some', last];
-				  })()
+					})()
 				: relationFiled;
 
 			setNestedValue(where, nestedValues, value, op, columnType.type);
@@ -584,7 +589,6 @@ export function validateAndCreateFilter<PrismaWhereInput extends Record<string, 
 		const col = modelSchema.properties[column as keyof typeof modelSchema.properties];
 
 		if (!col) {
-			
 			continue;
 		}
 
@@ -601,7 +605,6 @@ export function validateAndCreateFilter<PrismaWhereInput extends Record<string, 
 		const parsedValue = isNumber ? Number(value) : value;
 
 		if (isNumber && isNaN(parsedValue as number)) {
-			
 			continue;
 		}
 

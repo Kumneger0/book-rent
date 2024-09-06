@@ -18,7 +18,7 @@ export const DELETE = async (req: NextRequest) => {
 				},
 				{ status: 400 }
 			);
-	
+
 		const role = await prisma.role.findFirst({
 			where: {
 				id: roleId

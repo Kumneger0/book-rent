@@ -83,8 +83,7 @@ export const TableOwner = ({ data }: TableProps) => {
 			if (data.status == 'error') {
 				toast.error('Failed to Delete your book');
 			}
-		} catch (err) {
-		}
+		} catch (err) {}
 	};
 
 	const columns = useMemo<MRT_ColumnDef<(typeof data)[number]>[]>(

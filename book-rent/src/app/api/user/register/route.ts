@@ -8,9 +8,10 @@ export const POST = async (req: NextRequest) => {
 	const body = (await req?.json()) as unknown as User & {
 		confirmPassword: string;
 		terms: string;
+		role: string;
 	};
 
-	const { confirmPassword, terms, ...userData } = body;
+	const { confirmPassword, terms, role: roleName, ...userData } = body;
 
 	if (!userData)
 		return new Response(
@@ -41,20 +42,35 @@ export const POST = async (req: NextRequest) => {
 			);
 		}
 
+		const role = await prisma.role.findFirst({
+			where: {
+				name: roleName
+			}
+		});
+
 		const newUser = await prisma.user.create({
-			data: { ...userData, password: hashedPassWord }
+			data: {
+				...userData,
+				password: hashedPassWord,
+				role: {
+					connect: {
+						id: role?.id
+					}
+				}
+			}
 		});
 		return new Response(
 			JSON.stringify({
 				status: 'success',
 				data: {
 					message: 'user created successfully',
-					user: user
+					user: newUser
 				}
 			}),
 			{ status: 200 }
 		);
 	} catch (err) {
+		console.error(err);
 		return new Response(
 			JSON.stringify({
 				status: 'error',

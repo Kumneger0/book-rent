@@ -84,8 +84,7 @@ const login = async ({ email, password }) => {
 		const token = setCookieHeader.split(';')[0].split('=').at(-1);
 
 		return token;
-	} catch (errr) {
-	}
+	} catch (errr) {}
 };
 
 {
@@ -129,7 +128,4 @@ const login = async ({ email, password }) => {
 	});
 }
 
-module.exports = {
-	login,
-	admin
-};
+module.exports = { login, admin };

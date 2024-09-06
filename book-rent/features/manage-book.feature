@@ -22,6 +22,7 @@ Feature: Update and delete owner book
     When an unauthorized user tries to delete the book
     Then the book should remain in the system
     And the unauthorized user should get an "error" notification
+    
 
   Scenario: Book visibility after owner upload and admin approval
     Given an owner has uploaded a new book to the system
@@ -37,5 +38,10 @@ Feature: Update and delete owner book
     Given the owner's initial wallet balance is recorded
     When a customer rents the book
     Then the owner's wallet should be incremented by the rental price
+
+  Scenario: Book becomes unavailable when both pieces are rented
+    Given an owner has uploaded two pieces of the same book
+    When both pieces are rented
+    Then the book should be unavailable for rent until one of them is returned
 
 

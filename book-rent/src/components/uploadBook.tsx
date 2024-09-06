@@ -124,7 +124,7 @@ function UploadBook({ books }: { books: Partial<Book>[] }) {
 						quantity: bookQuantity ?? 0,
 						price: bookPrice ?? 0
 					}
-			  ])
+				])
 			: books
 	).filter(
 		({ bookName, author }) =>

@@ -6,7 +6,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 
-
 type Permissions = Awaited<ReturnType<typeof prisma.permission.findMany>>;
 const getAllPermmissions = async (): Promise<Permissions | null> => {
 	try {
@@ -21,7 +20,7 @@ const getAllPermmissions = async (): Promise<Permissions | null> => {
 		return null;
 	}
 };
- 
+
 const ViewPermissions: React.FC = async () => {
 	const permissions = await getAllPermmissions();
 	if (!permissions) return <div>No Permission found</div>;

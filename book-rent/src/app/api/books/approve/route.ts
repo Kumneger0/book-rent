@@ -92,11 +92,12 @@ export async function PUT(req: NextRequest) {
 			}
 		});
 	} catch (e) {
+		console.error(e);
 		return NextResponse.json(
 			{
 				status: 'error',
 				data: {
-					message: 'Book upload failed'
+					message: 'Book approve failed'
 				}
 			},
 			{ status: 500 }

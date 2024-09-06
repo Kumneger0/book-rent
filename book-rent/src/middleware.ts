@@ -3,8 +3,6 @@ import { NextResponse } from 'next/server';
 import { verify } from './lib/utils';
 import { User } from '@prisma/client';
 
-
-
 export async function middleware(req: NextRequest) {
 	try {
 		const token = req.cookies.get('token');

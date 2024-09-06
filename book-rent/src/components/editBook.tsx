@@ -59,8 +59,7 @@ export default function BasicModal({
 			if (result?.status) {
 				handleClose();
 			}
-		} catch (err) {
-		}
+		} catch (err) {}
 	};
 
 	return (

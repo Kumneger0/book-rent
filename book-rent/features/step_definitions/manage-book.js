@@ -17,6 +17,21 @@ const bookowners = [
 	}
 ];
 
+/**
+ * @typedef {Object} User
+ * @property {number} id - The unique identifier for the user.
+ * @property {string} fullName - The full name of the user.
+ * @property {string} email - The email address of the user.
+ * @property {string} password - The password of the user.
+ * @property {string} location - The location of the user.
+ * @property {string} phoneNumber - The phone number of the user.
+ * @property {boolean} approved - Indicates if the user is approved.
+ * @property {boolean} isActive - Indicates if the user account is active.
+ * @property {number} roleId - The role identifier for the user.
+ * @property {Book[]} Book
+ * @property {MonthlyIncome[]} MonthlyIncome - The user's monthly income details.
+ */
+
 setDefaultTimeout(10000);
 
 /**
@@ -37,6 +52,7 @@ setDefaultTimeout(10000);
  * @param {string} token - a token for owner who updates the book
  * @returns {Promise<'success' | 'error'>} The updated book data
  */
+
 const updateBook = async (bookData, token) => {
 	try {
 		const response = await fetch(`${BASE_URL}/api/books/update`, {
@@ -110,7 +126,7 @@ const deleteBook = async (bookId, token) => {
  * @param {string} token - The authentication token of the book owner
  * @returns {Promise<UploadBookResponse>} A promise that resolves to the upload response
  */
-const uploadBook = async (bookData, token) => {
+const uploadBook = async (quantity, token) => {
 	try {
 		const response = await fetch(`${BASE_URL}/api/books`, {
 			method: 'POST',
@@ -118,14 +134,20 @@ const uploadBook = async (bookData, token) => {
 				'Content-Type': 'application/json',
 				token: `Bearer ${token}`
 			},
-			body: JSON.stringify(bookData)
+			body: JSON.stringify({
+				name: `New Test Book ${Math.random().toString()}`,
+				author: 'test author',
+				category: 'fiction',
+				price: 150,
+				quantity
+			})
 		});
 		const { data } = await response.json();
 		return { bookId: data.book?.id };
 	} catch (err) {}
 };
 
-const getOwnerBalance = async (token) => {
+const getOwnerBalanceAndBookToRent = async (token) => {
 	const response = await fetch(`${BASE_URL}/api/me`, {
 		method: 'GET',
 		headers: {
@@ -138,8 +160,30 @@ const getOwnerBalance = async (token) => {
 		throw new Error(`HTTP error! status: ${response.status}`);
 	}
 
-	const data = await response.json();
-	return data.balance;
+	/**
+	 * @typedef {Object} ApiResponseMe
+	 * @property {'success' | 'error'} status
+	 * @property {object} data
+	 * @property {User} data.user
+	 */
+
+	/**
+	 * @type ApiResponseMe
+	 */
+
+	const { data } = await response.json();
+
+	/**
+	 * @type {number}
+	 */
+	const balance = data.user.MonthlyIncome.map(({ income }) => income).reduce(
+		(prv, curr) => prv + curr,
+		0
+	);
+
+	const ownerBooks = data.user.Book;
+
+	return { balance, ownerBooks, authorId: data.user.id };
 };
 
 /**
@@ -167,6 +211,7 @@ const approveBook = async (bookId, adminToken) => {
 		});
 
 		const data = await response.json();
+		console.log('approve result', data);
 		if (response.ok) {
 			return data.status;
 		} else {
@@ -217,6 +262,48 @@ const getAvailableBooks = async () => {
 		}
 	} catch (error) {
 		throw error;
+	}
+};
+
+const rentBook = async (bookId, authorId, price, token) => {
+	try {
+		const response = await fetch(`${BASE_URL}/api/books/rent`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				token: `Bearer ${token}`
+			},
+			body: JSON.stringify({ bookId, authorId, price })
+		});
+
+		const data = await response.json();
+		if (response.ok) {
+		} else {
+		}
+	} catch (err) {
+		console.errror(err);
+		throw err;
+	}
+};
+
+const returnBook = async (bookId, token) => {
+	try {
+		const response = await fetch(`${BASE_URL}/api/books/return`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				token: `Bearer ${token}`
+			},
+			body: JSON.stringify({ bookId })
+		});
+
+		const data = await response.json();
+		if (response.ok) {
+		} else {
+		}
+	} catch (err) {
+		console.errror(err);
+		throw err;
 	}
 };
 
@@ -283,6 +370,7 @@ const getAvailableBooks = async () => {
 		const { email, password } = bookowners[1];
 		this.token = await login({ email, password });
 		this.bookId = 7;
+		assert.ok(this.token, 'Token is needed to make a request');
 	});
 
 	When('an unauthorized user tries to delete the book', async function () {
@@ -304,15 +392,9 @@ const getAvailableBooks = async () => {
 	Given('an owner has uploaded a new book to the system', async function () {
 		const { email, password } = bookowners[0];
 		this.ownerToken = await login({ email, password });
-		const bookData = {
-			name: `New Test Book ${Math.random().toString()}`,
-			author: 'test author',
-			category: 'fiction',
-			price: 150,
-			quantity: 100
-		};
-		const result = await uploadBook(bookData, this.ownerToken);
-		uploadedBookId = result.bookId;
+
+		uploadedBookId = (await uploadBook(100, this.ownerToken)).bookId;
+
 		assert.ok(uploadedBookId, 'Book should be uploaded successfully');
 	});
 
@@ -324,6 +406,10 @@ const getAvailableBooks = async () => {
 
 	Then('the book should appear in the list of books available for rent', async function () {
 		const availableBooks = await getAvailableBooks();
+
+		console.log('avail books', availableBooks);
+
+		console.log('bookiD', uploadedBookId);
 
 		const bookIsAvailable = availableBooks.some((book) => book?.id === uploadedBookId);
 		assert.ok(bookIsAvailable, 'Approved book should be available for rent');
@@ -339,15 +425,7 @@ const getAvailableBooks = async () => {
 		const { email, password } = bookowners[0];
 		this.ownerToken = await login({ email, password });
 
-		const bookData = {
-			name: `New Test Book ${Math.random().toString()}`,
-			author: 'test author',
-			category: 'fiction',
-			price: 150,
-			quantity: 100
-		};
-
-		const result = await uploadBook(bookData, this.ownerToken);
+		const result = await uploadBook(100, this.ownerToken);
 		assert.ok(!!result.bookId, 'Book should be uploaded successfully');
 	});
 
@@ -363,33 +441,89 @@ const getAvailableBooks = async () => {
 }
 
 {
-	let initialBalance;
-	let bookId;
-	let rentalPrice;
-
 	Given("the owner's initial wallet balance is recorded", async function () {
 		const { email, password } = bookowners[0];
 		this.ownerToken = await login({ email, password });
-		initialBalance = await getOwnerBalance(this.ownerToken);
-		assert.ok(typeof initialBalance === 'number', 'Initial balance should be a number');
-
-		const availableBooks = await getAvailableBooks();
-		const bookToRent = availableBooks[0];
+		const { balance, ownerBooks, authorId } = await getOwnerBalanceAndBookToRent(this.ownerToken);
+		this.initialBalance = balance;
+		assert.ok(typeof this.initialBalance === 'number', 'Initial balance should be a number');
+		const bookToRent = ownerBooks[Math.floor(Math.random() * ownerBooks.length)];
 		assert.ok(bookToRent, 'There should be at least one book available for rent');
-		bookId = bookToRent.id;
-		rentalPrice = bookToRent.price;
+		this.bookId = bookToRent.id;
+		this.rentalPrice = bookToRent.price;
+		this.authorId = authorId;
 	});
 
 	When('a customer rents the book', async function () {
-		await rentBook(bookId, 'customer_token');
+		const email = 'alice@examp02le.com';
+		const password = 'password012';
+
+		const userToken = await login({ email, password });
+
+		assert.ok(userToken, 'user token needed to rent books');
+
+		await rentBook(this.bookId, this.authorId, this.rentalPrice, userToken);
 	});
 
 	Then("the owner's wallet should be incremented by the rental price", async function () {
-		const updatedBalance = await getOwnerBalance(this.ownerToken);
+		const { balance } = await getOwnerBalanceAndBookToRent(this.ownerToken);
+
+		console.log('table data');
+		console.table({
+			initialBalance: this.initialBalance,
+			rentalPrice: this.rentalPrice,
+			newBalance: balance
+		});
+
 		assert.strictEqual(
-			updatedBalance,
-			initialBalance + rentalPrice,
-			`Owner's wallet should be incremented by ${rentalPrice}`
+			balance,
+			this.initialBalance + this.rentalPrice,
+			`Owner's wallet should be incremented by ${this.rentalPrice}`
 		);
 	});
 }
+
+Given('an owner has uploaded two pieces of the same book', async function () {
+	const { email, password } = bookowners[0];
+	this.ownerToken = await login({ email, password });
+	const result = await uploadBook(2, this.ownerToken);
+	this.bookId = result.bookId;
+	const adminToken = await login({ email: admin.email, password: admin.password });
+	await approveBook(this.bookId, adminToken);
+	const { authorId } = await getOwnerBalanceAndBookToRent(this.ownerToken);
+	this.authorId = authorId;
+});
+
+When('both pieces are rented', async function () {
+	const email = 'alice@examp02le.com';
+	const password = 'password012';
+	this.userToken = await login({ email, password });
+
+	assert.ok(this.userToken, 'user token needed to rent books');
+
+	await rentBook(this.bookId, this.authorId, 150, this.userToken);
+	const secondUserEmail = 'zamarian.jerren@frontads.org';
+	const secondUserPass = '6GuPUpLJlA*Dn&u#';
+	this.secondUserToken = await login({ email: secondUserEmail, password: secondUserPass });
+
+	await rentBook(this.bookId, this.authorId, 150, this.userToken);
+
+	assert.ok(this.secondUserToken, 'user token needed to rent books');
+});
+
+Then('the book should be unavailable for rent until one of them is returned', async function () {
+	const allbooks = await getAvailableBooks();
+	const isBookNotAvailBeforeReturn = allbooks.every(({ id }) => Number(id) !== Number(this.bookId));
+	assert.ok(
+		isBookNotAvailBeforeReturn,
+		'book should not available for rent since both pieces are rented'
+	);
+	await returnBook(this.bookId, this.userToken);
+
+	const allbooksAfterReturn = await getAvailableBooks();
+	const isBookNotAvailAfterRetrun = allbooksAfterReturn.some(
+		({ id }) => Number(id) === Number(this.bookId)
+	);
+
+	assert.ok(isBookNotAvailAfterRetrun, 'book should be avail since on of user returns abook');
+});

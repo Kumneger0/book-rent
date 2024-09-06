@@ -58,9 +58,3 @@ export const EarningsSummaryChart = ({
 		</Box>
 	);
 };
-
-
-
-
-
-

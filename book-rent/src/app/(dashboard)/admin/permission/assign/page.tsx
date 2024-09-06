@@ -4,8 +4,6 @@ import { Permission, Role } from '@prisma/client';
 import PermissionAssign from '@/components/permissionAssign';
 import { baseURL, getRoles } from '@/lib/utils';
 
-
-
 const getPermissions = async () => {
 	try {
 		const res = await fetch(`${baseURL}/api/permissions`, { cache: 'no-store' });

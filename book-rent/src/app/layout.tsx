@@ -9,6 +9,7 @@ const inter = Inter({ subsets: ['latin'] });
 import { getCurrentUser } from '@/actions';
 import UserContextWrapper from '@/components/UserContextWrapper';
 import NextTopLoader from 'nextjs-toploader';
+import { prisma } from '@/db';
 
 export const metadata: Metadata = {
 	metadataBase: new URL('https://book-rent-challenge.vercel.app/'),
