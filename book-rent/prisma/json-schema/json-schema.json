@@ -1,280 +1,324 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema#",
-	"definitions": {
-		"User": {
-			"type": "object",
-			"properties": {
-				"id": {
-					"type": "integer",
-					"originalType": "Int"
-				},
-				"fullName": {
-					"type": "string",
-					"originalType": "String"
-				},
-				"email": {
-					"type": "string",
-					"originalType": "String"
-				},
-				"password": {
-					"type": "string",
-					"originalType": "String"
-				},
-				"location": {
-					"type": "string",
-					"originalType": "String"
-				},
-				"phoneNumber": {
-					"type": "string",
-					"originalType": "String"
-				},
-				"rentedBooks": {
-					"type": "array",
-					"originalType": "Book",
-					"items": {
-						"$ref": "#/definitions/Book"
-					}
-				},
-				"approved": {
-					"type": "boolean",
-					"originalType": "Boolean",
-					"default": false
-				},
-				"isActive": {
-					"type": "boolean",
-					"originalType": "Boolean",
-					"default": true
-				},
-				"wallet": {
-					"type": "integer",
-					"originalType": "Int",
-					"default": 0
-				},
-				"MonthlyIncome": {
-					"type": "array",
-					"originalType": "MonthlyIncome",
-					"items": {
-						"$ref": "#/definitions/MonthlyIncome"
-					}
-				},
-				"Book": {
-					"type": "array",
-					"originalType": "Book",
-					"items": {
-						"$ref": "#/definitions/Book"
-					}
-				},
-				"role": {
-					"$ref": "#/definitions/Role"
-				},
-				"roleId": {
-					"type": "integer",
-					"originalType": "Int"
-				}
-			},
-			"required": ["fullName", "email", "password", "location", "phoneNumber", "roleId"]
-		},
-		"Book": {
-			"type": "object",
-			"properties": {
-				"id": {
-					"type": "integer",
-					"originalType": "Int"
-				},
-				"bookNo": {
-					"type": "string",
-					"originalType": "String"
-				},
-				"author": {
-					"type": "string",
-					"originalType": "String"
-				},
-				"owner": {
-					"$ref": "#/definitions/User"
-				},
-				"ownerId": {
-					"type": "integer",
-					"originalType": "Int"
-				},
-				"isApproved": {
-					"type": "boolean",
-					"originalType": "Boolean",
-					"default": false
-				},
-				"bookName": {
-					"type": "string",
-					"originalType": "String"
-				},
-				"status": {
-					"type": "string",
-					"originalType": "BookStatus",
-					"default": "free",
-					"enum": ["rented", "free"]
-				},
-				"category": {
-					"type": "string",
-					"originalType": "Category",
-					"enum": ["fiction", "selfHelp", "business"]
-				},
-				"price": {
-					"type": "integer",
-					"originalType": "Int"
-				},
-				"quantity": {
-					"type": "integer",
-					"originalType": "Int",
-					"default": 0
-				},
-				"coverImage": {
-					"type": "string",
-					"originalType": "String",
-					"default": ""
-				},
-				"rentedBy": {
-					"anyOf": [
-						{
-							"$ref": "#/definitions/User"
-						},
-						{
-							"type": "null"
-						}
-					],
-					"originalType": "User"
-				},
-				"rentedByid": {
-					"type": ["integer", "null"],
-					"originalType": "Int"
-				}
-			},
-			"required": ["bookNo", "author", "ownerId", "bookName", "category", "price"]
-		},
-		"MonthlyIncome": {
-			"type": "object",
-			"properties": {
-				"id": {
-					"type": "integer",
-					"originalType": "Int"
-				},
-				"month": {
-					"type": "integer",
-					"originalType": "Int"
-				},
-				"year": {
-					"type": "integer",
-					"originalType": "Int"
-				},
-				"income": {
-					"type": "integer",
-					"originalType": "Int"
-				},
-				"user": {
-					"$ref": "#/definitions/User"
-				},
-				"userId": {
-					"type": "integer",
-					"originalType": "Int"
-				},
-				"createdAt": {
-					"type": "string",
-					"originalType": "DateTime",
-					"format": "date-time"
-				},
-				"updatedAt": {
-					"type": "string",
-					"originalType": "DateTime",
-					"format": "date-time"
-				}
-			},
-			"required": ["month", "year", "income", "userId", "updatedAt"]
-		},
-		"Permission": {
-			"type": "object",
-			"properties": {
-				"id": {
-					"type": "integer",
-					"originalType": "Int"
-				},
-				"actions": {
-					"type": "string",
-					"originalType": "String"
-				},
-				"subject": {
-					"type": "string",
-					"originalType": "String"
-				},
-				"condition": {
-					"type": ["number", "string", "boolean", "object", "array", "null"],
-					"originalType": "Json"
-				},
-				"name": {
-					"type": "string",
-					"originalType": "String"
-				},
-				"createdAt": {
-					"type": "string",
-					"originalType": "DateTime",
-					"format": "date-time"
-				},
-				"updatedAt": {
-					"type": "string",
-					"originalType": "DateTime",
-					"format": "date-time"
-				},
-				"Role": {
-					"type": "array",
-					"originalType": "Role",
-					"items": {
-						"$ref": "#/definitions/Role"
-					}
-				}
-			},
-			"required": ["actions", "subject", "name", "updatedAt"]
-		},
-		"Role": {
-			"type": "object",
-			"properties": {
-				"id": {
-					"type": "integer",
-					"originalType": "Int"
-				},
-				"name": {
-					"type": "string",
-					"originalType": "String"
-				},
-				"permissions": {
-					"type": "array",
-					"originalType": "Permission",
-					"items": {
-						"$ref": "#/definitions/Permission"
-					}
-				},
-				"User": {
-					"type": "array",
-					"originalType": "User",
-					"items": {
-						"$ref": "#/definitions/User"
-					}
-				}
-			},
-			"required": ["name"]
-		}
-	},
-	"type": "object",
-	"properties": {
-		"user": {
-			"$ref": "#/definitions/User"
-		},
-		"book": {
-			"$ref": "#/definitions/Book"
-		},
-		"monthlyIncome": {
-			"$ref": "#/definitions/MonthlyIncome"
-		},
-		"permission": {
-			"$ref": "#/definitions/Permission"
-		},
-		"role": {
-			"$ref": "#/definitions/Role"
-		}
-	}
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "fullName": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "email": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "password": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "location": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "rentedBooks": {
+          "type": "array",
+          "originalType": "Book",
+          "items": {
+            "$ref": "#/definitions/Book"
+          }
+        },
+        "approved": {
+          "type": "boolean",
+          "originalType": "Boolean",
+          "default": false
+        },
+        "isActive": {
+          "type": "boolean",
+          "originalType": "Boolean",
+          "default": true
+        },
+        "wallet": {
+          "type": "integer",
+          "originalType": "Int",
+          "default": 0
+        },
+        "MonthlyIncome": {
+          "type": "array",
+          "originalType": "MonthlyIncome",
+          "items": {
+            "$ref": "#/definitions/MonthlyIncome"
+          }
+        },
+        "Book": {
+          "type": "array",
+          "originalType": "Book",
+          "items": {
+            "$ref": "#/definitions/Book"
+          }
+        },
+        "role": {
+          "$ref": "#/definitions/Role"
+        },
+        "roleId": {
+          "type": "integer",
+          "originalType": "Int"
+        }
+      },
+      "required": [
+        "fullName",
+        "email",
+        "password",
+        "location",
+        "phoneNumber",
+        "roleId"
+      ]
+    },
+    "Book": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "bookNo": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "author": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "owner": {
+          "$ref": "#/definitions/User"
+        },
+        "ownerId": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "isApproved": {
+          "type": "boolean",
+          "originalType": "Boolean",
+          "default": false
+        },
+        "bookName": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "status": {
+          "type": "string",
+          "originalType": "BookStatus",
+          "default": "free",
+          "enum": [
+            "rented",
+            "free"
+          ]
+        },
+        "category": {
+          "type": "string",
+          "originalType": "Category",
+          "enum": [
+            "fiction",
+            "selfHelp",
+            "business"
+          ]
+        },
+        "price": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "quantity": {
+          "type": "integer",
+          "originalType": "Int",
+          "default": 0
+        },
+        "coverImage": {
+          "type": "string",
+          "originalType": "String",
+          "default": ""
+        },
+        "rentedBy": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/User"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "originalType": "User"
+        },
+        "rentedByid": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "originalType": "Int"
+        }
+      },
+      "required": [
+        "bookNo",
+        "author",
+        "ownerId",
+        "bookName",
+        "category",
+        "price"
+      ]
+    },
+    "MonthlyIncome": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "month": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "year": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "income": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "user": {
+          "$ref": "#/definitions/User"
+        },
+        "userId": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "createdAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "month",
+        "year",
+        "income",
+        "userId",
+        "updatedAt"
+      ]
+    },
+    "Permission": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "actions": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "subject": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "condition": {
+          "type": [
+            "number",
+            "string",
+            "boolean",
+            "object",
+            "array",
+            "null"
+          ],
+          "originalType": "Json"
+        },
+        "name": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "createdAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "Role": {
+          "type": "array",
+          "originalType": "Role",
+          "items": {
+            "$ref": "#/definitions/Role"
+          }
+        }
+      },
+      "required": [
+        "actions",
+        "subject",
+        "name",
+        "updatedAt"
+      ]
+    },
+    "Role": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "name": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "permissions": {
+          "type": "array",
+          "originalType": "Permission",
+          "items": {
+            "$ref": "#/definitions/Permission"
+          }
+        },
+        "User": {
+          "type": "array",
+          "originalType": "User",
+          "items": {
+            "$ref": "#/definitions/User"
+          }
+        }
+      },
+      "required": [
+        "name"
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "user": {
+      "$ref": "#/definitions/User"
+    },
+    "book": {
+      "$ref": "#/definitions/Book"
+    },
+    "monthlyIncome": {
+      "$ref": "#/definitions/MonthlyIncome"
+    },
+    "permission": {
+      "$ref": "#/definitions/Permission"
+    },
+    "role": {
+      "$ref": "#/definitions/Role"
+    }
+  }
 }

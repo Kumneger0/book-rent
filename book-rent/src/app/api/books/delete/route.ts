@@ -1,6 +1,6 @@
 import { prisma } from '@/db';
 import { createAblity, getRolePermissions, mapPermissions, verify } from '@/lib/utils';
-import { User } from '@prisma/client';
+import { User, Book } from '@prisma/client';
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -63,6 +63,7 @@ export const DELETE = async (req: NextRequest) => {
 						message: 'please send id of book '
 					}
 				});
+
 			await prisma.book.delete({
 				where: {
 					id: Number(id)
